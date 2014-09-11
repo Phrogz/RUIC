@@ -1,3 +1,5 @@
+require 'set'
+
 class UIC::MetaData
 	class AssetClass
 		def self.properties
@@ -8,6 +10,12 @@ class UIC::MetaData
 			@presentation = presentation
 			@el = element
 		end
+
+		# Find the owning component
+		def component
+			presentation.owning_component(@el)
+		end
+
 		def to_xml
 			@el.to_xml
 		end
@@ -18,17 +26,20 @@ class UIC::MetaData
 		end
 		alias_method :eql?, :==
 	end
-	
+
 	attr_reader :by_name
 
+	HIER = { 'Asset'=>'AssetClass' }
+	%w[Node Behavior Effect Image Layer Material ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
+	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
+
+	SAMEONALLSLIDES = ::Set[*%w[ name ]]
+
 	def initialize(xml)
-		hier = { 'Asset'=>'AssetClass' }
-		%w[Node Behavior Effect Image Layer Material ReferencedMaterial RenderPlugin].each{ |s| hier[s]='Asset' }
-		%w[Camera Component Group Light Model Text].each{ |s| hier[s]='Node' }
 		@by_name = {'AssetClass'=>AssetClass}
 
 		doc = Nokogiri.XML(xml)
-		hier.each do |class_name,parent_class_name|
+		HIER.each do |class_name,parent_class_name|
 			parent_class = @by_name[parent_class_name]
 			el = doc.root.at(class_name)
 			@by_name[class_name] = create_class(el,parent_class)
@@ -41,11 +52,23 @@ class UIC::MetaData
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
 				property = UIC::Property.const_get(type).new(e)
-				define_method(property.name){ "GET #{property.name} on #{inspect}" }
-				define_method("#{property.name}="){ |new_value| p "SET #{property.name} to #{new_value}" }
+				define_method(property.name) do
+					if SAMEONALLSLIDES.include?(property.name)
+						presentation.get_asset_attribute(@el,property,0)
+					else
+						presentation.get_asset_attribute(@el,property)
+					end
+				end
+				define_method("#{property.name}=") do |new_value|
+					p "SET #{property.name} to #{new_value}"
+				end
 				[property.name,property]
 			end ]
-		end
+		end.tap{ |klass| UIC::MetaData.const_set(el.name,klass) }
+	end
+
+	def new_instance(presentation,el)
+		@by_name[el.name].new(presentation,el)
 	end
 end
 
@@ -63,29 +86,29 @@ class UIC::Property
 
 	class String < self
 		self.default = ''
-		def get(asset);       asset[name] || default; end
+		def get(str);       str || default; end
 		def set(asset,value); asset[name] = value; end
 	end
 	MultiLineString = String
 
 	class Float < self
 		self.default = 0.0
-		def get(asset); (asset[name] || default).to_f; end
+		def get(str); (str || default).to_f; end
 		def set(asset,value); asset[name] = value.to_f; end
 	end
 	class Long < self
 		self.default = 0
-		def get(asset); (asset[name] || default).to_i; end
+		def get(str); (str || default).to_i; end
 		def set(asset,value); asset[name] = value.to_i; end
 	end
 	class Boolean < self
 		self.default = false
-		def get(asset); (asset[name] ? asset[name]=='True' : default); end
+		def get(str); (str ? asset[name]=='True' : default); end
 		def set(asset,value); asset[name] = value ? 'True' : 'False'; end
 	end
 	class Vector < self
 		self.default = '0 0 0'
-		def get(asset); VectorValue.new(asset,self); end
+		def get(str); VectorValue.new(asset,self,str || default); end
 		def set(asset,value)
 			asset[name] = value ? 'True' : 'False'
 		end
@@ -102,13 +125,12 @@ class UIC::Property
 	FontSize   = Long
 
 	class VectorValue
-		def initialize(asset,property)
+		attr_reader :x, :y, :z
+		def initialize(asset,property,str)
 			@asset=asset
 			@name=property.name
+			@x, @y, @z = str.split(/\s+/).map(&:to_f)
 		end
-		def x; @asset[@name].split(/\s+/)[0].to_f; end
-		def y; @asset[@name].split(/\s+/)[1].to_f; end
-		def z; @asset[@name].split(/\s+/)[2].to_f; end
 		def x=(n); @asset[@name] = @asset[@name].split(/\s+/).tap{ |a| a[0]=n }.join(' '); end
 		def y=(n); @asset[@name] = @asset[@name].split(/\s+/).tap{ |a| a[1]=n }.join(' '); end
 		def z=(n); @asset[@name] = @asset[@name].split(/\s+/).tap{ |a| a[2]=n }.join(' '); end

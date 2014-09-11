@@ -1,14 +1,27 @@
 class UIC::Application
 	include UIC::FileBacked
 
-	def initialize(metadata,xml=DATA.read)
+	attr_reader :metadata
+	def initialize(metadata,uia_path)
 		@metadata = metadata
-		@doc      = Nokogiri.XML(xml)
-		@assets   = @doc.search('assets *').map{ |element| UIC::Application::Asset.from_element(element,self) }
+		self.file = uia_path
+		load_from_file if file_found?
+	end
+
+	def load_from_file
+		self.doc  = Nokogiri.XML(File.read(file,encoding:'utf-8'))
+		@assets   = @doc.search('assets *').map do |el|
+			case el.name
+				when 'behavior'     then UIC::Application::Behavior
+				when 'statemachine' then UIC::Application::StateMachine
+				when 'presentation' then UIC::Application::Presentation
+				when 'renderplugin' then UIC::Application::RenderPlugin
+			end.new(self,el)
+		end.group_by{ |asset| asset.el.name }
 	end
 
 	def [](asset_id)
-		@assets.find{ |asset| asset.id==asset_id }
+		@assets.values.inject(:+).find{ |asset| asset.id==asset_id }
 	end
 
 	def unused_files
@@ -23,7 +36,7 @@ class UIC::Application
 	end
 
 	def assets
-		@assets
+		@assets.values
 	end
 
 	def main_presentation
@@ -39,36 +52,31 @@ class UIC::Application
 	end
 
 	def presentations
-		assets.select{ |asset| asset.is_a?(UIC::Application::PresentationAsset) }
-	end
-
-	# Mapping asset ID to an asset
-	def asset
-		Hash[ assets.map{ |p| [p.id,p] } ]
+		@assets['presentation']
 	end
 
 	def behaviors
-		assets.select{ |asset| asset.is_a?(UIC::Application::BehaviorAsset) }
+		@assets['behavior']
 	end
 
 	def statemachines
-		assets.select{ |asset| asset.is_a?(UIC::Application::StateMachineAsset) }
+		@assets['statemachine']
 	end
 
 	def plugins
-		assets.select{ |asset| asset.is_a?(UIC::Application::PluginAsset) }
+		@assets['renderplugin']
 	end
 
 	def save_all
 		save!
-		presentations.map(&:presentation).each(&:save!)
+		presentations.each(&:save!)
 	end
 
 	def at(path)
 		parts = path.split(':')
-		preso = parts.length==2 ? asset[parts.first] : main_presentation
+		preso = parts.length==2 ? self[parts.first] : main_presentation
 		raise "Cannot find presentation for #{id}" unless preso
-		preso.presentation.at(parts.last)
+		preso.at(parts.last)
 	end
 	alias_method :/, :at
 
@@ -79,7 +87,7 @@ end
 
 class << UIC
 	def Application(metadata,uia_path)
-		UIC::Application.new( metadata, File.read(uia_path,encoding:'utf-8') ).tap{ |app| app.file = uia_path }
+		UIC::Application.new( metadata, uia_path )
 	end
 	alias_method :App, :Application
 end

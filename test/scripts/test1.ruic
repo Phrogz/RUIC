@@ -1,23 +1,32 @@
-metadata '../MetaData.xml'            # optional
-uia '../projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
+t1 = Time.now
+metadata '../MetaData.xml'                           # optional
+t2 = Time.now; p t2:t2-t1
+app = uia '../projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
+t3 = Time.now; p t3:t3-t2
 
 assert app['logic']
 assert app['logic'].datamodel=='{output=output}'
+t5 = Time.now
+p t5:t5-t3
 
 main = app['main']
 assert main == app.main_presentation
-assert main.file == 'BMW_Cluster.uip'
+assert main.filename == 'BMW_Cluster.uip'
+t6 = Time.now; p t6:t6-t5
 
 assert !app['beejonkers']
 
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
+t7 = Time.now; p t7:t7-t6
 assert sm.name == 'SimpleMedia'
 
 sm2 = main/'Scene.ClassicContent.ClassicContent.SimpleMedia'
 assert sm==sm2
+t8 = Time.now; p t8:t8-t7
 
-assert sm.component==main/'Scene.ClassicContent.ClassicContent'
+assert sm.component == (main/'Scene.ClassicContent.ClassicContent')
 assert sm.component.slides.length==2
+t9 = Time.now; p t9:t9-t8
 
 assert sm[1].endtime==500
 assert sm['SimpleMedia'].endtime==500

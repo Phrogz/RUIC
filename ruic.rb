@@ -30,9 +30,7 @@ end
 
 require_relative 'ruic/asset_classes'
 require_relative 'ruic/interfaces'
-require_relative 'ruic/datastructures'
-require_relative 'ruic/application_assets'
+require_relative 'ruic/application'
 require_relative 'ruic/behaviors'
 require_relative 'ruic/statemachine'
 require_relative 'ruic/presentation'
-require_relative 'ruic/application'
