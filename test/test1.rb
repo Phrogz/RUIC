@@ -1,7 +1,7 @@
-require_relative '../../ruic'
-RUIC do
-metadata '../MetaData.xml'                           # optional
-app = uia '../projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
+$: << ".."; require 'ruic'; RUIC do
+
+metadata 'MetaData.xml'                           # optional
+app = uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
 assert app['logic']
 assert app['logic'].datamodel=='{output=output}'
@@ -51,4 +51,5 @@ assert sm.endtime[2]==100
 
 assert sm.scale[0].y == 2.88
 assert sm.position[0].x==0
+
 end

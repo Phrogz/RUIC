@@ -227,6 +227,9 @@ class UIC::ValuesPerSlide
 	def linked?
 		@preso.attribute_linked?(@el,@property.name)
 	end
+	def values(with_master=false)
+		@preso.slide_values(@el,@property,with_master)
+	end
 	def inspect
 		"<multiple values for '#{property.name}' per slide>"
 	end

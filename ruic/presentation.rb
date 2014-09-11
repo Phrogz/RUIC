@@ -89,10 +89,19 @@ class UIC::Presentation
 	end
 
 	def slides_for( graph_element )
-		comp = owning_or_self_component_element( graph_element )
+		comp   = owning_or_self_component_element( graph_element )
 		master = @logic.at("./State[@component='##{comp['id']}']")
-		slides = [master,*master.xpath('./State')].map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
+		kids   = master.xpath('./State')
+		slides = [master,*kids].map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
 		UIC::SlideCollection.new( slides ) 
+	end
+
+	def slide_values( graph_element, property, with_master=false )
+		comp   = owning_or_self_component_element( graph_element )
+		master = @logic.at("./State[@component='##{comp['id']}']")
+		slide_count = master.xpath('count(./State)').to_i
+		start_index = with_master ? 0 : 1
+		start_index.upto(slide_count).map{ |idx| get_asset_attribute(graph_element,property,idx) }
 	end
 
 	def attribute_linked?(graph_element,attribute_name)
