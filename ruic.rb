@@ -28,6 +28,12 @@ module UIC
 	VERSION = '0.1'
 end
 
+def RUIC(&block)
+	Dir.chdir(File.dirname($0)) do
+		RUIC.new.instance_eval(&block)
+	end
+end
+
 require_relative 'ruic/asset_classes'
 require_relative 'ruic/interfaces'
 require_relative 'ruic/application'

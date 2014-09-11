@@ -13,6 +13,7 @@ class UIC::Presentation
 
 		@graph_by_id = {}
 		@scene.traverse{ |x| @graph_by_id[x['id']]=x if x.is_a?(Nokogiri::XML::Element) }
+		slideindex = {}
 
 		@graph_by_addset  = {}
 		@addsets_by_graph = {}
@@ -22,12 +23,13 @@ class UIC::Presentation
 			@addsets_by_graph[graph] ||= {}
 			slide = addset.parent
 			name  = slide['name']
-			index = name == 'Master Slide' ? 0 : slide.index + 1
+			index = name == 'Master Slide' ? 0 : (slideindex[slide] ||= (slide.index('State') + 1))
 			@addsets_by_graph[graph][name]  = addset
 			@addsets_by_graph[graph][index] = addset
 		end
 
-		@asset_by_el = {}
+		@asset_by_el  = {}
+		@slides_by_el = {}
 	end
 
 	attr_reader :addsets_by_graph
@@ -62,22 +64,39 @@ class UIC::Presentation
 	def get_asset_attribute( graph_element, property, slide=nil )
 		if slide
 			property.get(
-				# Try for a Set on the specific slide
-				( @addsets_by_graph[graph_element][slide] && @addsets_by_graph[graph_element][slide][property.name] ) ||
-				# …else try the master slide
-				( @addsets_by_graph[graph_element][0] && @addsets_by_graph[graph_element][0][property.name] ) ||
-				# …else try the graph
-				graph_element[property.name]
+				@addsets_by_graph[graph_element] && ( # State (slide) don't have any addsets
+					( @addsets_by_graph[graph_element][slide] && @addsets_by_graph[graph_element][slide][property.name] ) || # Try for a Set on the specific slide
+					( @addsets_by_graph[graph_element][0] && @addsets_by_graph[graph_element][0][property.name] ) # …else try the master slide
+				) || graph_element[property.name] # …else try the graph
 			)
 			# TODO: handle animation (child of addset)
 		else
-			raise "GENERATE ATTRIBUTE PROXY"
+			UIC::ValuesPerSlide.new(self,graph_element,property)
 		end
 	end
 
 	def owning_component( graph_element )
-		component = graph_element.at_xpath('(ancestor::Component[1] | ancestor::Scene[1])[last()]')
+		component = owning_component_element( graph_element )
 		@asset_by_el[component] ||= app.metadata.new_instance(self,component)
+	end
+
+	def owning_component_element( graph_element )
+		graph_element.at_xpath('(ancestor::Component[1] | ancestor::Scene[1])[last()]')
+	end
+
+	def owning_or_self_component_element( graph_element )
+		graph_element.at_xpath('(ancestor-or-self::Component[1] | ancestor-or-self::Scene[1])[last()]')
+	end
+
+	def slides_for( graph_element )
+		comp = owning_or_self_component_element( graph_element )
+		master = @logic.at("./State[@component='##{comp['id']}']")
+		slides = [master,*master.xpath('./State')].map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
+		UIC::SlideCollection.new( slides ) 
+	end
+
+	def attribute_linked?(graph_element,attribute_name)
+		!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][1].key?(attribute_name))
 	end
 end
 
@@ -105,7 +124,7 @@ class UIC::Application::Presentation < UIC::Presentation
 end
 
 class Nokogiri::XML::Element
-	def index # Find the index of this element amongs its siblings
-		xpath('count(preceding-sibling::*)').to_i
+	def index(kind='*') # Find the index of this element amongs its siblings
+		xpath("count(./preceding-sibling::#{kind})").to_i
 	end
 end

@@ -2,6 +2,7 @@ require 'set'
 
 class UIC::MetaData
 	class AssetClass
+		@properties = {}
 		def self.properties
 			(ancestors[1].respond_to?(:properties) ? ancestors[1].properties : {}).merge(@properties)
 		end
@@ -14,6 +15,21 @@ class UIC::MetaData
 		# Find the owning component
 		def component
 			presentation.owning_component(@el)
+		end
+
+		def component?
+			@el.name == 'Component'
+		end
+
+		def slides
+			presentation.slides_for(@el)
+		end
+
+		# Get the values of attributes on a specific slide
+		def [](slide_name_or_index)
+			if slide = slides[slide_name_or_index]
+				UIC::SlideValues.new(slide,self)
+			end
 		end
 
 		def to_xml
@@ -29,7 +45,7 @@ class UIC::MetaData
 
 	attr_reader :by_name
 
-	HIER = { 'Asset'=>'AssetClass' }
+	HIER = { 'Asset'=>'AssetClass', 'Slide'=>'AssetClass' }
 	%w[Node Behavior Effect Image Layer Material ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
 
@@ -39,13 +55,25 @@ class UIC::MetaData
 		@by_name = {'AssetClass'=>AssetClass}
 
 		doc = Nokogiri.XML(xml)
+		hack_in_slide_names!(doc)
+
 		HIER.each do |class_name,parent_class_name|
 			parent_class = @by_name[parent_class_name]
 			el = doc.root.at(class_name)
 			@by_name[class_name] = create_class(el,parent_class)
 		end
+
+		@by_name['State'] = @by_name['Slide']
+		@by_name['Slide'].instance_eval do
+			define_method(:inspect) do
+				"<Slide '#{name}' of #{@el['component'] || @el.parent['component']}>"
+			end
+		end
 	end
 
+	# Creates a class from MetaData.xml with accessors for the <Property> listed
+	# Instances of the class are associated with a presentation and know how to 
+	# get/set values in that XML based on value types, slides, defaults
 	def create_class(el,parent_class)
 		Class.new(parent_class) do
 			@properties = Hash[ el.css("Property").map do |e|
@@ -69,6 +97,10 @@ class UIC::MetaData
 
 	def new_instance(presentation,el)
 		@by_name[el.name].new(presentation,el)
+	end
+
+	def hack_in_slide_names!(doc)
+		doc.at('Slide') << '<Property name="name" formalName="Name" type="String" default="Slide" hidden="True" />'
 	end
 end
 
@@ -124,6 +156,8 @@ class UIC::Property
 	Font       = String #TODO: a real class
 	FontSize   = Long
 
+	StringListOrInt = String #TODO: a real class
+
 	class VectorValue
 		attr_reader :x, :y, :z
 		def initialize(asset,property,str)
@@ -144,4 +178,57 @@ class UIC::Property
 			"<#{[x,y,z].join ' '}>"
 		end
 	end
+end
+
+class UIC::SlideCollection
+	attr_reader :length
+	def initialize(slides)
+		@slides = slides
+		@length = slides.length-1
+		@slide_by_name = Hash[ slides.map{ |s| [s.name,s] } ]
+	end
+	def each(include_master=false)
+		(include_master ? 0 : 1).upto(@length){ |i| yield(@slides[i] ) }
+	end
+	def [](index_or_name)
+		index_or_name.is_a?(Fixnum) ? @slides[index_or_name] : @slide_by_name[index_or_name.to_s]
+	end
+	def inspect
+		"[ #{@slides.map(&:inspect).join ', '} ]"
+	end
+end
+
+class UIC::SlideValues
+	def initialize(slide,asset)
+		@slide = slide
+		@asset = asset
+	end
+	def method_missing(property_name,new_value=nil)
+		if @asset.respond_to?(property_name)
+			if property_name[/=$/]
+			else
+				@asset.presentation.get_asset_attribute( @asset.el, @asset.class.properties[property_name.to_s], @slide.name )
+			end
+		else
+			super
+		end
+	end
+end
+
+class UIC::ValuesPerSlide
+	def initialize(presentation,graph_element,property)
+		@preso    = presentation
+		@el       = graph_element
+		@property = property
+	end
+	def [](slide_name_or_index)
+		@preso.get_asset_attribute( @el, @property, slide_name_or_index )
+	end
+	def linked?
+		@preso.attribute_linked?(@el,@property.name)
+	end
+	def inspect
+		"<multiple values for '#{property.name}' per slide>"
+	end
+	alias_method :to_s, :inspect
 end
