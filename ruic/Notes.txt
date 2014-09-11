@@ -1,0 +1,11 @@
+Used:
+	* UIP - only those referenced by .uia
+	* Meshes
+		- specific mesh versions?
+	* Images
+		- remember set via .uia
+		- remember referenced via materials as defaults
+		- remember 
+	* Scripts
+	* Effects
+	* Materials
