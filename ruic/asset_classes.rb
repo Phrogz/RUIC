@@ -118,30 +118,35 @@ class UIC::Property
 
 	class String < self
 		self.default = ''
-		def get(str);       str || default; end
-		def set(asset,value); asset[name] = value; end
+		def get(str);   str || default; end
+		def set(value); value.to_s; end
 	end
 	MultiLineString = String
 
 	class Float < self
 		self.default = 0.0
 		def get(str); (str || default).to_f; end
-		def set(asset,value); asset[name] = value.to_f; end
+		def set(value); value.to_f; end
 	end
 	class Long < self
 		self.default = 0
 		def get(str); (str || default).to_i; end
-		def set(asset,value); asset[name] = value.to_i; end
+		def set(value); value.to_i; end
 	end
 	class Boolean < self
 		self.default = false
 		def get(str); (str ? asset[name]=='True' : default); end
-		def set(asset,value); asset[name] = value ? 'True' : 'False'; end
+		def set(value); value ? 'True' : 'False'; end
 	end
 	class Vector < self
 		self.default = '0 0 0'
 		def get(str); VectorValue.new(asset,self,str || default); end
-		def set(asset,value)
+		def set(value)
+			case value
+				when VectorValue then value.to_s
+				when Array       then value.join(' ')
+				when String      then value
+			end
 			asset[name] = value ? 'True' : 'False'
 		end
 	end
@@ -175,7 +180,10 @@ class UIC::Property
 		alias_method :g=, :y=
 		alias_method :b=, :z=
 		def inspect
-			"<#{[x,y,z].join ' '}>"
+			"<#{self}>"
+		end
+		def to_s
+			[x,y,z].join(' ')
 		end
 	end
 end
@@ -223,6 +231,10 @@ class UIC::ValuesPerSlide
 	end
 	def [](slide_name_or_index)
 		@preso.get_asset_attribute( @el, @property, slide_name_or_index )
+	end
+	def []=(slide_name_or_index,new_value)
+		xml_string = @property.set(new_value)
+		@preso.set_asset_attribute( @el, @property, slide_name_or_index, xml_string )
 	end
 	def linked?
 		@preso.attribute_linked?(@el,@property.name)

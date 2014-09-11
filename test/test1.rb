@@ -31,18 +31,22 @@ assert sm['CarStatus'  ].endtime==250
 
 assert sm.position.linked?
 assert !sm.endtime.linked?
-assert sm.endtime.values == [500,250]
+assert sm.endtime.values       == [500,250]
 assert sm.endtime.values(true) == [250,500,250]
 
 assert sm.endtime[1]==500
 assert sm.endtime['SimpleMedia']==500
 assert sm.endtime['CarStatus'  ]==250
 
-sm.endtime['CarStatus']==750
+sm.endtime['CarStatus'] = 750
 assert sm.endtime['SimpleMedia']==500
 assert sm.endtime['CarStatus'  ]==750
 assert sm['SimpleMedia'].endtime==500
 assert sm['CarStatus'  ].endtime==750
+
+sm['CarStatus'].endtime = 50
+assert sm.endtime['CarStatus']==50
+assert sm['CarStatus'].endtime==50
 
 sm.endtime = 100
 assert sm.endtime[0]==100

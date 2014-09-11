@@ -75,6 +75,20 @@ class UIC::Presentation
 		end
 	end
 
+	def set_asset_attribute( graph_element, property, slide, str )
+		if attribute_linked?( graph_element, property.name )
+			if @addsets_by_graph[graph_element]
+				@addsets_by_graph[graph_element][0][property.name] = str
+			else
+			end
+		else
+			if @addsets_by_graph[graph_element]
+				@addsets_by_graph[graph_element][slide][property.name] = str	
+			else
+			end
+		end
+	end
+
 	def owning_component( graph_element )
 		component = owning_component_element( graph_element )
 		@asset_by_el[component] ||= app.metadata.new_instance(self,component)
