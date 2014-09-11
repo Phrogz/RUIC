@@ -80,11 +80,19 @@ class UIC::Presentation
 			if @addsets_by_graph[graph_element]
 				@addsets_by_graph[graph_element][0][property.name] = str
 			else
+				raise "TODO"
 			end
 		else
 			if @addsets_by_graph[graph_element]
-				@addsets_by_graph[graph_element][slide][property.name] = str	
+				if slide
+					@addsets_by_graph[graph_element][slide][property.name] = str
+				else
+					master = master_slide_for( graph_element )
+					slide_count = master.xpath('count(./State)').to_i
+					0.upto(slide_count).each{ |idx| set_asset_attribute(graph_element,property,idx,str) }
+				end
 			else
+				raise "TODO"
 			end
 		end
 	end
@@ -102,17 +110,20 @@ class UIC::Presentation
 		graph_element.at_xpath('(ancestor-or-self::Component[1] | ancestor-or-self::Scene[1])[last()]')
 	end
 
-	def slides_for( graph_element )
+	def master_slide_for( graph_element )
 		comp   = owning_or_self_component_element( graph_element )
-		master = @logic.at("./State[@component='##{comp['id']}']")
+		@logic.at("./State[@component='##{comp['id']}']")
+	end
+
+	def slides_for( graph_element )
+		master = master_slide_for( graph_element )
 		kids   = master.xpath('./State')
 		slides = [master,*kids].map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
 		UIC::SlideCollection.new( slides ) 
 	end
 
 	def slide_values( graph_element, property, with_master=false )
-		comp   = owning_or_self_component_element( graph_element )
-		master = @logic.at("./State[@component='##{comp['id']}']")
+		master = master_slide_for( graph_element )
 		slide_count = master.xpath('count(./State)').to_i
 		start_index = with_master ? 0 : 1
 		start_index.upto(slide_count).map{ |idx| get_asset_attribute(graph_element,property,idx) }

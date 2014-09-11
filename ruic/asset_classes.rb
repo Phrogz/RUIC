@@ -88,7 +88,8 @@ class UIC::MetaData
 					end
 				end
 				define_method("#{property.name}=") do |new_value|
-					p "SET #{property.name} to #{new_value}"
+					xml_string = property.set(new_value)
+					presentation.set_asset_attribute( @el, property, nil, xml_string )
 				end
 				[property.name,property]
 			end ]
@@ -210,12 +211,25 @@ class UIC::SlideValues
 	def initialize(slide,asset)
 		@slide = slide
 		@asset = asset
+		@el    = asset.el
+		@preso = asset.presentation
 	end
 	def method_missing(property_name,new_value=nil)
+		property_name = property_name.to_s
+		property_name.sub!(/=$/,'') if setflag=property_name[/=$/]
 		if @asset.respond_to?(property_name)
-			if property_name[/=$/]
+			property = @asset.class.properties[property_name]
+			unless property
+				p property_name
+				p @asset.class.name
+				p @asset.class.properties.keys
+				p @asset.class.properties
+			end
+			if setflag
+				xml_string = property.set(new_value)
+				@preso.set_asset_attribute( @el, property, @slide.name, xml_string )
 			else
-				@asset.presentation.get_asset_attribute( @asset.el, @asset.class.properties[property_name.to_s], @slide.name )
+				@preso.get_asset_attribute( @el, property, @slide.name )
 			end
 		else
 			super
