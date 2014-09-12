@@ -83,7 +83,9 @@ show car.type #=> Model                  # Scene, Layer, Camera, Light, Group, M
                                          # RenderPlugin, Component, (custom materials)
 
 show car.component?  #=> false           # Ask if an element is a component 
-assert car.component==sub.scene          # Ask for the owning component (may be the scene)
+assert car.component==sub.scene          # Ask for the owning component; may be the scene
+
+
 ```
 
 ## Writing Assertions
