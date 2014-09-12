@@ -1,18 +1,94 @@
 # What is RUIC?
-_TODO: Documentation in progress_
+RUIC is a Ruby API for reading, analyzing, and manipulating application assets created by NVIDIA's [UI Composer](http://uicomposer.nvidia.com). Among other things, it allows you to:
 
-# Requirements
-_TODO: Pure Ruby, except that you need Nokogiri to compile._
+* See if an application is missing any assets (e.g. images or meshes) and what parts of the application are looking for those.
+* See if there are any files in the application folder that you can delete (e.g. images or materials that are no longer being used).
+* Read and modify the attributes of elements on different slides.
+* Batch change attributes (e.g. change all usage of one font or color to another).
+* Procedurally generate many models with automated placement in your scene.
 
-# Installing
+_Some of the features above are planned, but not yet implemented; see Known Limitations below._
 
-    gem install ruic
+## Table of Contents
+* Installing RUIC
+* Using the RUIC DSL
+  * Creating and Accessing Applications
+  * Working with Presentations
+  * Writing Assertions
+  * Locating MetaData.xml
+* Known Limitations (aka TODO)
+* History
+* License
+
+
+
+# Installing RUIC
+RUIC can be installed via RubyGems (part of Ruby) via the command:
+
+    gem install ruic   # May need `sudo gem install ruic` depending on your setup
+
+Although RUIC is a pure-Ruby library, it relies on [Nokogiri](http://nokogiri.org) for all the XML processing and manipulation. Installing RUIC will also automatically install Nokogiri, which may require some compilation.
+
+
 
 # Using the RUIC DSL
 
-_TODO: basically, `ruic myscript.ruic`; see test for examples_
+RUIC scripts are pure Ruby with a few convenience methods added. You run them via the `ruic` command-line script, e.g.
 
-# Known Limitations / TODO
+    ruic myscript.ruic  # or .rb extension, for syntax highlighting while editing
+
+## Creating and Accessing Applications
+RUIC scripts must start with `uia` commands to load an application and all its assets.
+After this you can access the application as `app`:
+
+```ruby
+uia '../MyApp.uia'      # Relative to the ruic script file, or absolute
+   
+show app.file           #=> /var/projects/UIC/MyApp/main/MyApp.uia
+show app.filename       #=> MyApp.uia
+
+show app.assets.count   #=> 7
+# You can ask for app.behaviors, app.presentations, app.statemachines, and app.renderplugins
+# for arrays of specific asset types
+```
+
+_The `show` command prints the result output; it is simply a nicer alias for `puts`._
+
+If you need to load multiple applications in the same script, subsequent `uia` commands will create
+`app2`, `app3`, etc. for you to use.
+
+```ruby
+uia '../MyApp.uia'       # Available as 'app'
+uia '../../v1/MyApp.uia' # Available as 'app2'
+```
+
+
+## Working with Presentations
+
+```ruby
+uia '../MyApp.uia'
+
+main = app.main_presentation   # The presentation displayed as the main presentation (regardless of id)
+sub  = app['#navigation']      # You can ask for an asset based on the id in the .uia...
+sub  = app['Navigation.uip']   # or based on the path to the file (relative to the .uia)
+```
+
+## Writing Assertions
+
+
+## Locating MetaData.xml
+RUIC needs access to a UIC `MetaData.xml` file to understand the properties in the various XML files.
+By default RUIC will look in the location specified by `RUIC::DEFAULTMETADATA`, e.g.  
+`C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml`
+
+If this file is in another location, you can tell the script where to find it either:
+
+* on the command line: `ruic -m path/to/MetaData.xml myscript.ruic` 
+* in the ruic script: `metadata 'path/to/MetaData.xml' # before any 'app' commands`
+
+
+
+# Known Limitations (aka TODO)
 _In decreasing priority…_
 
 - Report on image assets, their sizes
@@ -33,8 +109,12 @@ _In decreasing priority…_
 - Create new presentations/applications from code
 - Report on image asset file formats (e.g. find PNGs, find DXT1 vs DXT3 vs DXT Luminance…)
 
+
+
 # History
 * _In development, no releases yet._
+
+
 
 # License
 Copyright © 2014 [Gavin Kistner](mailto:!@phrogz.net)
