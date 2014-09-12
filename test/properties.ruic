@@ -22,6 +22,7 @@ assert !app['beejonkers']                   # If an asset id doesn't exist, you'
 
 scene = app/'main:Scene'
 assert scene
+assert scene==main.scene
 assert scene.type == 'Scene'
 assert scene.name == 'Scene'
 

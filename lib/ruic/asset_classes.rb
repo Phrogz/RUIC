@@ -16,7 +16,7 @@ class UIC::MetaData
 			self.class.name.split('::').last
 		end
 
-		# Find the owning component
+		# Find the owning component (even if you are a component)
 		def component
 			presentation.owning_component(@el)
 		end

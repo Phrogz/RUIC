@@ -81,6 +81,9 @@ show car.name #=> Car
 show car.type #=> Model                  # Scene, Layer, Camera, Light, Group, Model, Material,
                                          # Image, Behavior, Effect, ReferencedMaterial, Text,
                                          # RenderPlugin, Component, (custom materials)
+
+show car.component?  #=> false           # Ask if an element is a component 
+assert car.component==sub.scene          # Ask for the owning component (may be the scene)
 ```
 
 ## Writing Assertions

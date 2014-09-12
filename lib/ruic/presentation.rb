@@ -32,6 +32,10 @@ class UIC::Presentation
 		@slides_by_el = {}
 	end
 
+	def asset_for_el(el)
+		@asset_by_el[el] ||= app.metadata.new_instance(self,el)
+	end
+
 	attr_reader :addsets_by_graph
 	protected :addsets_by_graph
 
@@ -43,8 +47,8 @@ class UIC::Presentation
 		).sort_by{ |f| parts = f.split(/[\/\\]/); [parts.length,parts] }
 	end
 
-	def images
-		@doc.search('Graph Image').map{ |el| UIC::Presentation::Image.new(el,self) }
+	def scene
+		asset_for_el( @scene )
 	end
 
 	def at(path,root=@graph)
@@ -55,7 +59,7 @@ class UIC::Presentation
 			if path
 				at(path,node)
 			else
-				@asset_by_el[node] ||= app.metadata.new_instance(self,node)
+				asset_for_el(node)
 			end
 		end
 	end
@@ -101,8 +105,7 @@ class UIC::Presentation
 
 	def owning_component( graph_element )
 		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
-		component = owning_component_element( graph_element )
-		@asset_by_el[component] ||= app.metadata.new_instance(self,component)
+		asset_for_el( owning_component_element( graph_element ) )
 	end
 
 	def owning_component_element( graph_element )
