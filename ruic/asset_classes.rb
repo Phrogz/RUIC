@@ -82,14 +82,13 @@ class UIC::MetaData
 				property = UIC::Property.const_get(type).new(e)
 				define_method(property.name) do
 					if SAMEONALLSLIDES.include?(property.name)
-						presentation.get_asset_attribute(@el,property,0)
+						property.get(self,0)
 					else
-						presentation.get_asset_attribute(@el,property)
+						UIC::ValuesPerSlide.new(@presentation,self,property)
 					end
 				end
 				define_method("#{property.name}=") do |new_value|
-					xml_string = property.set(new_value)
-					presentation.set_asset_attribute( @el, property, nil, xml_string )
+					property.set(self,new_value,nil)
 				end
 				[property.name,property]
 			end ]
@@ -116,39 +115,39 @@ class UIC::Property
 	def formal; @formal||=@el['formalName'] || @el['name']; end
 	def description; @desc||=@el['description']; end
 	def default; @def ||= (@el['default'] || self.class.default); end
+	def get(asset,slide)
+		asset.presentation.get_asset_attribute(asset,name,slide) || default
+	end
+	def set(asset,new_value,slide_name_or_index)
+		asset.presentation.set_asset_attribute(asset,name,slide_name_or_index,new_value)
+	end
 
 	class String < self
 		self.default = ''
-		def get(str);   str || default; end
-		def set(value); value.to_s; end
 	end
 	MultiLineString = String
 
 	class Float < self
 		self.default = 0.0
-		def get(str); (str || default).to_f; end
-		def set(value); value.to_f; end
+		def get(asset,slide); super.to_f; end
 	end
 	class Long < self
 		self.default = 0
-		def get(str); (str || default).to_i; end
-		def set(value); value.to_i; end
+		def get(asset,slide); super.to_i; end
 	end
 	class Boolean < self
 		self.default = false
-		def get(str); (str ? asset[name]=='True' : default); end
-		def set(value); value ? 'True' : 'False'; end
+		def get(asset,slide); super=='True'; end
+		def set(asset,new_value,slide_name_or_index)
+			super( asset, new_value ? 'True' : 'False', slide_name_or_index )
+		end
 	end
 	class Vector < self
 		self.default = '0 0 0'
-		def get(str); VectorValue.new(asset,self,str || default); end
-		def set(value)
-			case value
-				when VectorValue then value.to_s
-				when Array       then value.join(' ')
-				when String      then value
-			end
-			asset[name] = value ? 'True' : 'False'
+		def get(asset,slide); VectorValue.new(asset,self,slide,super); end
+		def set(asset,new_value,slide_name_or_index)
+			new_value = new_value.join(' ') if new_value.is_a?(Array)
+			super( asset, new_value, slide_name_or_index )
 		end
 	end
 	Rotation = Vector
@@ -166,14 +165,18 @@ class UIC::Property
 
 	class VectorValue
 		attr_reader :x, :y, :z
-		def initialize(asset,property,str)
-			@asset=asset
-			@name=property.name
+		def initialize(asset,property,slide,str)
+			@asset    = asset
+			@property = property
+			@slide    = slide
 			@x, @y, @z = str.split(/\s+/).map(&:to_f)
 		end
-		def x=(n); @asset[@name] = @asset[@name].split(/\s+/).tap{ |a| a[0]=n }.join(' '); end
-		def y=(n); @asset[@name] = @asset[@name].split(/\s+/).tap{ |a| a[1]=n }.join(' '); end
-		def z=(n); @asset[@name] = @asset[@name].split(/\s+/).tap{ |a| a[2]=n }.join(' '); end
+		def setall
+			@property.set( @asset, to_s, @slide )
+		end
+		def x=(n); @x=n; setall end
+		def y=(n); @y=n; setall end
+		def z=(n); @z=n; setall end
 		alias_method :r, :x
 		alias_method :g, :y
 		alias_method :b, :z
@@ -190,14 +193,15 @@ class UIC::Property
 end
 
 class UIC::SlideCollection
+	include Enumerable
 	attr_reader :length
 	def initialize(slides)
 		@slides = slides
 		@length = slides.length-1
 		@slide_by_name = Hash[ slides.map{ |s| [s.name,s] } ]
 	end
-	def each(include_master=false)
-		(include_master ? 0 : 1).upto(@length){ |i| yield(@slides[i] ) }
+	def each
+		0.upto(@length){ |i| yield(@slides[i] ) }
 	end
 	def [](index_or_name)
 		index_or_name.is_a?(Fixnum) ? @slides[index_or_name] : @slide_by_name[index_or_name.to_s]
@@ -209,6 +213,9 @@ end
 
 class UIC::SlideValues
 	def initialize(slide,asset)
+		raise unless slide.is_a?(UIC::MetaData::Slide)
+		raise unless asset.is_a?(UIC::MetaData::AssetClass)
+
 		@slide = slide
 		@asset = asset
 		@el    = asset.el
@@ -219,17 +226,10 @@ class UIC::SlideValues
 		property_name.sub!(/=$/,'') if setflag=property_name[/=$/]
 		if @asset.respond_to?(property_name)
 			property = @asset.class.properties[property_name]
-			unless property
-				p property_name
-				p @asset.class.name
-				p @asset.class.properties.keys
-				p @asset.class.properties
-			end
 			if setflag
-				xml_string = property.set(new_value)
-				@preso.set_asset_attribute( @el, property, @slide.name, xml_string )
+				property.set( @asset, new_value, @slide.name )
 			else
-				@preso.get_asset_attribute( @el, property, @slide.name )
+				property.get( @asset, @slide.name )
 			end
 		else
 			super
@@ -238,23 +238,26 @@ class UIC::SlideValues
 end
 
 class UIC::ValuesPerSlide
-	def initialize(presentation,graph_element,property)
+	def initialize(presentation,asset,property)
+		raise unless presentation.is_a?(UIC::Presentation)
+		raise unless asset.is_a?(UIC::MetaData::AssetClass)
+		raise unless property.is_a?(UIC::Property)
 		@preso    = presentation
-		@el       = graph_element
+		@asset    = asset
+		@el       = asset.el
 		@property = property
 	end
 	def [](slide_name_or_index)
-		@preso.get_asset_attribute( @el, @property, slide_name_or_index )
+		@property.get( @asset, slide_name_or_index )
 	end
 	def []=(slide_name_or_index,new_value)
-		xml_string = @property.set(new_value)
-		@preso.set_asset_attribute( @el, @property, slide_name_or_index, xml_string )
+		@property.set( @asset, new_value, slide_name_or_index )
 	end
 	def linked?
 		@preso.attribute_linked?(@el,@property.name)
 	end
-	def values(with_master=false)
-		@preso.slide_values(@el,@property,with_master)
+	def values
+		@asset.slides.map{ |s| self[s.name] }
 	end
 	def inspect
 		"<multiple values for '#{property.name}' per slide>"

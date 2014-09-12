@@ -31,8 +31,7 @@ assert sm['CarStatus'  ].endtime==250
 
 assert sm.position.linked?
 assert !sm.endtime.linked?
-assert sm.endtime.values       == [500,250]
-assert sm.endtime.values(true) == [250,500,250]
+assert sm.endtime.values == [250,500,250]
 
 assert sm.endtime[1]==500
 assert sm.endtime['SimpleMedia']==500
@@ -53,7 +52,17 @@ assert sm.endtime[0]==100
 assert sm.endtime[1]==100
 assert sm.endtime[2]==100
 
-assert sm.scale[0].y == 2.88
+assert sm[0].position.x==0
+assert sm[0].scale.y == 2.88
 assert sm.position[0].x==0
+assert sm.scale[0].y == 2.88
+
+sm[0].position.x=42
+assert sm[0].position.x==42
+assert sm.position[0].x==42
+
+sm.position[0].y=17
+assert sm[0].position.y==17
+assert sm.position[0].y==17
 
 end

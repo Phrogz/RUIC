@@ -61,35 +61,37 @@ class UIC::Presentation
 	end
 	alias_method :/, :at
 
-	def get_asset_attribute( graph_element, property, slide=nil )
-		if slide
-			property.get(
-				@addsets_by_graph[graph_element] && ( # State (slide) don't have any addsets
-					( @addsets_by_graph[graph_element][slide] && @addsets_by_graph[graph_element][slide][property.name] ) || # Try for a Set on the specific slide
-					( @addsets_by_graph[graph_element][0] && @addsets_by_graph[graph_element][0][property.name] ) # …else try the master slide
-				) || graph_element[property.name] # …else try the graph
-			)
-			# TODO: handle animation (child of addset)
-		else
-			UIC::ValuesPerSlide.new(self,graph_element,property)
-		end
+	def get_asset_attribute( asset, property_name, slide_name_or_index )
+		raise "asset: #{asset.class}" unless asset.is_a?(UIC::MetaData::AssetClass)
+		raise "property_name: #{property_name.class}" unless property_name.is_a?(String)
+		raise "slide: #{slide_name_or_index.class}" unless slide_name_or_index.is_a?(String)||slide_name_or_index.is_a?(Fixnum)
+		graph_element = asset.el
+		(addsets=@addsets_by_graph[graph_element]) && ( # State (slide) don't have any addsets
+			( addsets[slide_name_or_index] && addsets[slide_name_or_index][property_name] ) || # Try for a Set on the specific slide
+			( addsets[0] && addsets[0][property_name] ) # …else try the master slide
+		) || graph_element[property_name] # …else try the graph
+		# TODO: handle animation (child of addset)
 	end
 
-	def set_asset_attribute( graph_element, property, slide, str )
-		if attribute_linked?( graph_element, property.name )
+	def set_asset_attribute( asset, property_name, slide_name_or_index, str )
+		raise "asset: #{asset.class}" unless asset.is_a?(UIC::MetaData::AssetClass)
+		raise "property_name: #{property_name.class}" unless property_name.is_a?(String)
+		raise "slide: #{slide_name_or_index.class}" unless slide_name_or_index.is_a?(String)||slide_name_or_index.is_a?(Fixnum)||slide_name_or_index.is_a?(NilClass)
+		graph_element = asset.el
+		if attribute_linked?( graph_element, property_name )
 			if @addsets_by_graph[graph_element]
-				@addsets_by_graph[graph_element][0][property.name] = str
+				@addsets_by_graph[graph_element][0][property_name] = str
 			else
 				raise "TODO"
 			end
 		else
 			if @addsets_by_graph[graph_element]
-				if slide
-					@addsets_by_graph[graph_element][slide][property.name] = str
+				if slide_name_or_index
+					@addsets_by_graph[graph_element][slide_name_or_index][property_name] = str
 				else
 					master = master_slide_for( graph_element )
 					slide_count = master.xpath('count(./State)').to_i
-					0.upto(slide_count).each{ |idx| set_asset_attribute(graph_element,property,idx,str) }
+					0.upto(slide_count).each{ |idx| set_asset_attribute(asset,property_name,idx,str) }
 				end
 			else
 				raise "TODO"
@@ -98,38 +100,38 @@ class UIC::Presentation
 	end
 
 	def owning_component( graph_element )
+		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
 		component = owning_component_element( graph_element )
 		@asset_by_el[component] ||= app.metadata.new_instance(self,component)
 	end
 
 	def owning_component_element( graph_element )
+		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
 		graph_element.at_xpath('(ancestor::Component[1] | ancestor::Scene[1])[last()]')
 	end
 
 	def owning_or_self_component_element( graph_element )
+		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
 		graph_element.at_xpath('(ancestor-or-self::Component[1] | ancestor-or-self::Scene[1])[last()]')
 	end
 
 	def master_slide_for( graph_element )
+		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
 		comp   = owning_or_self_component_element( graph_element )
 		@logic.at("./State[@component='##{comp['id']}']")
 	end
 
 	def slides_for( graph_element )
+		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
 		master = master_slide_for( graph_element )
 		kids   = master.xpath('./State')
 		slides = [master,*kids].map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
-		UIC::SlideCollection.new( slides ) 
-	end
-
-	def slide_values( graph_element, property, with_master=false )
-		master = master_slide_for( graph_element )
-		slide_count = master.xpath('count(./State)').to_i
-		start_index = with_master ? 0 : 1
-		start_index.upto(slide_count).map{ |idx| get_asset_attribute(graph_element,property,idx) }
+		UIC::SlideCollection.new( slides )
 	end
 
 	def attribute_linked?(graph_element,attribute_name)
+		raise "graph_element: #{graph_element.class}" unless graph_element.is_a?(Nokogiri::XML::Element)
+		raise "attribute_name: #{attribute_name.class}" unless attribute_name.is_a?(String)
 		!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][1].key?(attribute_name))
 	end
 end
