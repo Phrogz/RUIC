@@ -1,6 +1,4 @@
-$: << ".."; require 'ruic'; RUIC do
-
-metadata 'MetaData.xml'                           # optional
+# metadata 'MetaData.xml'                         # optional; also may be set via -m flag
 app = uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
 assert app['logic']
@@ -64,5 +62,3 @@ assert sm.position[0].x==42
 sm.position[0].y=17
 assert sm[0].position.y==17
 assert sm.position[0].y==17
-
-end
