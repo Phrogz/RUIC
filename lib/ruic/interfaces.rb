@@ -10,9 +10,9 @@ module UIC::FileBacked
 		!@file_not_found
 	end
 	def file=( new_path )
-		@file = new_path
+		@file = File.expand_path(new_path)
 		@file_not_found = !File.exist?(new_path)
-		warn "Could not find file '#{new_path}'" unless file_found?
+		# warn "Could not find file '#{new_path}'" unless file_found?
 	end
 end
 

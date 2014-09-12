@@ -1,16 +1,27 @@
 #!/usr/bin/env ruic -m MetaData.xml
-# metadata 'MetaData.xml'                         # optional; also may be set via -m flag
-app = uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
+# metadata 'MetaData.xml'                   # optional; also may be set via -m flag
+uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
-assert app['logic']
-assert app['logic'].datamodel=='{output=output}'
+show app.file
+show app.filename
+assert app.assets.length==10, "There should be 10 assets"
+assert app.behaviors.length==3
+assert app.presentations.length==6
 
-main = app['main']
-assert main == app.main_presentation
-assert main.filename == 'BMW_Cluster.uip'
+assert app['#logic']
+assert app['#logic'].datamodel=='{output=output}'
+assert app['#logic']==app['states/logic.scxml']
+assert app['#logic']==app['./states/logic.scxml']
+assert app['#logic']==app['../BMW_Cluster/states/logic.scxml']
 
-assert !app['beejonkers']
+main = app['#main']                         # Look up a presentation by asset id
+assert main == app.main_presentation        # …or ask for the main rendered presentation
+assert main.filename == 'BMW_Cluster.uip'   # You can also ask for the full path via .file
+assert main == app['BMW_Cluster.uip']       # Look up a presentation by asset id
 
+assert !app['beejonkers']                   # If an asset id doesn't exist, you'll get nil
+
+# Find an element based on path, prefixed with asset id
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 assert sm.name == 'SimpleMedia'
 

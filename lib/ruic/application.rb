@@ -20,8 +20,15 @@ class UIC::Application
 		end.group_by{ |asset| asset.el.name }
 	end
 
-	def [](asset_id)
-		@assets.values.inject(:+).find{ |asset| asset.id==asset_id }
+	def [](asset_id_or_path)
+		all = assets
+		if asset_id_or_path.start_with?('#')
+			id = asset_id_or_path[1..-1]
+			all.find{ |asset| asset.id==id }
+		else
+			full_path = File.expand_path(asset_id_or_path,File.dirname(file))
+			all.find{ |asset| asset.file==full_path }
+		end
 	end
 
 	def unused_files
@@ -36,7 +43,7 @@ class UIC::Application
 	end
 
 	def assets
-		@assets.values
+		@assets.values.inject(:+)
 	end
 
 	def main_presentation
@@ -63,7 +70,7 @@ class UIC::Application
 		@assets['statemachine']
 	end
 
-	def plugins
+	def renderplugins
 		@assets['renderplugin']
 	end
 
@@ -74,7 +81,7 @@ class UIC::Application
 
 	def at(path)
 		parts = path.split(':')
-		preso = parts.length==2 ? self[parts.first] : main_presentation
+		preso = parts.length==2 ? self["##{parts.first}"] : main_presentation
 		raise "Cannot find presentation for #{id}" unless preso
 		preso.at(parts.last)
 	end
