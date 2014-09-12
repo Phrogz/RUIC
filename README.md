@@ -37,6 +37,7 @@ RUIC scripts are pure Ruby with a few convenience methods added. You run them vi
 
     ruic myscript.ruic  # or .rb extension, for syntax highlighting while editing
 
+
 ## Creating and Accessing Applications
 RUIC scripts must start with `uia` commands to load an application and all its assets.
 After this you can access the application as `app`:
@@ -69,8 +70,17 @@ uia '../../v1/MyApp.uia' # Available as 'app2'
 uia '../MyApp.uia'
 
 main = app.main_presentation   # The presentation displayed as the main presentation (regardless of id)
-sub  = app['#navigation']      # You can ask for an asset based on the id in the .uia...
+sub  = app['#nav']             # You can ask for an asset based on the id in the .uia...
 sub  = app['Navigation.uip']   # or based on the path to the file (relative to the .uia)
+
+
+car = sub/"Scene.Vehicle.Group.Car"      # Find elements in a presentation by presentation path…
+car = app/"nav:Scene.Vehicle.Group.Car"  # …or absolute application path
+
+show car.name #=> Car
+show car.type #=> Model                  # Scene, Layer, Camera, Light, Group, Model, Material,
+                                         # Image, Behavior, Effect, ReferencedMaterial, Text,
+                                         # RenderPlugin, Component, (custom materials)
 ```
 
 ## Writing Assertions
@@ -97,6 +107,7 @@ _In decreasing priority…_
 - Report missing assets (and who was looking for them)
 - Gobs more unit tests
 - Parse .material files
+- Navigate through scene graph hierarchy (parent, children)
 - Parse .lua files (in case one references an image)
 - Parse render plugins
 - Read/edit animation tracks
@@ -108,7 +119,6 @@ _In decreasing priority…_
 - Modify the scene graph of presentations
 - Create new presentations/applications from code
 - Report on image asset file formats (e.g. find PNGs, find DXT1 vs DXT3 vs DXT Luminance…)
-
 
 
 # History
