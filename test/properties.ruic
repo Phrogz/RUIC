@@ -2,8 +2,7 @@
 # metadata 'MetaData.xml'                   # optional; also may be set via -m flag
 uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
-show app.file
-show app.filename
+assert app.filename == 'BMW_Cluster.uia'
 assert app.assets.length==10, "There should be 10 assets"
 assert app.behaviors.length==3
 assert app.presentations.length==6
@@ -21,12 +20,17 @@ assert main == app['BMW_Cluster.uip']       # Look up a presentation by asset id
 
 assert !app['beejonkers']                   # If an asset id doesn't exist, you'll get nil
 
+scene = app/'main:Scene'
+assert scene
+assert scene.type == 'Scene'
+assert scene.name == 'Scene'
+
 # Find an element based on path, prefixed with asset id
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 assert sm.name == 'SimpleMedia'
+assert sm.type == 'Model'
 
-sm2 = main/'Scene.ClassicContent.ClassicContent.SimpleMedia'
-assert sm==sm2
+assert sm==main/'Scene.ClassicContent.ClassicContent.SimpleMedia'
 
 assert sm.component == (main/'Scene.ClassicContent.ClassicContent')
 assert sm.component.slides.length==2

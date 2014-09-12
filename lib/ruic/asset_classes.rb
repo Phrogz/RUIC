@@ -12,6 +12,10 @@ class UIC::MetaData
 			@el = element
 		end
 
+		def type
+			self.class.name.split('::').last
+		end
+
 		# Find the owning component
 		def component
 			presentation.owning_component(@el)
@@ -45,7 +49,8 @@ class UIC::MetaData
 
 	attr_reader :by_name
 
-	HIER = { 'Asset'=>'AssetClass', 'Slide'=>'AssetClass' }
+	HIER = {}
+	%w[Asset Slide Scene].each{ |s| HIER[s] = 'AssetClass' }
 	%w[Node Behavior Effect Image Layer Material ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
 
