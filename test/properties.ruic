@@ -1,3 +1,4 @@
+#!/usr/bin/env ruic -m MetaData.xml
 # metadata 'MetaData.xml'                         # optional; also may be set via -m flag
 app = uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
