@@ -1,5 +1,5 @@
 # What is RUIC?
-RUIC is a Ruby API for reading, analyzing, and manipulating application assets created by NVIDIA's [UI Composer](http://uicomposer.nvidia.com). Among other things, it allows you to:
+RUIC is a Ruby API for reading, analyzing, and manipulating application assets created by NVIDIA's [UI Composer][1]. Among other things, it allows you to:
 
 * See if an application is missing any assets (e.g. images or meshes) and what parts of the application are looking for those.
 * See if there are any files in the application folder that you can delete (e.g. images or materials that are no longer being used).
@@ -10,15 +10,15 @@ RUIC is a Ruby API for reading, analyzing, and manipulating application assets c
 _Some of the features above are planned, but not yet implemented; see Known Limitations below._
 
 ## Table of Contents
-* Installing RUIC
-* Using the RUIC DSL
-  * Creating and Accessing Applications
-  * Working with Presentations
-  * Writing Assertions
-  * Locating MetaData.xml
-* Known Limitations (aka TODO)
-* History
-* License
+* [Installing RUIC](#installing-ruic)
+* [Using the RUIC DSL](#using-the-ruic-dsl)
+  * [Creating and Accessing Applications](#creating-and-accessing-applications)
+  * [Working with Presentations](#working-with-presentations)
+  * [Writing Assertions](#writing-assertions)
+  * [Locating MetaData.xml](#locating-metadataxml)
+* [Known Limitations (aka TODO)](#known-limitations-aka-todo)
+* [History](#history)
+* [License & Contact](#license--contact)
 
 
 
@@ -27,7 +27,7 @@ RUIC can be installed via RubyGems (part of Ruby) via the command:
 
     gem install ruic   # May need `sudo gem install ruic` depending on your setup
 
-Although RUIC is a pure-Ruby library, it relies on [Nokogiri](http://nokogiri.org) for all the XML processing and manipulation. Installing RUIC will also automatically install Nokogiri, which may require some compilation.
+Although RUIC is a pure-Ruby library, it relies on [Nokogiri][2] for all the XML processing and manipulation. Installing RUIC will also automatically install Nokogiri, which may require some compilation.
 
 
 
@@ -53,7 +53,7 @@ show app.assets.count   #=> 7
 # for arrays of specific asset types
 ```
 
-_The `show` command prints the result output; it is simply a nicer alias for `puts`._
+_The `show` command prints the result; it is simply a nicer alias for `puts`._
 
 If you need to load multiple applications in the same script, subsequent `uia` commands will create
 `app2`, `app3`, etc. for you to use.
@@ -99,7 +99,7 @@ By default RUIC will look in the location specified by `RUIC::DEFAULTMETADATA`, 
 If this file is in another location, you can tell the script where to find it either:
 
 * on the command line: `ruic -m path/to/MetaData.xml myscript.ruic` 
-* in the ruic script: `metadata 'path/to/MetaData.xml' # before any 'app' commands`
+* in your ruic script: `metadata 'path/to/MetaData.xml' # before any 'app' commands`
 
 
 
@@ -131,7 +131,12 @@ _In decreasing priority…_
 
 
 
-# License
-Copyright © 2014 [Gavin Kistner](mailto:!@phrogz.net)
+# License & Contact
+RUIC is copyright ©2014 by Gavin Kistner and is licensed under the [MIT License][3]. See the `LICENSE` file for more details.
 
-Licensed under the [MIT License](http://opensource.org/licenses/MIT). See the `LICENSE` file for more details.
+For bugs or feature requests please open [issues on GitHub][4]. For other communication you can [email the author directly](mailto:!@phrogz.net?subject=RUIC).
+
+[1]: http://uicomposer.nvidia.com
+[2]: http://nokogiri.org
+[3]: http://opensource.org/licenses/MIT
+[4]: https://github.com/Phrogz/RUIC/issues
