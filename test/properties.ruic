@@ -26,9 +26,6 @@ assert scene==main.scene
 assert scene.type == 'Scene'
 assert scene.name == 'Scene'
 
-show scene.slides
-p scene.slides
-
 # Find an element based on path, prefixed with asset id
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 assert sm.name == 'SimpleMedia'

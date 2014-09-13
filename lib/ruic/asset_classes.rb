@@ -227,10 +227,10 @@ class UIC::SlideValues
 		@preso = asset.presentation
 	end
 	def method_missing(property_name,new_value=nil)
-		property_name = property_name.to_s
-		property_name.sub!(/=$/,'') if setflag=property_name[/=$/]
-		if @asset.respond_to?(property_name)
-			property = @asset.class.properties[property_name]
+		string_name = property_name.to_s
+		string_name.sub!(/=$/,'') if setflag=string_name[/=$/]
+		if @asset.respond_to?(string_name)
+			property = @asset.class.properties[string_name]
 			if setflag
 				property.set( @asset, new_value, @slide.name )
 			else
@@ -239,6 +239,9 @@ class UIC::SlideValues
 		else
 			super
 		end
+	end
+	def inspect
+		"<Attributes for slide '#{@slide.name}' of '#{@asset.name}'>"
 	end
 end
 
@@ -265,7 +268,7 @@ class UIC::ValuesPerSlide
 		@asset.slides.map{ |s| self[s.name] }
 	end
 	def inspect
-		"<multiple values for '#{property.name}' per slide>"
+		"<Values of '#{@asset.name}.#{@property.name}' across slides>"
 	end
 	alias_method :to_s, :inspect
 end
