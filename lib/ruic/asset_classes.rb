@@ -29,6 +29,10 @@ class UIC::MetaData
 			presentation.slides_for(@el)
 		end
 
+		def path
+			@path ||= @presentation.path_to(@el)
+		end
+
 		# Get the values of attributes on a specific slide
 		def [](slide_name_or_index)
 			if slide = slides[slide_name_or_index]
@@ -121,10 +125,10 @@ class UIC::Property
 	def description; @desc||=@el['description']; end
 	def default; @def ||= (@el['default'] || self.class.default); end
 	def get(asset,slide)
-		asset.presentation.get_asset_attribute(asset,name,slide) || default
+		asset.presentation.get_attribute(asset.el,name,slide) || default
 	end
 	def set(asset,new_value,slide_name_or_index)
-		asset.presentation.set_asset_attribute(asset,name,slide_name_or_index,new_value)
+		asset.presentation.set_attribute(asset.el,name,slide_name_or_index,new_value)
 	end
 
 	class String < self

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruic -m MetaData.xml
-# metadata 'MetaData.xml'                   # optional; also may be set via -m flag
+metadata 'MetaData.xml'                     # optional; also may be set via -m flag
 uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
 assert app.filename == 'BMW_Cluster.uia'
@@ -30,6 +30,7 @@ assert scene.name == 'Scene'
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 assert sm.name == 'SimpleMedia'
 assert sm.type == 'Model'
+assert sm.path == 'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 
 assert sm==main/'Scene.ClassicContent.ClassicContent.SimpleMedia'
 
