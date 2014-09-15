@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP version="3" >
+	<Project >
+		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False" />
+		<Classes >
+			<Effect id="Brush Strokes" name="Brush Strokes" sourcepath=".\Brush Strokes.effect" />
+			<CustomMaterial id="copper" name="copper" sourcepath=".\copper.material" />
+		</Classes>
+		<Graph >
+			<Scene id="Scene" >
+				<Layer id="Layer" >
+					<Camera id="Camera" />
+					<Light id="Light" />
+					<Effect id="Brush Strokes_001" class="#Brush Strokes" />
+					<Model id="Rectangle" >
+						<CustomMaterial id="Material" class="#copper" />
+					</Model>
+				</Layer>
+			</Scene>
+		</Graph>
+		<Logic >
+			<State name="Master Slide" component="#Scene" >
+				<Add ref="#Layer" />
+				<Add ref="#Camera" />
+				<Add ref="#Light" />
+				<State id="Scene-Slide1" name="Slide1" >
+					<Add ref="#Brush Strokes_001" name="Brush Strokes" />
+					<Add ref="#Rectangle" name="Rectangle" rotation="-4.94025 -10.2291 -12.3676" scale="5 5 5" sourcepath="#Rectangle" />
+					<Add ref="#Material" name="Material" roughness="0.0869565" uEnvironmentMappingEnabled="True" />
+				</State>
+			</State>
+		</Logic>
+	</Project>
+</UIP>

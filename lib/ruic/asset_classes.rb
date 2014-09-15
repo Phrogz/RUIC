@@ -33,6 +33,10 @@ class UIC::MetaData
 			@el.name == 'Component'
 		end
 
+		def master?
+			presentation.master?(@el)
+		end
+
 		def slides
 			presentation.slides_for(@el)
 		end

@@ -71,9 +71,17 @@ class UIC::Presentation
 		end
 	end
 
+	def errors?
+		!errors.empty?
+	end
+
+	def errors
+		file_found? ? [] : ["File not found: '#{file}'"]
+	end
+
 	def at(path,root=@graph)
 		name,path = path.split('.',2)
-		node = root.element_children.find{ |el| @logic.at_xpath("State/Add[@ref='##{el['id']}'][@name='#{name}']") } || 
+		node = root.element_children.find{ |el| @logic.at_xpath(".//State/Add[@ref='##{el['id']}'][@name='#{name}']") } || 
 		       root.element_children.find{ |el| el['id']==name }
 		if node
 			if path
@@ -141,6 +149,10 @@ class UIC::Presentation
 
 	def attribute_linked?(graph_element,attribute_name)
 		!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][1].key?(attribute_name))
+	end
+
+	def master?(graph_element)
+		(graph_element == @scene) || !!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
 	end
 end
 
