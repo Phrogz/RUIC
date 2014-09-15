@@ -3,9 +3,17 @@ require 'set'
 class UIC::MetaData
 	class AssetClass
 		@properties = {}
-		def self.properties
-			(ancestors[1].respond_to?(:properties) ? ancestors[1].properties : {}).merge(@properties)
+		class << self
+			def properties
+				(ancestors[1].respond_to?(:properties) ? ancestors[1].properties : {}).merge(@properties)
+			end
+
+			def each
+				(@by_name.values - [self]).each{ |klass| yield klass }
+			end
+			include Enumerable
 		end
+
 		attr_accessor :presentation, :el
 		def initialize( presentation, element )
 			@presentation = presentation

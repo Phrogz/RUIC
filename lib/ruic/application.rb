@@ -58,6 +58,16 @@ class UIC::Application
 		@doc.at('assets')['initial'] = presentation.id
 	end
 
+	def image_usage
+		(presentations + statemachines)
+			.map(&:image_usage)
+			.inject{ |h1,h2| h1.merge(h2){ |path,els1,els2| [*els1,*els2] } }
+	end
+
+	def image_paths
+		image_usage.keys
+	end
+
 	def presentations
 		@assets['presentation']
 	end

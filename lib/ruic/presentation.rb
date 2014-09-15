@@ -32,6 +32,15 @@ class UIC::Presentation
 		@slides_by_el = {}
 	end
 
+	def image_usage
+		# Find image
+	end
+
+	def image_paths
+		image_usage.keys
+	end
+
+
 	def asset_for_el(el)
 		@asset_by_el[el] ||= app.metadata.new_instance(self,el)
 	end
