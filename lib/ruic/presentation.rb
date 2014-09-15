@@ -143,7 +143,8 @@ class UIC::Presentation
 	def slides_for( graph_element )
 		master = master_slide_for( graph_element )
 		kids   = master.xpath('./State')
-		slides = [master,*kids].map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
+		master = nil unless @addsets_by_graph[graph_element][0]
+		slides = [master,*kids].compact.map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
 		UIC::SlideCollection.new( slides )
 	end
 

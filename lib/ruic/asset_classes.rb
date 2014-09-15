@@ -103,6 +103,7 @@ class UIC::MetaData
 				property = UIC::Property.const_get(type).new(e)
 				define_method(property.name) do
 					if SAMEONALLSLIDES.include?(property.name)
+						# master? ? property.get(self,0) : property.get(self,presentation.slides_for(@el).first.name)
 						property.get(self,0)
 					else
 						UIC::ValuesPerSlide.new(@presentation,self,property)
