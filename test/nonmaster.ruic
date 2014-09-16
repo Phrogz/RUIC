@@ -1,0 +1,14 @@
+metadata 'MetaData.xml'                         # optional; also may be set via -m flag
+uia 'projects/CustomClasses/CustomClasses.uia'  # required before other commands
+
+if app.errors?
+	show "Uh oh!", app.errors
+	exit
+end
+
+main = app.main_presentation
+
+assert main.scene.master?
+assert (main/"Scene.Layer").master?
+assert (main/"Scene.Layer.Camera").master?
+assert !(main/"Scene.Layer.Rectangle").master?

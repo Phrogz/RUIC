@@ -20,6 +20,14 @@ class UIC::Application
 		end.group_by{ |asset| asset.el.name }
 	end
 
+	def errors?
+		!errors.empty?
+	end
+
+	def errors
+		file_found? ? assets.flat_map(&:errors) : ["File not found: '#{file}'"]
+	end
+
 	def [](asset_id_or_path)
 		all = assets
 		if asset_id_or_path.start_with?('#')

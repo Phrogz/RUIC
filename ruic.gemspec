@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.description = %q{RUIC is a library that understands the XML formats used by NVIDIA's "UI Composer" tool suite. In addition to APIs for analyzing and manipulating these files—the UIC portion of the library—it also includes a mini DSL for writing scripts that can be run by the `ruic` interpreter.}
   s.homepage    = "https://github.com/Phrogz/RUIC"
 
-  s.add_runtime_dependency "nokogiri", '~> 1.6'
+  s.add_runtime_dependency "nokogiri", '~> 1'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
