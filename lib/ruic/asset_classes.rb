@@ -1,3 +1,4 @@
+#encoding: utf-8
 require 'set'
 
 class UIC::MetaData
@@ -12,6 +13,10 @@ class UIC::MetaData
 				(@by_name.values - [self]).each{ |klass| yield klass }
 			end
 			include Enumerable
+		end
+
+		def properties
+			self.class.properties
 		end
 
 		attr_accessor :presentation, :el
@@ -67,7 +72,7 @@ class UIC::MetaData
 
 	HIER = {}
 	%w[Asset Slide Scene].each{ |s| HIER[s] = 'AssetClass' }
-	%w[Node Behavior Effect Image Layer Material ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
+	%w[Node Behavior Effect Image Layer Material MaterialBase ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
 
 	SAMEONALLSLIDES = ::Set[*%w[ name ]]
@@ -82,6 +87,7 @@ class UIC::MetaData
 			parent_class = @by_name[parent_class_name]
 			el = doc.root.at(class_name)
 			@by_name[class_name] = create_class(el,parent_class)
+			UIC::MetaData.const_set( el.name, @by_name[class_name] ) # give the class instance a name by pointing a constant to it :/
 		end
 
 		@by_name['State'] = @by_name['Slide']
@@ -102,9 +108,8 @@ class UIC::MetaData
 				type = "Float" if type=="float"
 				property = UIC::Property.const_get(type).new(e)
 				define_method(property.name) do
-					if SAMEONALLSLIDES.include?(property.name)
-						# master? ? property.get(self,0) : property.get(self,presentation.slides_for(@el).first.name)
-						property.get(self,0)
+					if SAMEONALLSLIDES.include?(property.name) || !master?
+						property.get( self, presentation.slide_index(@el) )
 					else
 						UIC::ValuesPerSlide.new(@presentation,self,property)
 					end
@@ -114,7 +119,7 @@ class UIC::MetaData
 				end
 				[property.name,property]
 			end ]
-		end.tap{ |klass| UIC::MetaData.const_set(el.name,klass) }
+		end
 	end
 
 	def new_instance(presentation,el)
@@ -181,6 +186,7 @@ class UIC::Property
 	Renderable = String #TODO: a real class
 	Image      = String #TODO: a real class
 	Font       = String #TODO: a real class
+	Texture    = String #TODO: a real class
 	FontSize   = Long
 
 	StringListOrInt = String #TODO: a real class

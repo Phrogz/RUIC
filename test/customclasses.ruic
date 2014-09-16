@@ -12,7 +12,7 @@ effect = main/"Scene.Layer.Brush Strokes"
 assert effect
 assert effect.name == "Brush Strokes"
 assert effect.properties.length == 11 # 6 shared asset, 1 effect, 4 from effect
-assert effect.brushAngle[1] == 45
+assert effect.brushAngle == 45
 assert effect.starttime == 0
 
 material = main/"Scene.Layer.Rectangle.Material"

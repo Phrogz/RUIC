@@ -11,12 +11,22 @@ class UIC::Presentation
 		@scene = @graph.at('Scene')
 		@logic = @doc.at('Logic')
 
+		@class_by_ref = {}
+		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
+			path = app.path_to(reference['sourcepath'])
+			raise "Cannot find file '#{path}' referenced by #{self.inspect}" unless File.exist?( path )
+			# TODO: special-case Lua preambles
+			meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
+			from = app.metadata.by_name[ reference.name == 'CustomMaterial' ? 'MaterialBase' : reference.name ]
+			@class_by_ref[ "##{reference['id']}" ] = app.metadata.create_class( meta, from )
+		end
+
 		@graph_by_id = {}
 		@scene.traverse{ |x| @graph_by_id[x['id']]=x if x.is_a?(Nokogiri::XML::Element) }
-		slideindex = {}
 
 		@graph_by_addset  = {}
 		@addsets_by_graph = {}
+		slideindex = {}
 		@logic.search('Add,Set').each do |addset|
 			graph = @graph_by_id[addset['ref'][1..-1]]
 			@graph_by_addset[addset] = graph
@@ -32,6 +42,13 @@ class UIC::Presentation
 		@slides_by_el = {}
 	end
 
+	# Find the index of the slide where an element is added
+	def slide_index(graph_element)
+		# TODO: probably faster to .find the first @addsets_by_graph
+		slide = @logic.at(".//Add[@ref='##{graph_element['id']}']/..")
+		slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i
+	end
+
 	def image_usage
 		# Find image
 	end
@@ -42,7 +59,7 @@ class UIC::Presentation
 
 
 	def asset_for_el(el)
-		@asset_by_el[el] ||= app.metadata.new_instance(self,el)
+		@asset_by_el[el] ||= el['class'] ? @class_by_ref[el['class']].new(self,el) : app.metadata.new_instance(self,el)
 	end
 
 	attr_reader :addsets_by_graph
@@ -152,6 +169,7 @@ class UIC::Presentation
 		!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][1].key?(attribute_name))
 	end
 
+	# Is this element added on the master slide?
 	def master?(graph_element)
 		(graph_element == @scene) || !!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
 	end
