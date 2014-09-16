@@ -15,10 +15,23 @@ class UIC::Presentation
 		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
 			path = app.path_to(reference['sourcepath'])
 			raise "Cannot find file '#{path}' referenced by #{self.inspect}" unless File.exist?( path )
-			# TODO: special-case Lua preambles
-			meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
-			from = app.metadata.by_name[ reference.name == 'CustomMaterial' ? 'MaterialBase' : reference.name ]
-			@class_by_ref[ "##{reference['id']}" ] = app.metadata.create_class( meta, from )
+			metaklass = case reference.name
+				when 'CustomMaterial'
+					meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
+					from = app.metadata.by_name[ 'MaterialBase' ]
+					app.metadata.create_class( meta, from )
+				when 'Effect'
+					meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
+					from = app.metadata.by_name[ 'Effect' ]
+					app.metadata.create_class( meta, from )
+				when 'Behavior'
+					lua  = File.read(path,encoding:'utf-8')
+					meta = lua[ /--\[\[(.+?)(?:--)?\]\]/m, 1 ]
+					meta = Nokogiri.XML("<MetaData>#{meta}</MetaData>").root
+					from = app.metadata.by_name[ 'Behavior' ]
+					app.metadata.create_class( meta, from )
+			end
+			@class_by_ref[ "##{reference['id']}" ] = metaklass
 		end
 
 		@graph_by_id = {}
@@ -46,7 +59,7 @@ class UIC::Presentation
 	def slide_index(graph_element)
 		# TODO: probably faster to .find the first @addsets_by_graph
 		slide = @logic.at(".//Add[@ref='##{graph_element['id']}']/..")
-		slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i
+		slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0 # the Scene is never added
 	end
 
 	def image_usage
