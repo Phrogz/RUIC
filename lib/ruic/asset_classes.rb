@@ -50,10 +50,31 @@ class UIC::MetaData
 			@path ||= @presentation.path_to(@el)
 		end
 
-		# Get the values of attributes on a specific slide
-		def [](slide_name_or_index)
-			if slide = slides[slide_name_or_index]
-				UIC::SlideValues.new(slide,self)
+		# Get the value(s) of an attribute
+		def [](attribute_name, slide_name_or_index=nil)
+			if property = properties[attribute_name] then
+				if slide_name_or_index
+					property.get( self, slide_name_or_index )
+				else
+					if SAMEONALLSLIDES.include?(attribute_name) || !master?
+						property.get( self, presentation.slide_index(@el) )
+					else
+						UIC::ValuesPerSlide.new(@presentation,self,property)
+					end
+				end
+			end
+		end
+
+		# Set the value of an attribute, either across all slides, or on a particular slide
+		# el['foo']   = 42
+		# el['foo',0] = 42
+		def []=( attribute_name, slide_name_or_index=nil, new_value )
+			if property = properties[attribute_name] then
+				if SAMEONALLSLIDES.include?(property.name) || !master?
+					property.set(self,new_value,presentation.slide_index(@el))
+				else
+					property.set(self,new_value,slide_name_or_index)
+				end
 			end
 		end
 
@@ -107,17 +128,7 @@ class UIC::MetaData
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
 				property = UIC::Property.const_get(type).new(e)
-				define_method(property.name) do
-					if SAMEONALLSLIDES.include?(property.name) || !master?
-						property.get( self, presentation.slide_index(@el) )
-					else
-						UIC::ValuesPerSlide.new(@presentation,self,property)
-					end
-				end
-				define_method("#{property.name}=") do |new_value|
-					property.set(self,new_value,nil)
-				end
-				[property.name,property]
+				[ property.name, UIC::Property.const_get(type).new(e) ]
 			end ]
 		end
 	end

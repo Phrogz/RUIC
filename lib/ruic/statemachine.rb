@@ -3,6 +3,14 @@ class UIC::StateMachine
 	def initialize( xml )
 		@doc = Nokogiri.XML( xml )
 	end
+
+	def errors?
+		!errors.empty?
+	end
+
+	def errors
+		file_found? ? [] : ["File not found: '#{file}'"]
+	end
 end
 
 def UIC.StateMachine( scxml_path )

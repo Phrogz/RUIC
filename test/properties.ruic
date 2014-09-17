@@ -2,6 +2,11 @@
 metadata 'MetaData.xml'                     # optional; also may be set via -m flag
 uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
+if app.errors?
+	show "Uh oh!", app.errors
+	exit
+end
+
 assert app.filename == 'BMW_Cluster.uia'
 assert app.assets.length==10, "There should be 10 assets"
 assert app.behaviors.length==3
@@ -24,13 +29,13 @@ scene = app/'main:Scene'
 assert scene
 assert scene==main.scene
 assert scene.type == 'Scene'
-assert scene.name == 'Scene'
+assert scene['name'] == 'Scene'
 
 # Find an element based on path, prefixed with asset id
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
-assert sm.name == 'SimpleMedia'
-assert sm.type == 'Model'
-assert sm.path == 'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
+assert sm['name'] == 'SimpleMedia'
+assert sm.type    == 'Model'
+assert sm.path    == 'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 
 assert sm==main/'Scene.ClassicContent.ClassicContent.SimpleMedia'
 
@@ -40,43 +45,35 @@ assert sm.component.slides[2].name == 'CarStatus'
 assert sm.component.slides[0].name == 'Master Slide'
 assert sm.component.slides['CarStatus'].name == 'CarStatus'
 
-assert sm[0].endtime==250
-assert sm[1].endtime==500
-assert sm['SimpleMedia'].endtime==500
-assert sm['CarStatus'  ].endtime==250
+assert sm['endtime',0]==250
+assert sm['endtime',1]==500
+assert sm['endtime','SimpleMedia']==500
+assert sm['endtime','CarStatus'  ]==250
+assert sm['endtime',99].nil?
 
-assert sm.position.linked?
-assert !sm.endtime.linked?
-assert sm.endtime.values == [250,500,250]
+assert sm['position'].linked?
+assert !sm['endtime'].linked?
+assert sm['endtime'].values == [250,500,250]
+assert sm['endtime'].value  == 250
 
-assert sm.endtime[1]==500
-assert sm.endtime['SimpleMedia']==500
-assert sm.endtime['CarStatus'  ]==250
+assert sm['endtime',1]==500
+assert sm['endtime','SimpleMedia']==500
+assert sm['endtime','CarStatus'  ]==250
 
-sm.endtime['CarStatus'] = 750
-assert sm.endtime['SimpleMedia']==500
-assert sm.endtime['CarStatus'  ]==750
-assert sm['SimpleMedia'].endtime==500
-assert sm['CarStatus'  ].endtime==750
+sm['endtime','CarStatus'] = 750
+assert sm['endtime','SimpleMedia']==500
+assert sm['endtime','CarStatus'  ]==750
 
-sm['CarStatus'].endtime = 50
-assert sm.endtime['CarStatus']==50
-assert sm['CarStatus'].endtime==50
+sm['endtime'] = 100
+assert sm['endtime',0]==100
+assert sm['endtime',1]==100
+assert sm['endtime',2]==100
 
-sm.endtime = 100
-assert sm.endtime[0]==100
-assert sm.endtime[1]==100
-assert sm.endtime[2]==100
+assert sm['position',0].x==0
+assert sm['scale',0].y == 2.88
 
-assert sm[0].position.x==0
-assert sm[0].scale.y == 2.88
-assert sm.position[0].x==0
-assert sm.scale[0].y == 2.88
+sm['position',0].x=42
+assert sm['position',0].x==0
 
-sm[0].position.x=42
-assert sm[0].position.x==42
-assert sm.position[0].x==42
-
-sm.position[0].y=17
-assert sm[0].position.y==17
-assert sm.position[0].y==17
+sm['position',0].y=17
+assert sm['position',0].x==17

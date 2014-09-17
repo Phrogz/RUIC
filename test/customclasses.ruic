@@ -10,12 +10,13 @@ main = app.main_presentation
 
 effect = main/"Scene.Layer.Brush Strokes"
 assert effect
-assert effect.name == "Brush Strokes"
+assert effect['name'] == "Brush Strokes"
 assert effect.properties.length == 11 # 6 shared asset, 1 effect, 4 from effect
-assert effect.brushAngle == 45
-assert effect.starttime == 0
+assert effect['brushAngle'].value == 45
+assert effect['starttime',1] == 0
 
-material = main/"Scene.Layer.Rectangle.Material"
+material = main["Scene.Layer.Rectangle.Material"]
 assert material.properties.length == 11 # 6 shared asset, 1 MaterialBase, 4 from material
-assert material.name == "Material"
-assert material.uEnvironmentMappingEnabled
+assert material['name'] == "Material"
+assert material['uEnvironmentMappingEnabled']
+assert !material['ATTRIBUTE-DOES-NOT-EXIST']
