@@ -13,5 +13,9 @@ rect = main/"Scene.Layer.Rectangle"
 assert !rect.master?
 assert rect['scale'].values.length == 1
 assert rect['scale'].value.x       == 5
-p rect.slides
 assert rect['scale',1].x           == 5
+assert rect['scale',0].nil?
+
+assert rect['position'].values.length == 1
+assert rect['position',1].x == 0
+assert rect['position',0].nil?
