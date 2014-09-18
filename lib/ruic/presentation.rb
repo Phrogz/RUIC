@@ -171,10 +171,11 @@ class UIC::Presentation
 	end
 
 	def slides_for( graph_element )
+		slides = []
 		master = master_slide_for( graph_element )
-		kids   = master.xpath('./State')
-		master = nil unless @addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0]
-		slides = [master,*kids].compact.map.with_index{ |el,i| @slides_by_el[el] ||= app.metadata.new_instance(self,el).tap{ |s| s.index=i } }
+		slides << [master,0] if graph_element==@scene || (@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
+		slides.concat( master.xpath('./State').map.with_index{ |el,i| [el,i+1] } )
+		slides.map!{ |el,idx| @slides_by_el[el] ||= app.metadata.new_instance(self,el).tap{ |s| s.index=idx } }
 		UIC::SlideCollection.new( slides )
 	end
 

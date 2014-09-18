@@ -1,5 +1,6 @@
 metadata 'MetaData.xml'                     # optional; also may be set via -m flag
 uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
+show app.errors if app.errors?
 
 show app.image_usage      # hash mapping image paths, relative to uia, to arrays of things referencing them: materials; scxml visual actions; effects; 
 show app.image_paths      # Just the paths

@@ -42,6 +42,10 @@ class UIC::MetaData
 			presentation.master?(@el)
 		end
 
+		def slide?
+			false
+		end
+
 		def has_slide?(slide_name_or_index)
 			!!slides[slide_name_or_index]
 		end
@@ -120,6 +124,7 @@ class UIC::MetaData
 			define_method(:inspect) do
 				"<Slide ##{index} '#{name}' of #{@el['component'] || @el.parent['component']}>"
 			end
+			define_method(:slide?){ true }
 		end
 	end
 
@@ -158,7 +163,9 @@ class UIC::Property
 	def description; @desc||=@el['description']; end
 	def default; @def ||= (@el['default'] || self.class.default); end
 	def get(asset,slide)
-		asset.presentation.get_attribute(asset.el,name,slide) || default
+		if asset.slide? || asset.has_slide?(slide)
+			asset.presentation.get_attribute(asset.el,name,slide) || default
+		end
 	end
 	def set(asset,new_value,slide_name_or_index)
 		asset.presentation.set_attribute(asset.el,name,slide_name_or_index,new_value)
@@ -239,18 +246,18 @@ class UIC::SlideCollection
 	include Enumerable
 	attr_reader :length
 	def initialize(slides)
-		@slides = slides
 		@length = slides.length-1
-		@slide_by_name = Hash[ slides.map{ |s| [s.name,s] } ]
+		@slide_by_index = Hash[ slides.map{ |s| [s.index,s] } ]
+		@slide_by_name  = Hash[ slides.map{ |s| [s.name, s] } ]
 	end
 	def each
-		0.upto(@length){ |i| yield(@slides[i] ) }
+		@slide_by_index.each{ |i,s| yield(s) }
 	end
 	def [](index_or_name)
-		index_or_name.is_a?(Numeric) ? @slides[index_or_name.to_i] : @slide_by_name[index_or_name.to_s]
+		index_or_name.is_a?(Numeric) ? @slide_by_index[index_or_name.to_i] : @slide_by_name[index_or_name.to_s]
 	end
 	def inspect
-		"[ #{@slides.map(&:inspect).join ', '} ]"
+		"[ #{@slide_by_index.values.map(&:inspect).join ', '} ]"
 	end
 end
 
