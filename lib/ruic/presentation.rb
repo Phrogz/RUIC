@@ -166,15 +166,15 @@ class UIC::Presentation
 	end
 
 	def master_slide_for( graph_element )
-		comp   = owning_or_self_component_element( graph_element )
+		comp = owning_or_self_component_element( graph_element )
 		@logic.at("./State[@component='##{comp['id']}']")
 	end
 
 	def slides_for( graph_element )
 		master = master_slide_for( graph_element )
 		kids   = master.xpath('./State')
-		master = nil unless @addsets_by_graph[graph_element][0]
-		slides = [master,*kids].compact.map{ |el| @slides_by_el[el] ||= app.metadata.new_instance(self,el) }
+		master = nil unless @addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0]
+		slides = [master,*kids].compact.map.with_index{ |el,i| @slides_by_el[el] ||= app.metadata.new_instance(self,el).tap{ |s| s.index=i } }
 		UIC::SlideCollection.new( slides )
 	end
 

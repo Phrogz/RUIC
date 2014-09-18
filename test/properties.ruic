@@ -2,10 +2,9 @@
 metadata 'MetaData.xml'                     # optional; also may be set via -m flag
 uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
-if app.errors?
-	show "Uh oh!", app.errors
-	exit
-end
+require 'pry'
+
+show "Uh oh!", app.errors if app.errors?
 
 assert app.filename == 'BMW_Cluster.uia'
 assert app.assets.length==10, "There should be 10 assets"
@@ -29,21 +28,25 @@ scene = app/'main:Scene'
 assert scene
 assert scene==main.scene
 assert scene.type == 'Scene'
-assert scene['name'] == 'Scene'
+assert scene.name == 'Scene'
+assert scene['name'].value == 'Scene'
 
 # Find an element based on path, prefixed with asset id
 sm = app/'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
-assert sm['name'] == 'SimpleMedia'
-assert sm.type    == 'Model'
-assert sm.path    == 'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
+assert sm.name == 'SimpleMedia'
+assert sm.type == 'Model'
+assert sm.path == 'main:Scene.ClassicContent.ClassicContent.SimpleMedia'
 
 assert sm==main/'Scene.ClassicContent.ClassicContent.SimpleMedia'
 
 assert sm.component == (main/'Scene.ClassicContent.ClassicContent')
 assert sm.component.slides.length==2
-assert sm.component.slides[2].name == 'CarStatus'
-assert sm.component.slides[0].name == 'Master Slide'
+assert sm.component.slides[0].name  == 'Master Slide'
+assert sm.component.slides[0].index == 0
+assert sm.component.slides[2].name  == 'CarStatus'
+assert sm.component.slides[2].index == 2
 assert sm.component.slides['CarStatus'].name == 'CarStatus'
+assert sm.component.slides['CarStatus'] == sm.component.slides[2]
 
 assert sm['endtime',0]==250
 assert sm['endtime',1]==500
@@ -73,7 +76,8 @@ assert sm['position',0].x==0
 assert sm['scale',0].y == 2.88
 
 sm['position',0].x=42
-assert sm['position',0].x==0
+assert sm['position',0].x==42
 
 sm['position',0].y=17
-assert sm['position',0].x==17
+assert sm['position',0].y==17
+assert sm['position',0].x==42

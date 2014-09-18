@@ -42,6 +42,10 @@ class UIC::MetaData
 			presentation.master?(@el)
 		end
 
+		def has_slide?(slide_name_or_index)
+			!!slides[slide_name_or_index]
+		end
+
 		def slides
 			presentation.slides_for(@el)
 		end
@@ -50,17 +54,22 @@ class UIC::MetaData
 			@path ||= @presentation.path_to(@el)
 		end
 
+		def name
+			properties['name'].get( self, presentation.slide_index(@el) )
+		end
+
+		def name=( new_name )
+			properties['name'].set( self, new_name, presentation.slide_index(@el) )
+		end
+
 		# Get the value(s) of an attribute
 		def [](attribute_name, slide_name_or_index=nil)
-			if property = properties[attribute_name] then
+			# puts "Looking for #{attribute_name.inspect} on slide #{slide_name_or_index.inspect} of #{@el.name}##{@el['id']}"
+			if property = properties[attribute_name]
 				if slide_name_or_index
-					property.get( self, slide_name_or_index )
+					property.get( self, slide_name_or_index ) if has_slide?(slide_name_or_index)
 				else
-					if SAMEONALLSLIDES.include?(attribute_name) || !master?
-						property.get( self, presentation.slide_index(@el) )
-					else
-						UIC::ValuesPerSlide.new(@presentation,self,property)
-					end
+					UIC::ValuesPerSlide.new(@presentation,self,property)
 				end
 			end
 		end
@@ -70,11 +79,7 @@ class UIC::MetaData
 		# el['foo',0] = 42
 		def []=( attribute_name, slide_name_or_index=nil, new_value )
 			if property = properties[attribute_name] then
-				if SAMEONALLSLIDES.include?(property.name) || !master?
-					property.set(self,new_value,presentation.slide_index(@el))
-				else
-					property.set(self,new_value,slide_name_or_index)
-				end
+				property.set(self,new_value,slide_name_or_index)
 			end
 		end
 
@@ -96,8 +101,6 @@ class UIC::MetaData
 	%w[Node Behavior Effect Image Layer Material MaterialBase ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
 
-	SAMEONALLSLIDES = ::Set[*%w[ name ]]
-
 	def initialize(xml)
 		@by_name = {'AssetClass'=>AssetClass}
 
@@ -113,8 +116,9 @@ class UIC::MetaData
 
 		@by_name['State'] = @by_name['Slide']
 		@by_name['Slide'].instance_eval do
+			attr_accessor :index
 			define_method(:inspect) do
-				"<Slide '#{name}' of #{@el['component'] || @el.parent['component']}>"
+				"<Slide ##{index} '#{name}' of #{@el['component'] || @el.parent['component']}>"
 			end
 		end
 	end
@@ -223,7 +227,7 @@ class UIC::Property
 		alias_method :g=, :y=
 		alias_method :b=, :z=
 		def inspect
-			"<#{self}>"
+			"<#{@asset.path}.#{@property.name}: #{self}>"
 		end
 		def to_s
 			[x,y,z].join(' ')
@@ -243,39 +247,10 @@ class UIC::SlideCollection
 		0.upto(@length){ |i| yield(@slides[i] ) }
 	end
 	def [](index_or_name)
-		index_or_name.is_a?(Fixnum) ? @slides[index_or_name] : @slide_by_name[index_or_name.to_s]
+		index_or_name.is_a?(Numeric) ? @slides[index_or_name.to_i] : @slide_by_name[index_or_name.to_s]
 	end
 	def inspect
 		"[ #{@slides.map(&:inspect).join ', '} ]"
-	end
-end
-
-class UIC::SlideValues
-	def initialize(slide,asset)
-		raise unless slide.is_a?(UIC::MetaData::Slide)
-		raise unless asset.is_a?(UIC::MetaData::AssetClass)
-
-		@slide = slide
-		@asset = asset
-		@el    = asset.el
-		@preso = asset.presentation
-	end
-	def method_missing(property_name,new_value=nil)
-		string_name = property_name.to_s
-		string_name.sub!(/=$/,'') if setflag=string_name[/=$/]
-		if @asset.respond_to?(string_name)
-			property = @asset.class.properties[string_name]
-			if setflag
-				property.set( @asset, new_value, @slide.name )
-			else
-				property.get( @asset, @slide.name )
-			end
-		else
-			super
-		end
-	end
-	def inspect
-		"<Attributes for slide '#{@slide.name}' of '#{@asset.name}'>"
 	end
 end
 
@@ -288,6 +263,9 @@ class UIC::ValuesPerSlide
 		@asset    = asset
 		@el       = asset.el
 		@property = property
+	end
+	def value
+		values.first
 	end
 	def [](slide_name_or_index)
 		@property.get( @asset, slide_name_or_index )
