@@ -11,9 +11,11 @@ assert effect.name == "Brush Strokes"
 assert effect.properties.length == 11 # 6 shared asset, 1 effect, 4 from effect
 assert effect['brushAngle'].value == 45
 assert effect['starttime',1] == 0
+assert effect['NoiseSamp'].value == 'maps/effects/brushnoise.dds'
 
 material = main/"Scene.Layer.Rectangle.Material"
 assert material.properties.length == 11 # 6 shared asset, 1 MaterialBase, 4 from material
 assert material.name == "Material"
 assert material['uEnvironmentMappingEnabled']
 assert !material['ATTRIBUTE-DOES-NOT-EXIST']
+assert material['uEnvironmentTexture',1] == 'maps/materials/spherical_checker.png'

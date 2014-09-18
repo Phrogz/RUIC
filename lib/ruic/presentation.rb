@@ -55,6 +55,10 @@ class UIC::Presentation
 		@slides_by_el = {}
 	end
 
+	def asset_by_id( id )
+		@graph_by_id[id] && asset_for_el( @graph_by_id[id] )
+	end
+
 	# Find the index of the slide where an element is added
 	def slide_index(graph_element)
 		# TODO: probably faster to .find the first @addsets_by_graph
@@ -62,8 +66,26 @@ class UIC::Presentation
 		slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0 # the Scene is never added
 	end
 
+	# Get an array of all assets in the scene graph, in document order
+	def assets
+		@graph_by_id.map{ |id,graph_element| asset_for_el(graph_element) }
+	end
+
+	# Returns a hash mapping image paths to arrays of the assets referencing them
 	def image_usage
-		# Find image
+		assets # TODO: speed up by only finding Material/CustomMaterial/Effect/Behavior assets
+			.flat_map do |asset|
+				asset.properties.values
+					.select{ |property| property.type=='Image' || property.type == 'Texture' }
+					.flat_map do |property|
+						asset[property.name].values.map do |value|
+							[
+								property.type=='img' ? value['sourcepath'] : value,
+								asset
+							]
+						end
+					end
+		end.group_by(&:first).each{ |path,array| array.map!(&:last) }
 	end
 
 	def image_paths

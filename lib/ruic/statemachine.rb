@@ -44,9 +44,12 @@ class UIC::Application::StateMachine < UIC::StateMachine
 			visual_transitions.flat_map{ |vt| vt.actions.flat_map{ |a| [a,vt] } }
 		).select do |visual_action,owner|
 			visual_action.is_a?(UIC::Application::StateMachine::VisualAction::SetAttribute) &&
+			visual_action.value[/\A(['"])[^'"]+\1\Z/] && # ensure that it's a simple string value
 			visual_action.element.properties[ visual_action.attribute ].is_a?( UIC::Property::Image )
 		end.group_by do |visual_action,owner|
-			visual_action.value # FIXME: need to parse the Lua expression to get the value (!)
+			visual_action.value[/\A(['"])([^'"]+)\1\Z/,2]
+		end.each do |image_path,array|
+			array.map!(&:last)
 		end
 	end
 

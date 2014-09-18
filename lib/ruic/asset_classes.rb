@@ -1,8 +1,8 @@
 #encoding: utf-8
 require 'set'
 
-class UIC::MetaData
-	class AssetClass
+class UIC::Asset
+	class Root
 		@properties = {}
 		class << self
 			def properties
@@ -54,6 +54,12 @@ class UIC::MetaData
 			presentation.slides_for(@el)
 		end
 
+		def on_slide(slide_name_or_index)
+			if has_slide?(slide_name_or_index)
+				UIC::SlideValues.new( self, slide_name_or_index )
+			end
+		end
+
 		def path
 			@path ||= @presentation.path_to(@el)
 		end
@@ -101,12 +107,12 @@ class UIC::MetaData
 	attr_reader :by_name
 
 	HIER = {}
-	%w[Asset Slide Scene].each{ |s| HIER[s] = 'AssetClass' }
+	%w[Asset Slide Scene].each{ |s| HIER[s] = 'Root' }
 	%w[Node Behavior Effect Image Layer Material MaterialBase ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
 
 	def initialize(xml)
-		@by_name = {'AssetClass'=>AssetClass}
+		@by_name = {'Root'=>Root}
 
 		doc = Nokogiri.XML(xml)
 		hack_in_slide_names!(doc)
@@ -115,7 +121,7 @@ class UIC::MetaData
 			parent_class = @by_name[parent_class_name]
 			el = doc.root.at(class_name)
 			@by_name[class_name] = create_class(el,parent_class)
-			UIC::MetaData.const_set( el.name, @by_name[class_name] ) # give the class instance a name by pointing a constant to it :/
+			UIC::Asset.const_set( el.name, @by_name[class_name] ) # give the class instance a name by pointing a constant to it :/
 		end
 
 		@by_name['State'] = @by_name['Slide']
@@ -152,13 +158,14 @@ class UIC::MetaData
 end
 
 def UIC.Meta(metadata_path)
-	UIC::MetaData.new(File.read(metadata_path,encoding:'utf-8'))
+	UIC::Asset.new(File.read(metadata_path,encoding:'utf-8'))
 end
 
 class UIC::Property
 	class << self; attr_accessor :default; end
 	def initialize(el); @el = el; end
 	def name; @name||=@el['name']; end
+	def type; @el['type']; end
 	def formal; @formal||=@el['formalName'] || @el['name']; end
 	def description; @desc||=@el['description']; end
 	def default; @def ||= (@el['default'] || self.class.default); end
@@ -201,14 +208,32 @@ class UIC::Property
 	end
 	Rotation = Vector
 	Color    = Vector
+	class Image < self
+		self.default = nil
+		def get(asset,slide)
+			if idref = super
+				result = asset.presentation.asset_by_id( idref[1..-1] )
+				slide ? result.on_slide( slide ) : result
+			end
+		end
+		def set(asset,new_value,slide)
+			raise "Setting image attributes not yet supported"
+		end
+	end
+	class Texture < String
+		def get(asset,slide)
+			if path=super
+				path.gsub('\\','/').sub(/\A.\//,'')
+			end
+		end
+	end
+
 
 	ObjectRef  = String #TODO: a real class
 	Import     = String #TODO: a real class
 	Mesh       = String #TODO: a real class
 	Renderable = String #TODO: a real class
-	Image      = String #TODO: a real class
 	Font       = String #TODO: a real class
-	Texture    = String #TODO: a real class
 	FontSize   = Long
 
 	StringListOrInt = String #TODO: a real class
@@ -264,7 +289,7 @@ end
 class UIC::ValuesPerSlide
 	def initialize(presentation,asset,property)
 		raise unless presentation.is_a?(UIC::Presentation)
-		raise unless asset.is_a?(UIC::MetaData::AssetClass)
+		raise unless asset.is_a?(UIC::Asset::Root)
 		raise unless property.is_a?(UIC::Property)
 		@preso    = presentation
 		@asset    = asset
@@ -290,4 +315,23 @@ class UIC::ValuesPerSlide
 		"<Values of '#{@asset.name}.#{@property.name}' across slides>"
 	end
 	alias_method :to_s, :inspect
+end
+
+class UIC::SlideValues
+	def initialize( asset, slide )
+		@asset = asset
+		@slide = slide
+	end
+	def [](attribute_name)
+		@asset[attribute_name,@slide]
+	end
+	def []=( attribute_name, new_value )
+		@asset[attribute_name,@slide] = new_value
+	end
+	def method_missing( name, *args, &blk )
+		asset.send(name,*args,&blk)
+	end
+	def inspect
+		"<#{@asset.inspect} on slide #{@slide.inspect}>"
+	end
 end
