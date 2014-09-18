@@ -8,6 +8,15 @@ class UIC::Behavior
 	def load_from_file
 		@lua = File.read(file,encoding:'utf-8')
 	end
+
+	def errors?
+		!errors.empty?
+	end
+
+	def errors
+		file_found? ? [] : ["File not found: '#{file}'"]
+	end
+
 end
 
 class UIC::Application::Behavior < UIC::Behavior
