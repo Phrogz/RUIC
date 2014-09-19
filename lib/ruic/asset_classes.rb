@@ -1,6 +1,6 @@
 #encoding: utf-8
 require 'set'
-
+$depth = 0
 class UIC::Asset
 	class Root
 		@properties = {}
@@ -13,6 +13,10 @@ class UIC::Asset
 				(@by_name.values - [self]).each{ |klass| yield klass }
 			end
 			include Enumerable
+
+			def inspect
+				"<#{@name}>"
+			end
 		end
 
 		def properties
@@ -47,7 +51,7 @@ class UIC::Asset
 		end
 
 		def has_slide?(slide_name_or_index)
-			!!slides[slide_name_or_index]
+			presentation.has_slide?(@el,slide_name_or_index)
 		end
 
 		def slides
@@ -96,7 +100,9 @@ class UIC::Asset
 		def to_xml
 			@el.to_xml
 		end
-		alias_method :inspect, :to_xml
+		def inspect
+			"<asset #{@el.name}##{@el['id']}>"
+		end
 
 		def ==(other)
 			(self.class==other.class) && (el==other.el)
@@ -120,25 +126,27 @@ class UIC::Asset
 		HIER.each do |class_name,parent_class_name|
 			parent_class = @by_name[parent_class_name]
 			el = doc.root.at(class_name)
-			@by_name[class_name] = create_class(el,parent_class)
+			@by_name[class_name] = create_class(el,parent_class,el.name)
 			UIC::Asset.const_set( el.name, @by_name[class_name] ) # give the class instance a name by pointing a constant to it :/
 		end
 
 		@by_name['State'] = @by_name['Slide']
 		@by_name['Slide'].instance_eval do
-			attr_accessor :index
-			define_method(:inspect) do
-				"<Slide ##{index} '#{name}' of #{@el['component'] || @el.parent['component']}>"
+			attr_accessor :index, :name
+			define_method :inspect do
+				"<slide ##{index} of #{@el['component'] || @el.parent['component']}>"
 			end
 			define_method(:slide?){ true }
 		end
 	end
 
-	# Creates a class from MetaData.xml with accessors for the <Property> listed
+	# Creates a class from MetaData.xml with accessors for the <Property> listed.
 	# Instances of the class are associated with a presentation and know how to 
-	# get/set values in that XML based on value types, slides, defaults
-	def create_class(el,parent_class)
+	# get/set values in that XML based on value types, slides, defaults.
+	# Also used to create classes from effects, materials, and behavior preambles.
+	def create_class(el,parent_class,name='CustomAsset')
 		Class.new(parent_class) do
+			@name = name
 			@properties = Hash[ el.css("Property").map do |e|
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
@@ -165,7 +173,7 @@ class UIC::Property
 	class << self; attr_accessor :default; end
 	def initialize(el); @el = el; end
 	def name; @name||=@el['name']; end
-	def type; @el['type']; end
+	def type; @type||=@el['type']; end
 	def formal; @formal||=@el['formalName'] || @el['name']; end
 	def description; @desc||=@el['description']; end
 	def default; @def ||= (@el['default'] || self.class.default); end
@@ -176,6 +184,9 @@ class UIC::Property
 	end
 	def set(asset,new_value,slide_name_or_index)
 		asset.presentation.set_attribute(asset.el,name,slide_name_or_index,new_value)
+	end
+	def inspect
+		"<#{type} '#{name}'>"
 	end
 
 	class String < self
@@ -200,7 +211,9 @@ class UIC::Property
 	end
 	class Vector < self
 		self.default = '0 0 0'
-		def get(asset,slide); VectorValue.new(asset,self,slide,super); end
+		def get(asset,slide)
+			VectorValue.new(asset,self,slide,super)
+		end
 		def set(asset,new_value,slide_name_or_index)
 			new_value = new_value.join(' ') if new_value.is_a?(Array)
 			super( asset, new_value, slide_name_or_index )
@@ -223,7 +236,7 @@ class UIC::Property
 	class Texture < String
 		def get(asset,slide)
 			if path=super
-				path.gsub('\\','/').sub(/\A.\//,'')
+				path.empty? ? nil : path
 			end
 		end
 	end
@@ -272,17 +285,21 @@ class UIC::SlideCollection
 	attr_reader :length
 	def initialize(slides)
 		@length = slides.length-1
-		@slide_by_index = Hash[ slides.map{ |s| [s.index,s] } ]
-		@slide_by_name  = Hash[ slides.map{ |s| [s.name, s] } ]
+		@slides = slides
+		@lookup = {}
+		slides.each do |s|
+			@lookup[s.index] = s
+			@lookup[s.name]  = s
+		end
 	end
 	def each
-		@slide_by_index.each{ |i,s| yield(s) }
+		@slides.each{ |s| yield(s) }
 	end
 	def [](index_or_name)
-		index_or_name.is_a?(Numeric) ? @slide_by_index[index_or_name.to_i] : @slide_by_name[index_or_name.to_s]
+		@lookup[ index_or_name ]
 	end
 	def inspect
-		"[ #{@slide_by_index.values.map(&:inspect).join ', '} ]"
+		"[ #{@slides.map(&:inspect).join ', '} ]"
 	end
 end
 

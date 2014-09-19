@@ -77,19 +77,19 @@ class UIC::Application
 	end
 
 	def presentations
-		@assets['presentation']
+		@assets['presentation'] ||= []
 	end
 
 	def behaviors
-		@assets['behavior']
+		@assets['behavior'] ||= []
 	end
 
 	def statemachines
-		@assets['statemachine']
+		@assets['statemachine'] ||= []
 	end
 
 	def renderplugins
-		@assets['renderplugin']
+		@assets['renderplugin'] ||= []
 	end
 
 	def save_all

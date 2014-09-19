@@ -2,8 +2,6 @@
 metadata 'MetaData.xml'                     # optional; also may be set via -m flag
 uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
 
-require 'pry'
-
 show "Uh oh!", app.errors if app.errors?
 
 assert app.filename == 'BMW_Cluster.uia'

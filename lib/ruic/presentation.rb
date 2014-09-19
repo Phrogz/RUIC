@@ -19,17 +19,17 @@ class UIC::Presentation
 				when 'CustomMaterial'
 					meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
 					from = app.metadata.by_name[ 'MaterialBase' ]
-					app.metadata.create_class( meta, from )
+					app.metadata.create_class( meta, from, reference.name )
 				when 'Effect'
 					meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
 					from = app.metadata.by_name[ 'Effect' ]
-					app.metadata.create_class( meta, from )
+					app.metadata.create_class( meta, from, reference.name )
 				when 'Behavior'
 					lua  = File.read(path,encoding:'utf-8')
 					meta = lua[ /--\[\[(.+?)(?:--)?\]\]/m, 1 ]
 					meta = Nokogiri.XML("<MetaData>#{meta}</MetaData>").root
 					from = app.metadata.by_name[ 'Behavior' ]
-					app.metadata.create_class( meta, from )
+					app.metadata.create_class( meta, from, reference.name )
 			end
 			@class_by_ref[ "##{reference['id']}" ] = metaklass
 		end
@@ -40,7 +40,7 @@ class UIC::Presentation
 		@graph_by_addset  = {}
 		@addsets_by_graph = {}
 		slideindex = {}
-		@logic.search('Add,Set').each do |addset|
+		@logic.xpath('.//Add|.//Set').each do |addset|
 			graph = @graph_by_id[addset['ref'][1..-1]]
 			@graph_by_addset[addset] = graph
 			@addsets_by_graph[graph] ||= {}
@@ -51,19 +51,20 @@ class UIC::Presentation
 			@addsets_by_graph[graph][index] = addset
 		end
 
-		@asset_by_el  = {}
-		@slides_by_el = {}
+		@asset_by_el  = {} # indexed by asset graph element
+		@slides_for   = {} # indexed by asset graph element
+		@slides_by_el = {} # indexed by slide state element
 	end
 
 	def asset_by_id( id )
-		@graph_by_id[id] && asset_for_el( @graph_by_id[id] )
+		(@graph_by_id[id] && asset_for_el( @graph_by_id[id] ))
 	end
 
 	# Find the index of the slide where an element is added
 	def slide_index(graph_element)
 		# TODO: probably faster to .find the first @addsets_by_graph
 		slide = @logic.at(".//Add[@ref='##{graph_element['id']}']/..")
-		slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0 # the Scene is never added
+		(slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0) # the Scene is never added
 	end
 
 	# Get an array of all assets in the scene graph, in document order
@@ -73,28 +74,36 @@ class UIC::Presentation
 
 	# Returns a hash mapping image paths to arrays of the assets referencing them
 	def image_usage
-		assets # TODO: speed up by only finding Material/CustomMaterial/Effect/Behavior assets
-			.flat_map do |asset|
-				asset.properties.values
-					.select{ |property| property.type=='Image' || property.type == 'Texture' }
-					.flat_map do |property|
-						asset[property.name].values.map do |value|
-							[
-								property.type=='img' ? value['sourcepath'] : value,
-								asset
-							]
+		asset_types = app.metadata.by_name.values + @class_by_ref.values
+
+		image_properties_by_type = asset_types.flat_map do |type|
+			type.properties.values
+			    .select{ |property| property.type=='Image' || property.type == 'Texture' }
+			    .map{ |property| [type,property] }
+		end.group_by(&:first).tap{ |x| x.each{ |t,a| a.map!(&:last) } }
+
+		assets.each_with_object({}) do |asset,usage|
+			if properties = image_properties_by_type[asset.class]
+				properties.each do |property|
+					asset[property.name].values.compact.each do |value|
+						value = value['sourcepath'] if property.type=='Image'
+						unless value.nil? || value.empty?
+							value = value.gsub('\\','/').sub(/^.\//,'')
+							usage[value] ||= []
+							usage[value] << asset
 						end
 					end
-		end.group_by(&:first).each{ |path,array| array.map!(&:last) }
+				end
+			end
+		end
 	end
 
 	def image_paths
 		image_usage.keys
 	end
 
-
 	def asset_for_el(el)
-		@asset_by_el[el] ||= el['class'] ? @class_by_ref[el['class']].new(self,el) : app.metadata.new_instance(self,el)
+		(@asset_by_el[el] ||= el['class'] ? @class_by_ref[el['class']].new(self,el) : app.metadata.new_instance(self,el))
 	end
 
 	attr_reader :addsets_by_graph
@@ -124,11 +133,11 @@ class UIC::Presentation
 	end
 
 	def errors?
-		!errors.empty?
+		(!errors.empty?)
 	end
 
 	def errors
-		file_found? ? [] : ["File not found: '#{file}'"]
+		(file_found? ? [] : ["File not found: '#{file}'"])
 	end
 
 	def at(path,root=@graph)
@@ -146,10 +155,10 @@ class UIC::Presentation
 	alias_method :/, :at
 
 	def get_attribute( graph_element, property_name, slide_name_or_index )
-		(addsets=@addsets_by_graph[graph_element]) && ( # State (slide) don't have any addsets
+		((addsets=@addsets_by_graph[graph_element]) && ( # State (slide) don't have any addsets
 			( addsets[slide_name_or_index] && addsets[slide_name_or_index][property_name] ) || # Try for a Set on the specific slide
 			( addsets[0] && addsets[0][property_name] ) # …else try the master slide
-		) || graph_element[property_name] # …else try the graph
+		) || graph_element[property_name]) # …else try the graph
 		# TODO: handle animation (child of addset)
 	end
 
@@ -193,12 +202,23 @@ class UIC::Presentation
 	end
 
 	def slides_for( graph_element )
-		slides = []
-		master = master_slide_for( graph_element )
-		slides << [master,0] if graph_element==@scene || (@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
-		slides.concat( master.xpath('./State').map.with_index{ |el,i| [el,i+1] } )
-		slides.map!{ |el,idx| @slides_by_el[el] ||= app.metadata.new_instance(self,el).tap{ |s| s.index=idx } }
-		UIC::SlideCollection.new( slides )
+		@slides_for[graph_element] ||= begin
+			slides = []
+			master = master_slide_for( graph_element )
+			slides << [master,0] if graph_element==@scene || (@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
+			slides.concat( master.xpath('./State').map.with_index{ |el,i| [el,i+1] } )
+			slides.map!{ |el,idx| @slides_by_el[el] ||= app.metadata.new_instance(self,el).tap{ |s| s.index=idx; s.name=el['name'] } }
+			UIC::SlideCollection.new( slides )
+		end
+	end
+
+	def has_slide?( graph_element, slide_name_or_index )
+		if graph_element == @scene
+			# The scene is never actually added, so we'll treat it just like the first add, which is on the master slide of the scene
+			has_slide?( @addsets_by_graph.first.first, slide_name_or_index )
+		else
+			@addsets_by_graph[graph_element][slide_name_or_index]
+		end
 	end
 
 	def attribute_linked?(graph_element,attribute_name)
@@ -235,6 +255,10 @@ class UIC::Application::Presentation < UIC::Presentation
 
 	def path_to( el )
 		"#{id}:#{super}"
+	end
+
+	def inspect
+		"<presentation #{file}>"
 	end
 end
 
