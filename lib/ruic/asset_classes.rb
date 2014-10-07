@@ -104,6 +104,10 @@ class UIC::Asset
 			"<asset #{@el.name}##{@el['id']}>"
 		end
 
+		def to_s
+			"<#{type} #{path}>"
+		end
+
 		def ==(other)
 			(self.class==other.class) && (el==other.el)
 		end

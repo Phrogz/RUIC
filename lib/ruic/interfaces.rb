@@ -28,3 +28,9 @@ module UIC::ElementBacked
 		end
   end	
 end
+
+module UIC::PresentableHash
+	def to_s
+		flat_map{ |k,v| [ k, *(v.is_a?(Array) ? v.map{|v2| "\t#{v2.to_s}" } : v) ] }
+	end
+end
