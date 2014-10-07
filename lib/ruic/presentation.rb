@@ -82,7 +82,7 @@ class UIC::Presentation
 			    .map{ |property| [type,property] }
 		end.group_by(&:first).tap{ |x| x.each{ |t,a| a.map!(&:last) } }
 
-		assets.each_with_object({}) do |asset,usage|
+		Hash[ assets.each_with_object({}) do |asset,usage|
 			if properties = image_properties_by_type[asset.class]
 				properties.each do |property|
 					asset[property.name].values.compact.each do |value|
@@ -95,7 +95,10 @@ class UIC::Presentation
 					end
 				end
 			end
-		end
+		end.sort_by do |path,assets|
+			parts = path.downcase.split '/'
+			[ parts.length, parts ]
+		end ].tap{ |h| h.extend(UIC::PresentableHash) }
 	end
 
 	def image_paths
@@ -125,7 +128,7 @@ class UIC::Presentation
 		if el.ancestors('Graph')
 			path = []
 			until el==@graph
-				path.unshift el==@scene ? 'Scene' : get_attribute(el,'name',0)
+				path.unshift asset_for_el(el).name
 				el = el.parent
 			end
 			path.join('.')
