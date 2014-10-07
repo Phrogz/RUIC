@@ -19,8 +19,8 @@ class RUIC
 			self.new.instance_eval(script,ruic_path)
 		end
 	end
-	def initialize
-		@metadata = DEFAULTMETADATA
+	def initialize( metadata=DEFAULTMETADATA )
+		@metadata = metadata
 		@apps = {}
 	end
 	def metadata(path)
@@ -45,7 +45,7 @@ class RUIC
 			exit 1
 		end
 	end
-	def show(*a); puts *a; end
+	def show(*a); puts *a.map(&:to_s); end
 end
 
 def RUIC(file_path=nil,&block)
