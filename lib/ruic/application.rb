@@ -67,9 +67,15 @@ class UIC::Application
 	end
 
 	def image_usage
-		(presentations + statemachines)
-			.map(&:image_usage)
-			.inject{ |h1,h2| h1.merge(h2){ |path,els1,els2| [*els1,*els2] } }
+		Hash[
+			(presentations + statemachines)
+				.map(&:image_usage)
+				.inject{ |h1,h2| h1.merge(h2){ |path,els1,els2| [*els1,*els2] } }
+				.sort_by do |path,assets|
+					parts = path.downcase.split '/'
+					[ parts.length, parts ]
+				end
+		].tap{ |h| h.extend(UIC::PresentableHash) }
 	end
 
 	def image_paths
