@@ -1,7 +1,7 @@
 module UIC; end
 class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 	INVALIDINDEX = Qt::ModelIndex.new
-	INVALIDDATA  = Qt::Variant.new
+	NODATA       = Qt::Variant.new
 	def initialize(qtparent,app)
 		super(qtparent)
 		@root = El.new(app,0)
@@ -25,13 +25,12 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 			case section
 				when 0; Qt::Variant.new(tr("Name"))
 				when 1; Qt::Variant.new(tr("Type"))
-				else  ; INVALIDDATA
+				else  ; NODATA
 			end
 		else
-			INVALIDDATA
+			NODATA
 		end
 	end
-
 
 	def parent(child)
 		if child.valid?
@@ -59,15 +58,19 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 					case index.column
 						when 0; Qt::Variant.new(element.displayName)
 						when 1; Qt::Variant.new(element.displayType)
-						else  ; INVALIDDATA
+						else  ; NODATA
 					end
 				when Qt::DecorationRole
-					Qt::Pixmap.new(':/resources/images/Objects-Scene-Normal.png')
+					if index.column==0
+						Qt::Pixmap.new(':/resources/images/Objects-Scene-Normal.png')
+					else
+						NODATA
+					end
 				else
-					INVALIDDATA
+					NODATA
 			end
 		else
-			INVALIDDATA
+			NODATA
 		end
 	end
 end
@@ -97,11 +100,11 @@ class UIC::GUI::AppElementsModel::El
 
 	def parent
 		unless @el.is_a?( UIC::Application )
-			self.class[@el.parent || @el.presentation.app, @row] 
+			self.class[@el.parent || @el.presentation.app, @row]
 		end
 	end
 	def displayName
-		@el.type=='Scene' ? @el.path : @el.name 
+		@el.type=='Scene' ? @el.path : @el.name
 	end
 	def displayType
 		@el.type
