@@ -1,3 +1,4 @@
+#encoding: utf-8
 require_relative 'window_qrc'
 require_relative '../lib/ruic'
 
