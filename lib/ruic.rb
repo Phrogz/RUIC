@@ -3,13 +3,13 @@ class RUIC; end
 module UIC; end
 
 require 'nokogiri'
-require 'ruic/version'
-require 'ruic/asset_classes'
-require 'ruic/interfaces'
-require 'ruic/application'
-require 'ruic/behaviors'
-require 'ruic/statemachine'
-require 'ruic/presentation'
+require_relative 'ruic/version'
+require_relative 'ruic/asset_classes'
+require_relative 'ruic/interfaces'
+require_relative 'ruic/application'
+require_relative 'ruic/behaviors'
+require_relative 'ruic/statemachine'
+require_relative 'ruic/presentation'
 
 class RUIC
 	DEFAULTMETADATA = 'C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml'

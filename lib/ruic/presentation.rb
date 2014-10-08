@@ -67,6 +67,14 @@ class UIC::Presentation
 		(slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0) # the Scene is never added
 	end
 
+	def parent_asset( child_graph_el )
+		asset_for_el( child_graph_el.parent ) unless child_graph_el==@scene 
+	end
+
+	def child_assets( parent_graph_el )
+		parent_graph_el.element_children.map{ |child| asset_for_el(child) }
+	end
+
 	# Get an array of all assets in the scene graph, in document order
 	def assets
 		@graph_by_id.map{ |id,graph_element| asset_for_el(graph_element) }

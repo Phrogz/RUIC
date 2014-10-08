@@ -5,6 +5,7 @@ class UIC::Asset
 	class Root
 		@properties = {}
 		class << self
+			attr_reader :name
 			def properties
 				(ancestors[1].respond_to?(:properties) ? ancestors[1].properties : {}).merge(@properties)
 			end
@@ -30,7 +31,16 @@ class UIC::Asset
 		end
 
 		def type
-			self.class.name.split('::').last
+			self.class.name
+			# self.class.name.split('::').last
+		end
+
+		def parent
+			presentation.parent_asset(@el)
+		end
+
+		def children
+			presentation.child_assets(@el)
 		end
 
 		# Find the owning component (even if you are a component)

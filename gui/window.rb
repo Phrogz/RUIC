@@ -1,6 +1,7 @@
-require_relative 'window_ui'
-require 'ruic'
-class RUICWindow < Qt::MainWindow	
+require_relative 'window_qrc'
+require_relative '../lib/ruic'
+
+class UIC::GUI < Qt::MainWindow	
 	slots	*%w[ open() save() saveAll() ]
 
 	def initialize(parent = nil)
@@ -12,17 +13,8 @@ class RUICWindow < Qt::MainWindow
 	end
 
 	def connect_menus!
-		connect( @ui.menuFileOpen, SIGNAL('triggered()'), self, SLOT('open()') )
-	end
-
-	def populate_interface!
-		hier = @ui.appHierarchy
-		hier.column_count = 2
-		hier.header_labels = ['element', 'kind']
-		
-		10.times.map do |i|
-			Qt::TreeWidgetItem.new(hier){ set_text 0, "My Label ##{i}" }
-		end
+		connect( @ui.menuFileOpen, SIGNAL('triggered()'), self, SLOT('open()')  )
+		connect( @ui.actionQuit,   SIGNAL('triggered()'), self, SLOT('close()') )
 	end
 
 	def open
@@ -36,13 +28,20 @@ class RUICWindow < Qt::MainWindow
 		@ruic = RUIC.new
 		@ruic.metadata( 'MetaData.xml' ) unless File.exist?(RUIC::DEFAULTMETADATA)
 		@uia = @ruic.uia(path)
-		reload_data
+		dir = File.basename(File.dirname(path))
+		self.window_title = File.join(dir,File.basename(path))
+		reload_interface
 	end
 
 	def reload_interface
-
+		reload_hierarchy
 	end
 
 	def reload_hierarchy
+		@elements = AppElementsModel.new(self,@uia)
+		@ui.elements.model = @elements
 	end
 end
+
+require_relative 'window_ui'
+require_relative 'appelementsmodel'
