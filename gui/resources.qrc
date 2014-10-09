@@ -10,6 +10,7 @@
     <file alias="Layer">resources/images/Objects-Layer-Normal.png</file>
     <file alias="Light">resources/images/Objects-Light-Normal.png</file>
     <file alias="Material">resources/images/Objects-Material-Normal.png</file>
+    <file alias="CustomMaterial">resources/images/Objects-Material-Normal.png</file>
     <file alias="Model">resources/images/Objects-Model-Normal.png</file>
     <file alias="Text">resources/images/Objects-Text-Normal.png</file>
     <file alias="Scene">resources/images/Objects-Scene-Normal.png</file>
