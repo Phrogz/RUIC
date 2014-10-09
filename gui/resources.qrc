@@ -1,31 +1,31 @@
 <RCC>
   <qresource prefix="/">
-    <file>resources/images/Objects-Effect-Normal.png</file>
-    <file>resources/images/Objects-Unknown-Normal.png</file>
-    <file>resources/images/Objects-Behavior-Normal.png</file>
-    <file>resources/images/Objects-Camera-Normal.png</file>
-    <file>resources/images/Objects-Component-Normal.png</file>
-    <file>resources/images/Objects-Group-Normal.png</file>
-    <file>resources/images/Objects-Image-Normal.png</file>
-    <file>resources/images/Objects-Layer-Normal.png</file>
-    <file>resources/images/Objects-Light-Normal.png</file>
-    <file>resources/images/Objects-Material-Normal.png</file>
-    <file>resources/images/Objects-Model-Normal.png</file>
-    <file>resources/images/Objects-Text-Normal.png</file>
-    <file>resources/images/Objects-Scene-Normal.png</file>
+    <file alias="Effect">resources/images/Objects-Effect-Normal.png</file>
+    <file alias="Unknown">resources/images/Objects-Unknown-Normal.png</file>
+    <file alias="Behavior">resources/images/Objects-Behavior-Normal.png</file>
+    <file alias="Camera">resources/images/Objects-Camera-Normal.png</file>
+    <file alias="Component">resources/images/Objects-Component-Normal.png</file>
+    <file alias="Group">resources/images/Objects-Group-Normal.png</file>
+    <file alias="Image">resources/images/Objects-Image-Normal.png</file>
+    <file alias="Layer">resources/images/Objects-Layer-Normal.png</file>
+    <file alias="Light">resources/images/Objects-Light-Normal.png</file>
+    <file alias="Material">resources/images/Objects-Material-Normal.png</file>
+    <file alias="Model">resources/images/Objects-Model-Normal.png</file>
+    <file alias="Text">resources/images/Objects-Text-Normal.png</file>
+    <file alias="Scene">resources/images/Objects-Scene-Normal.png</file>
     <file>resources/style/dark.qss</file>
     <file>resources/style/checkbox.png</file>
     <file>resources/style/down_arrow.png</file>
     <file>resources/images/textfile_icon.png</file>
     <file>resources/images/studio_architect32.png</file>
-    <file>resources/images/clipboard.png</file>
+    <file alias="copy">resources/images/clipboard.png</file>
     <file>resources/images/cross.png</file>
     <file>resources/images/disk-black.png</file>
     <file>resources/images/disks-black.png</file>
     <file>resources/images/document-copy.png</file>
     <file>resources/images/document--plus.png</file>
     <file>resources/images/folder-horizontal-open.png</file>
-    <file>resources/images/scissors-blue.png</file>
+    <file alias="cut">resources/images/scissors-blue.png</file>
     <file>resources/images/gear.png</file>
     <file>resources/images/executable-actions-delete-active.png</file>
     <file>resources/images/executable-actions-delete-idle.png</file>
