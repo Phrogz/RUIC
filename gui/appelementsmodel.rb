@@ -52,20 +52,16 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 
 	def data(index, role)
 		if index.valid?
+			element = index.internalPointer
 			case role
 				when Qt::DisplayRole
-					element = index.internalPointer
 					case index.column
 						when 0; Qt::Variant.new(element.displayName)
 						when 1; Qt::Variant.new(element.displayType)
 						else  ; NODATA
 					end
 				when Qt::DecorationRole
-					if index.column==0
-						Qt::Pixmap.new(':/resources/images/Objects-Scene-Normal.png')
-					else
-						NODATA
-					end
+					index.column==0 ? element.icon : NODATA
 				else
 					NODATA
 			end
@@ -103,10 +99,27 @@ class UIC::GUI::AppElementsModel::El
 			self.class[@el.parent || @el.presentation.app, @row]
 		end
 	end
+
+	def icon
+		@icon ||= UIC::GUI::IconVariant[@el.type]
+	end
+
 	def displayName
 		@el.type=='Scene' ? @el.path : @el.name
 	end
 	def displayType
 		@el.type
+	end
+end
+
+module UIC::GUI::IconVariant
+	@by_path = {}
+	def self.[]( alias_or_path )
+		@by_path[alias_or_path] ||= begin
+			icon = Qt::Pixmap.new(alias_or_path)
+			icon = Qt::Pixmap.new(":/#{alias_or_path}") if icon.isNull
+			icon = Qt::Pixmap.new(":/Unknown") if icon.isNull
+			Qt::Variant.fromValue(icon)
+		end
 	end
 end

@@ -2,7 +2,7 @@
 require_relative 'window_qrc'
 require_relative '../lib/ruic'
 
-class UIC::GUI < Qt::MainWindow	
+class UIC::GUI < Qt::MainWindow
 	slots	*%w[ open() save() saveAll() ]
 
 	def initialize(parent = nil)
