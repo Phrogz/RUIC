@@ -5,12 +5,12 @@ require_relative '../lib/ruic'
 class UIC::GUI < Qt::MainWindow
 	slots	*%w[ open() save() saveAll() ]
 
-	def initialize(parent = nil)
-		super
-
+	def initialize(parent=nil, &block)
+		super(parent)
 		@ui = Ui_MainWin.new
 		@ui.setupUi(self)
 		connect_menus!
+		# instance_exec(&block) if block
 	end
 
 	def connect_menus!
@@ -19,10 +19,15 @@ class UIC::GUI < Qt::MainWindow
 	end
 
 	def open
+		recent = $prefs.value('RecentProjects').value
+		recent = recent ? recent.last : Dir.pwd
     path = Qt::FileDialog.get_open_file_name(
-    	self, tr("Open an Application"), Dir.pwd, tr("UIC Application (*.uia)")
+    	self, tr("Open an Application"), recent, tr("UIC Application (*.uia)")
     )
-    load_file path unless path.nil?
+    unless path.nil?
+    	add_recent(path)
+	    load_file path
+	   end
 	end
 
 	def load_file( path )
@@ -41,6 +46,13 @@ class UIC::GUI < Qt::MainWindow
 	def reload_hierarchy
 		@elements = AppElementsModel.new(self,@uia)
 		@ui.elements.model = @elements
+	end
+
+	def add_recent(path)
+		recent = $prefs.value("RecentProjects").value || []
+		recent.delete(path)
+		recent << path
+		$prefs.set_value("RecentProjects",Qt::Variant.new(recent))
 	end
 end
 
