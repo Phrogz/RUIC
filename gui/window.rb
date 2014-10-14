@@ -21,6 +21,7 @@ class UIC::GUI < Qt::MainWindow
 	def open
 		recent = $prefs.value('RecentProjects').value
 		recent = recent ? recent.last : Dir.pwd
+		# TODO: ensure that the file/directory exists
     path = Qt::FileDialog.get_open_file_name(
     	self, tr("Open an Application"), recent, tr("UIC Application (*.uia)")
     )
@@ -46,6 +47,7 @@ class UIC::GUI < Qt::MainWindow
 	def reload_hierarchy
 		@elements = AppElementsModel.new(self,@uia)
 		@ui.elements.model = @elements
+		p @ui.elements.selectionModel
 	end
 
 	def add_recent(path)
