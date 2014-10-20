@@ -189,6 +189,8 @@ class UIC::Property
 	def name; @name||=@el['name']; end
 	def type; @type||=@el['type']; end
 	def formal; @formal||=@el['formalName'] || @el['name']; end
+	def min; @el['min']; end
+	def max; @el['max']; end
 	def description; @desc||=@el['description']; end
 	def default; @def ||= (@el['default'] || self.class.default); end
 	def get(asset,slide)
@@ -314,6 +316,9 @@ class UIC::SlideCollection
 	end
 	def inspect
 		"[ #{@slides.map(&:inspect).join ', '} ]"
+	end
+	def to_ary
+		@slides
 	end
 end
 

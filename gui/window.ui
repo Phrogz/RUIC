@@ -29,39 +29,24 @@
    <property name="autoFillBackground">
     <bool>true</bool>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QSplitter" name="mainSplitter">
-      <property name="lineWidth">
-       <number>0</number>
-      </property>
+     <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
       <property name="handleWidth">
-       <number>9</number>
+       <number>12</number>
       </property>
-      <widget class="QSplitter" name="topRowSplitter">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>1</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QSplitter" name="TopHalf">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="handleWidth">
-        <number>9</number>
+        <number>12</number>
        </property>
-       <property name="childrenCollapsible">
-        <bool>false</bool>
-       </property>
-       <widget class="QWidget" name="layoutWidget">
+       <widget class="QWidget" name="">
         <layout class="QVBoxLayout" name="elementsBox">
-         <property name="spacing">
-          <number>0</number>
-         </property>
          <item>
           <widget class="QLabel" name="elementsHeader">
            <property name="sizePolicy">
@@ -73,13 +58,13 @@
            <property name="minimumSize">
             <size>
              <width>61</width>
-             <height>16</height>
+             <height>20</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>16</height>
+             <height>20</height>
             </size>
            </property>
            <property name="font">
@@ -94,33 +79,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QSplitter" name="elementsSplitter">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>361</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
+          <widget class="QSplitter" name="splitter">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
            <property name="handleWidth">
-            <number>9</number>
-           </property>
-           <property name="childrenCollapsible">
-            <bool>false</bool>
+            <number>8</number>
            </property>
            <widget class="QTreeView" name="elements">
             <property name="minimumSize">
@@ -138,6 +102,12 @@
             <property name="horizontalScrollBarPolicy">
              <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
+            <property name="autoScroll">
+             <bool>false</bool>
+            </property>
+            <property name="autoScrollMargin">
+             <number>0</number>
+            </property>
             <property name="indentation">
              <number>16</number>
             </property>
@@ -148,63 +118,63 @@
              <bool>false</bool>
             </property>
            </widget>
-           <widget class="QWidget" name="layoutWidget">
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <property name="spacing">
-              <number>0</number>
-             </property>
+           <widget class="QWidget" name="">
+            <layout class="QVBoxLayout" name="inspectorLayout">
              <item>
-              <widget class="QTabWidget" name="slideTabs">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>21</height>
-                </size>
-               </property>
-               <property name="currentIndex">
-                <number>0</number>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-               <widget class="QWidget" name="tab_3">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <attribute name="title">
-                 <string notr="true">0: Master</string>
-                </attribute>
-                <layout class="QHBoxLayout" name="horizontalLayout"/>
-               </widget>
-               <widget class="QWidget" name="tab_4">
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <attribute name="title">
-                 <string notr="true">1: Slide1</string>
-                </attribute>
-               </widget>
-               <widget class="QWidget" name="tab_5">
-                <attribute name="title">
-                 <string notr="true">2: Slide2</string>
-                </attribute>
-               </widget>
-              </widget>
+              <layout class="QHBoxLayout" name="slideLayout">
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>41</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Slide: </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="slideList">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>0: Master Slide</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
               <widget class="QTableView" name="inspector">
@@ -214,18 +184,32 @@
                  <height>60</height>
                 </size>
                </property>
+               <property name="font">
+                <font>
+                 <pointsize>12</pointsize>
+                </font>
+               </property>
                <property name="styleSheet">
-                <string notr="true">#inspector { border-top:none; margin-right:2px /*hack to line up with border on tabs */ }</string>
+                <string notr="true"/>
                </property>
                <property name="horizontalScrollBarPolicy">
                 <enum>Qt::ScrollBarAlwaysOff</enum>
                </property>
                <property name="showGrid">
-                <bool>true</bool>
+                <bool>false</bool>
+               </property>
+               <property name="gridStyle">
+                <enum>Qt::NoPen</enum>
                </property>
                <property name="wordWrap">
                 <bool>false</bool>
                </property>
+               <attribute name="horizontalHeaderVisible">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="horizontalHeaderCascadingSectionResizes">
+                <bool>false</bool>
+               </attribute>
               </widget>
              </item>
             </layout>
@@ -258,13 +242,13 @@
              <property name="minimumSize">
               <size>
                <width>45</width>
-               <height>0</height>
+               <height>20</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <property name="font">
@@ -286,7 +270,7 @@
              <property name="sizeHint" stdset="0">
               <size>
                <width>48</width>
-               <height>13</height>
+               <height>20</height>
               </size>
              </property>
             </spacer>
@@ -296,13 +280,13 @@
              <property name="minimumSize">
               <size>
                <width>76</width>
-               <height>0</height>
+               <height>20</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>87</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <property name="maxVisibleItems">
@@ -376,7 +360,7 @@
              <property name="maximumSize">
               <size>
                <width>69</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <item>
@@ -443,7 +427,7 @@
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <item>
@@ -488,13 +472,13 @@
              <property name="minimumSize">
               <size>
                <width>46</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <property name="font">
@@ -526,13 +510,13 @@
              <property name="minimumSize">
               <size>
                <width>69</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
                <width>16777215</width>
-               <height>16</height>
+               <height>20</height>
               </size>
              </property>
              <item>
@@ -653,8 +637,8 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="menuFileOpen"/>
-    <addaction name="actionSave_All"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSaveAll"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_Unused_Assets"/>
     <addaction name="separator"/>
@@ -679,7 +663,7 @@
    <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="menuFileOpen">
+  <action name="actionOpen">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/resources/images/folder-horizontal-open.png</normaloff>:/resources/images/folder-horizontal-open.png</iconset>
@@ -732,7 +716,7 @@
     <string>Ctrl+C</string>
    </property>
   </action>
-  <action name="actionSave_All">
+  <action name="actionSaveAll">
    <property name="enabled">
     <bool>false</bool>
    </property>
