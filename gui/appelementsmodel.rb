@@ -12,7 +12,7 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 	end
 
 	def index( row, col, parent=INVALIDINDEX )
-		parentEl = parent.valid? ? parent.internalPointer : @root
+		parentEl = parent.valid? ? parent.internal_pointer : @root
 		if childEl=parentEl.child(row)
 			createIndex(row,col,childEl)
 		else
@@ -34,7 +34,7 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 
 	def parent(child)
 		if child.valid?
-			parentEl = child.internalPointer.parent
+			parentEl = child.internal_pointer.parent
 			if parentEl.nil? || parentEl==@root
 				INVALIDINDEX
 			else
@@ -46,13 +46,13 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 	end
 
 	def rowCount( parent=INVALIDINDEX )
-		parentEl = parent.valid? ? parent.internalPointer : @root
+		parentEl = parent.valid? ? parent.internal_pointer : @root
 		parentEl.child_count
 	end
 
 	def data(index, role)
 		if index.valid?
-			element = index.internalPointer
+			element = index.internal_pointer
 			case role
 				when Qt::DisplayRole
 					case index.column
@@ -80,6 +80,7 @@ class UIC::GUI::AppElementsModel::El
 	end
 
 	attr_reader :row
+	attr_reader :el
 	def initialize(el,row)
 		@el    = el
 		@isapp = el.is_a?( UIC::Application )

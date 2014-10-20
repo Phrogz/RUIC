@@ -8,6 +8,13 @@ class Qt::Application
 	end
 end
 
+Qt::CoreApplication.organization_name   = "PhrogzSoft"
+Qt::CoreApplication.organization_domain = "phrogz.net"
+Qt::CoreApplication.application_name    = "RUIC"
+$prefs = Qt::Settings.new
+
 $app = Qt::Application.new(ARGV)
-UIC::GUI.new.show
+gui = UIC::GUI.new
+gui.show
+gui.open
 $app.exec
