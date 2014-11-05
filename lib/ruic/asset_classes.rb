@@ -24,6 +24,11 @@ class UIC::Asset
 			self.class.properties
 		end
 
+		def at(sub_path)
+			presentation.at(sub_path,@el)
+		end
+		alias_method :/, :at
+
 		attr_accessor :presentation, :el
 		def initialize( presentation, element )
 			@presentation = presentation
@@ -155,7 +160,7 @@ class UIC::Asset
 	end
 
 	# Creates a class from MetaData.xml with accessors for the <Property> listed.
-	# Instances of the class are associated with a presentation and know how to 
+	# Instances of the class are associated with a presentation and know how to
 	# get/set values in that XML based on value types, slides, defaults.
 	# Also used to create classes from effects, materials, and behavior preambles.
 	def create_class(el,parent_class,name='CustomAsset')
