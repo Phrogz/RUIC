@@ -68,7 +68,7 @@ class UIC::Presentation
 	end
 
 	def parent_asset( child_graph_el )
-		asset_for_el( child_graph_el.parent ) unless child_graph_el==@scene 
+		asset_for_el( child_graph_el.parent ) unless child_graph_el==@scene
 	end
 
 	def child_assets( parent_graph_el )
@@ -153,14 +153,8 @@ class UIC::Presentation
 
 	def at(path,root=@graph)
 		name,path = path.split('.',2)
-		node = root.element_children.find{ |el| @logic.at_xpath(".//State/Add[@ref='##{el['id']}'][@name='#{name}']") } || 
-		       root.element_children.find{ |el| el['id']==name }
-		if node
-			if path
-				at(path,node)
-			else
-				asset_for_el(node)
-			end
+		if el=root.element_children.find{ |el| asset_for_el(el).name==name }
+			path ? at(path,el) : asset_for_el(el)
 		end
 	end
 	alias_method :/, :at
