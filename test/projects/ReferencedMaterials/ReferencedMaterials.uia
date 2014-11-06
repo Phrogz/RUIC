@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://nvidia.com/uicomposer">
+	<assets initial="main">
+		<presentation id="main"	src="ReferencedMaterials.uip"/>
+	</assets>
+</application>
