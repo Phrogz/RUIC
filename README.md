@@ -88,6 +88,29 @@ assert car.component==sub.scene          # Ask for the owning component; may be 
 
 ```
 
+## Working with References
+
+```ruby
+uia 'MyApp.uia'
+mat1 = app/"main:Scene.Layer.Sphere.Material" # A normal UIC Material
+mat2 = app/"main:Scene.Layer.Cube.Material"   # A normal UIC Material
+p mat2.type                                   #=> "Material"
+ref = mat2.replace_with_referenced_material   # A very specific method :)
+p ref.properties['referencedmaterial'].type   #=> "ObjectRef"
+p ref['referencedmaterial',0].object          #=> nil
+p ref['referencedmaterial',0].type            #=> :absolute
+ref['referencedmaterial',0].object = mat1     #=> Sets an absolute reference
+ref['referencedmaterial',0].type = :path      #=> Use a relative path instead
+
+# Alternatively, you can omit the .object when setting the reference:
+# ref['referencedmaterial',0] = mat1
+
+mat3 = ref['referencedmaterial',1].object     #=> Get the asset pointed to
+assert mat1 == mat3                           #=> They are the same! It worked!
+
+app.save_all!                                 #=> Write presentations in place
+```
+
 ## Writing Assertions
 
 
