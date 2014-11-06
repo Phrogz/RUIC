@@ -270,8 +270,56 @@ class UIC::Property
 		end
 	end
 
+	class ObjectRef < self
+		self.default = nil
+		def get(asset,slide)
+			ref  = super
+			type = :absolute
+			obj  = nil
+			unless ref=='' || ref.nil?
+				type = ref[0]=='#' ? :absolute : :path
+				ref = type==:absolute ? asset.presentation.asset_by_id( ref[1..-1] ) : asset.presentation.at( ref, asset.el )
+			end
+			ObjectReference.new(asset,self,slide,ref,type)
+		end
+		def set(asset,new_object,slide)
+			get(asset,slide).object = new_object
+		end
+	end
 
-	ObjectRef  = String #TODO: a real class
+	class ObjectReference
+		attr_reader :object, :type
+		def initialize(asset,property,slide,object=nil,type=nil)
+			@asset    = asset
+			@name     = property.name
+			@slide    = slide
+			@object   = object
+			@type     = type
+		end
+		def object=(new_object)
+			raise "ObjectRef must be set to an asset (not a #{new_object.class.name})" unless new_object.is_a?(UIC::Asset::Root)
+			@object = new_object
+			write_value!
+		end
+		def type=(new_type)
+			raise "ObjectRef types must be either :absolute or :path (not #{new_type.inspect})" unless [:absolute,:path].include?(new_type)
+			@type = new_type
+			write_value!
+		end
+		private
+		def write_value!
+			path = case @object
+				when NilClass then ""
+				else case @type
+					when :absolute then "##{@object.el['id']}"
+					when :path     then @asset.presentation.path_to( @object.el, @asset.el ).sub(/^[^:.]+:/,'')
+					# when :root     then @asset.presentation.path_to( @object.el ).sub(/^[^:.]+:/,'')
+				end
+			end
+			@asset.presentation.set_attribute( @asset.el, @name, @slide, path )
+		end
+	end
+
 	Import     = String #TODO: a real class
 	Mesh       = String #TODO: a real class
 	Renderable = String #TODO: a real class
@@ -307,6 +355,7 @@ class UIC::Property
 			[x,y,z].join(' ')
 		end
 	end
+
 end
 
 class UIC::SlideCollection
@@ -357,10 +406,10 @@ class UIC::ValuesPerSlide
 	def linked?
 		@preso.attribute_linked?(@el,@property.name)
 	end
-	def unlink!
+	def unlink
 		@preso.unlink_attribute( @el, @property.name )
 	end
-	def link!
+	def link
 		@preso.link_attribute( @el, @property.name )
 	end
 	def values

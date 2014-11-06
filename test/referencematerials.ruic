@@ -23,7 +23,7 @@ cubemat['diffuse',2].r = 0.2
 assert cubemat['diffuse',1].r == cubemat['diffuse',2].r
 
 # Ensure that we can unlink an attribute and vary the values per slide
-cubemat['diffuse'].unlink!
+cubemat['diffuse'].unlink
 assert !cubemat['diffuse'].linked?
 cubemat['diffuse',1].r = 1
 cubemat['diffuse',2].r = 0.2
@@ -38,14 +38,16 @@ assert cubemat.parent.nil?                  # The old material is removed from t
 assert ref.parent==model                    # The new material is where the old was
 assert ref['id'] == cubemat['id']           # The new material has the same id and name
 assert ref.name == 'Material'
-assert ref['referencedmaterial',0].nil?     # New referenced materials start out with no reference
+assert ref['referencedmaterial',0].object.nil?       # New referenced materials start out with no reference
+assert ref['referencedmaterial',0].type == :absolute # New references default to absolute
 
-ref['referencedmaterial'].unlink!
-%w[Sphere Sphere2].each.with_index do |name,slide_offset|
-	ref['referencedmaterial',slide_offset+1] = layer/name/"Material"
+ref['referencedmaterial'].unlink
+%w[Sphere Sphere2].each.with_index do |name,s|
+	# You can set a reference directly to an object, or alternatively
+	# ref['referencedmaterial',1].object = layer/name/"Material"
+	ref['referencedmaterial',s+1] = layer/name/"Material"
+	ref['referencedmaterial',s+1].type = :path
 end
 
+
 app.save_all!
-
-
-FileUtils.rm_rf('projects/_RefMat')

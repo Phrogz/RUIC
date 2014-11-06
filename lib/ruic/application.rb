@@ -98,8 +98,8 @@ class UIC::Application
 		@assets['renderplugin'] ||= []
 	end
 
-	def save_all
-		save!
+	def save_all!
+		# save!
 		presentations.each(&:save!)
 	end
 

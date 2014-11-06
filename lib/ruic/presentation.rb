@@ -6,7 +6,7 @@ class UIC::Presentation
 	end
 
 	def load_from_file
-		@doc = Nokogiri.XML( File.read( file, encoding:'utf-8' ) )
+		@doc = Nokogiri.XML( File.read( file, encoding:'utf-8' ), &:noblanks )
 		@graph = @doc.at('Graph')
 		@scene = @graph.at('Scene')
 		@logic = @doc.at('Logic')
@@ -39,6 +39,14 @@ class UIC::Presentation
 		@asset_by_el  = {} # indexed by asset graph element
 		@slides_for   = {} # indexed by asset graph element
 		@slides_by_el = {} # indexed by slide state element
+	end
+
+	def save!
+		File.open(file,'w:utf-8'){ |f|
+			f << @doc.to_xml( indent:1, indent_text:"\t" )
+			         .gsub( %r{(<\w+(?: [\w:]+="[^"]*")*)(/?>)}i, '\1 \2' )
+			         .sub('"?>','" ?>')
+		}
 	end
 
 	def rebuild_caches_from_document
@@ -138,15 +146,29 @@ class UIC::Presentation
 		asset_for_el( @scene )
 	end
 
-	def path_to( el )
-		if el.ancestors('Graph')
-			path = []
-			until el==@graph
-				path.unshift asset_for_el(el).name
-				el = el.parent
-			end
-			path.join('.')
+	def path_to( el, from_el=nil )
+		to_parts = if el.ancestors('Graph')
+			[].tap{ |parts|
+				until el==@graph
+					parts.unshift asset_for_el(el).name
+					el = el.parent
+				end
+			}
 		end
+		if from_el && from_el.ancestors('Graph')
+			from_parts = [].tap{ |parts|
+				until from_el==@graph
+					parts.unshift asset_for_el(from_el).name
+					from_el = from_el.parent
+				end
+			}
+			until to_parts.empty? || from_parts.empty? || to_parts.first!=from_parts.first
+				to_parts.shift
+				from_parts.shift
+			end
+			to_parts.unshift *(['parent']*from_parts.length)
+		end
+		to_parts.join('.')
 	end
 
 	def errors?
@@ -159,9 +181,12 @@ class UIC::Presentation
 
 	def at(path,root=@graph)
 		name,path = path.split('.',2)
-		if el=root.element_children.find{ |el| asset_for_el(el).name==name }
-			path ? at(path,el) : asset_for_el(el)
+		el = case name
+			when 'parent' then root==@scene ? nil : root.parent
+			when 'Scene'  then @scene
+			else               root.element_children.find{ |el| asset_for_el(el).name==name }
 		end
+		path ? at(path,el) : asset_for_el(el) if el
 	end
 	alias_method :/, :at
 
@@ -288,7 +313,7 @@ class UIC::Application::Presentation < UIC::Presentation
 	end
 	alias_method :app, :owner
 
-	def path_to( el )
+	def path_to( el, from=nil )
 		"#{id}:#{super}"
 	end
 
