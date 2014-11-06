@@ -9,6 +9,7 @@ show app.errors if app.errors?
 layer   = app/'main:Scene.Layer'
 cubemat = layer/"Cube"/"Material"
 
+# Ensure that the diffuse attribute is linked and present on multiple slides
 assert cubemat['diffuse'].linked?
 assert cubemat.has_slide?(0)
 assert cubemat.has_slide?(1)
@@ -21,25 +22,27 @@ cubemat['diffuse',1].r = 1
 cubemat['diffuse',2].r = 0.2
 assert cubemat['diffuse',1].r == cubemat['diffuse',2].r
 
+# Ensure that we can unlink an attribute and vary the values per slide
 cubemat['diffuse'].unlink!
 assert !cubemat['diffuse'].linked?
-
 cubemat['diffuse',1].r = 1
 cubemat['diffuse',2].r = 0.2
 assert cubemat['diffuse',1].r == 1
 assert cubemat['diffuse',2].r == 0.2
 
-%w[Sphere Sphere2].each do |name|
-	mat = layer/name/"Material"
-	assert mat
-	assert mat.type == 'Material'
-	model = mat.parent
-	ref = mat.replace_with_referenced_material
-	assert mat.parent.nil?                      # The old material is removed from the graph
-	assert ref.parent==model                    # The new material is where the old was
-	assert ref['id'] == mat['id']               # The new material has the same id and name
-	assert ref.name == 'Material'
-	assert ref['referencedmaterial',0].nil?
+# We can swap a material with a referenced material
+model = cubemat.parent
+assert model
+ref = cubemat.replace_with_referenced_material
+assert cubemat.parent.nil?                  # The old material is removed from the graph
+assert ref.parent==model                    # The new material is where the old was
+assert ref['id'] == cubemat['id']           # The new material has the same id and name
+assert ref.name == 'Material'
+assert ref['referencedmaterial',0].nil?     # New referenced materials start out with no reference
+
+ref['referencedmaterial'].unlink!
+%w[Sphere Sphere2].each.with_index do |name,slide_offset|
+	ref['referencedmaterial',slide_offset+1] = layer/name/"Material"
 end
 
 app.save_all!
