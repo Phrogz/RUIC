@@ -29,19 +29,18 @@ cubemat['diffuse',2].r = 0.2
 assert cubemat['diffuse',1].r == 1
 assert cubemat['diffuse',2].r == 0.2
 
-puts app.main_presentation.instance_eval{ @doc }
-
 %w[Sphere Sphere2].each do |name|
 	mat = layer/name/"Material"
 	assert mat
 	assert mat.type == 'Material'
-	assert mat.material_type == :uic
-	mat.material_type = :referenced
+	model = mat.parent
+	ref = mat.replace_with_referenced_material
+	assert mat.parent.nil?                      # The old material is removed from the graph
+	assert ref.parent==model                    # The new material is where the old was
+	assert ref['id'] == mat['id']               # The new material has the same id and name
+	assert ref.name == 'Material'
+	assert ref['referencedmaterial',0].nil?
 end
-assert smats.first.type == "Material"
-assert smats.last.type  == "Material"
-
-
 
 app.save_all!
 
