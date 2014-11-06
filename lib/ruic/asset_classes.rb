@@ -132,8 +132,9 @@ class UIC::Asset
 
 	HIER = {}
 	%w[Asset Slide Scene].each{ |s| HIER[s] = 'Root' }
-	%w[Node Behavior Effect Image Layer Material MaterialBase ReferencedMaterial RenderPlugin].each{ |s| HIER[s]='Asset' }
+	%w[Node Behavior Effect Image Layer MaterialBase RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
+	%w[Material ReferencedMaterial].each{ |s| HIER[s]='MaterialBase' }
 
 	def initialize(xml)
 		@by_name = {'Root'=>Root}
@@ -148,6 +149,7 @@ class UIC::Asset
 			UIC::Asset.const_set( el.name, @by_name[class_name] ) # give the class instance a name by pointing a constant to it :/
 		end
 
+		# Extend well-known classes with script interfaces after they are created
 		@by_name['State'] = @by_name['Slide']
 		@by_name['Slide'].instance_eval do
 			attr_accessor :index, :name
@@ -155,6 +157,13 @@ class UIC::Asset
 				"<slide ##{index} of #{@el['component'] || @el.parent['component']}>"
 			end
 			define_method(:slide?){ true }
+		end
+
+		refmat = @by_name['ReferencedMaterial']
+		@by_name['MaterialBase'].instance_eval do
+			define_method :replace_with_referenced_material do
+				type=='ReferencedMaterial' ? self : presentation.replace_asset( self, 'ReferencedMaterial', name:name )
+			end
 		end
 	end
 

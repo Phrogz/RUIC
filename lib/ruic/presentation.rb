@@ -34,17 +34,17 @@ class UIC::Presentation
 			@class_by_ref[ "##{reference['id']}" ] = metaklass
 		end
 
-		@graph_by_id = {}
-		@scene.traverse{ |x| @graph_by_id[x['id']]=x if x.is_a?(Nokogiri::XML::Element) }
-
-		rescan_addsets
+		rebuild_caches_from_document
 
 		@asset_by_el  = {} # indexed by asset graph element
 		@slides_for   = {} # indexed by asset graph element
 		@slides_by_el = {} # indexed by slide state element
 	end
 
-	def rescan_addsets
+	def rebuild_caches_from_document
+		@graph_by_id = {}
+		@scene.traverse{ |x| @graph_by_id[x['id']]=x if x.is_a?(Nokogiri::XML::Element) }
+
 		@graph_by_addset  = {}
 		@addsets_by_graph = {}
 		slideindex = {}
@@ -72,7 +72,9 @@ class UIC::Presentation
 	end
 
 	def parent_asset( child_graph_el )
-		asset_for_el( child_graph_el.parent ) unless child_graph_el==@scene
+		unless child_graph_el==@scene || child_graph_el.parent.nil?
+			asset_for_el( child_graph_el.parent )
+		end
 	end
 
 	def child_assets( parent_graph_el )
@@ -241,8 +243,20 @@ class UIC::Presentation
 				addset = slide.el.at_xpath( ".//*[@ref='##{graph_element['id']}']" ) || slide.el.add_child("<Set ref='##{graph_element['id']}'/>").first
 				addset[attribute_name] = master_value
 			end
-			rescan_addsets
+			rebuild_caches_from_document
 			true
+		end
+	end
+
+	def replace_asset( existing_asset, new_type, attributes={} )
+		old_el = existing_asset.el
+		new_el = old_el.replace( "<#{new_type}/>" ).first
+		attributes['id'] = old_el['id']
+		attributes.each{ |att,val| new_el[att.to_s] = val }
+		asset_for_el( new_el ).tap do |new_asset|
+			unsupported_attributes = ".//*[name()='Add' or name()='Set'][@ref='##{old_el['id']}']/@*[name()!='ref' and #{new_asset.properties.keys.map{|p| "name()!='#{p}'"}.join(' and ')}]"
+			@logic.xpath(unsupported_attributes).remove
+			rebuild_caches_from_document
 		end
 	end
 
