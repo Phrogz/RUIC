@@ -37,6 +37,14 @@ class UIC::Presentation
 		@graph_by_id = {}
 		@scene.traverse{ |x| @graph_by_id[x['id']]=x if x.is_a?(Nokogiri::XML::Element) }
 
+		rescan_addsets
+
+		@asset_by_el  = {} # indexed by asset graph element
+		@slides_for   = {} # indexed by asset graph element
+		@slides_by_el = {} # indexed by slide state element
+	end
+
+	def rescan_addsets
 		@graph_by_addset  = {}
 		@addsets_by_graph = {}
 		slideindex = {}
@@ -50,10 +58,6 @@ class UIC::Presentation
 			@addsets_by_graph[graph][name]  = addset
 			@addsets_by_graph[graph][index] = addset
 		end
-
-		@asset_by_el  = {} # indexed by asset graph element
-		@slides_for   = {} # indexed by asset graph element
-		@slides_by_el = {} # indexed by slide state element
 	end
 
 	def asset_by_id( id )
@@ -222,12 +226,24 @@ class UIC::Presentation
 			# The scene is never actually added, so we'll treat it just like the first add, which is on the master slide of the scene
 			has_slide?( @addsets_by_graph.first.first, slide_name_or_index )
 		else
-			@addsets_by_graph[graph_element][slide_name_or_index]
+			@addsets_by_graph[graph_element][slide_name_or_index] || @addsets_by_graph[graph_element][0]
 		end
 	end
 
 	def attribute_linked?(graph_element,attribute_name)
-		!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][1].key?(attribute_name))
+		!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][1] && @addsets_by_graph[graph_element][1].key?(attribute_name))
+	end
+
+	def unlink_attribute(graph_element,attribute_name)
+		if master?(graph_element) && attribute_linked?(graph_element,attribute_name)
+			master_value = get_attribute( graph_element, attribute_name, 0 )
+			slides_for( graph_element ).to_ary[1..-1].each do |slide|
+				addset = slide.el.at_xpath( ".//*[@ref='##{graph_element['id']}']" ) || slide.el.add_child("<Set ref='##{graph_element['id']}'/>").first
+				addset[attribute_name] = master_value
+			end
+			rescan_addsets
+			true
+		end
 	end
 
 	# Is this element added on the master slide?

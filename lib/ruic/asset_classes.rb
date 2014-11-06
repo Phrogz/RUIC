@@ -93,7 +93,6 @@ class UIC::Asset
 
 		# Get the value(s) of an attribute
 		def [](attribute_name, slide_name_or_index=nil)
-			# puts "Looking for #{attribute_name.inspect} on slide #{slide_name_or_index.inspect} of #{@el.name}##{@el['id']}"
 			if property = properties[attribute_name]
 				if slide_name_or_index
 					property.get( self, slide_name_or_index ) if has_slide?(slide_name_or_index)
@@ -348,6 +347,12 @@ class UIC::ValuesPerSlide
 	end
 	def linked?
 		@preso.attribute_linked?(@el,@property.name)
+	end
+	def unlink!
+		@preso.unlink_attribute( @el, @property.name )
+	end
+	def link!
+		@preso.link_attribute( @el, @property.name )
 	end
 	def values
 		@asset.slides.map{ |s| self[s.name] }
