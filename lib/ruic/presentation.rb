@@ -291,15 +291,19 @@ class UIC::Presentation
 	end
 
 	def find(options={})
-		start = options[:under] || @scene
-		@graph_by_id.values.map do |el|
-			asset = asset_for_el(el)
-			asset = nil if asset && options.key?(:type)   && asset.type!=options[:type]
-			asset = nil if asset && options.key?(:slide)  && !has_slide?(el,options[:slide])
-			asset = nil if asset && options.key?(:master) && asset.master?!=options[:master]
-			asset = nil if asset && options.key?(:attributes) && options[:attributes].any?{ |att,val| asset.properties[att.to_s] && asset[att.to_s].value!=val }
-			asset
-		end.compact
+		start = options[:under] ? options[:under].el : @graph
+		[].tap do |result|
+			start.traverse do |el|
+				next unless el.is_a?(Nokogiri::XML::Element)
+				next if el==start
+				next if options.key?(:slide)  && !has_slide?(el,options[:slide])
+				next if options.key?(:type)   && el.name    != options[:type]
+				next if options.key?(:master) && master?(el)!= options[:master]
+				asset = asset_for_el(el)
+				next if options.key?(:attributes) && options[:attributes].any?{ |att,val| asset.properties[att.to_s] && !(asset[att.to_s].value === val) }
+				result << asset
+			end
+		end
 	end
 end
 

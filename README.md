@@ -14,6 +14,8 @@ _Some of the features above are planned, but not yet implemented; see Known Limi
 * [Using the RUIC DSL](#using-the-ruic-dsl)
   * [Creating and Accessing Applications](#creating-and-accessing-applications)
   * [Working with Presentations](#working-with-presentations)
+  * [Finding Many Assets](#finding-many-assets)
+  * [Working with References](#working-with-references)
   * [Writing Assertions](#writing-assertions)
   * [Locating MetaData.xml](#locating-metadataxml)
 * [Known Limitations (aka TODO)](#known-limitations-aka-todo)
@@ -84,8 +86,24 @@ show car.type #=> Model                  # Scene, Layer, Camera, Light, Group, M
 
 show car.component?  #=> false           # Ask if an element is a component 
 assert car.component==sub.scene          # Ask for the owning component; may be the scene
+```
 
+## Finding Many Assets
 
+```ruby
+uia 'MyApp.uia'
+main = app.main_presentation
+
+every_asset   = main.find                # Returns an array of matching assets
+master_assets = main.find master:true
+models        = main.find type:'Model'
+master_models = main.find type:'Model', master:true
+slide2_assets = main.find slide:2
+slide2_rects  = main.find type:'Model', slide:2, attributes:{sourcepath:'#Rectangle'}
+gamecovers    = main.find attributes:{name:'Game Cover'}
+bottom_row    = main.find attributes:{position:[nil,-200,nil]}
+red_materials = main.find type:'Material', attributes:{diffuse:[1,0,0] }
+group_models  = main.find under:main/"Scene.Layer.Group", type:'Model'
 ```
 
 ## Working with References
