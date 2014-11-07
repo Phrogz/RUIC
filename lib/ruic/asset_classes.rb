@@ -357,9 +357,6 @@ class UIC::Property
 		def to_a
 			[x,y,z]
 		end
-		def ===(o)
-			to_a.zip(o.to_a).map{ |a,b| !b || (a-b).abs<0.001 }.all?
-		end
 	end
 end
 

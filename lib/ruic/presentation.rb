@@ -293,14 +293,20 @@ class UIC::Presentation
 	def find(options={})
 		start = options[:under] ? options[:under].el : @graph
 		[].tap do |result|
-			start.traverse do |el|
-				next unless el.is_a?(Nokogiri::XML::Element)
-				next if el==start
-				next if options.key?(:slide)  && !has_slide?(el,options[:slide])
+			start.xpath('./descendant::*').each do |el|
 				next if options.key?(:type)   && el.name    != options[:type]
+				next if options.key?(:slide)  && !has_slide?(el,options[:slide])
 				next if options.key?(:master) && master?(el)!= options[:master]
 				asset = asset_for_el(el)
-				next if options.key?(:attributes) && options[:attributes].any?{ |att,val| asset.properties[att.to_s] && !(asset[att.to_s].value === val) }
+				next if options.key?(:attributes) && options[:attributes].any?{ |att,val|
+					value = asset[att.to_s].value
+					case val
+						when Regexp  then val !~ value.to_s
+						when Numeric then (val-value).abs >= 0.001
+						when Array   then value.to_a.zip(val).map{ |a,b| b && (a-b).abs>=0.001 }.any?
+						else value != val
+					end if asset.properties[att.to_s]
+				}
 				result << asset
 			end
 		end

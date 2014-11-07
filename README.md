@@ -94,17 +94,26 @@ assert car.component==sub.scene          # Ask for the owning component; may be 
 uia 'MyApp.uia'
 main = app.main_presentation
 
-every_asset   = main.find                # Returns an array of matching assets
-master_assets = main.find master:true
-models        = main.find type:'Model'
-master_models = main.find type:'Model', master:true
-slide2_assets = main.find slide:2
+every_asset   = main.find                                      # Returns an array of matching assets
+master_assets = main.find master:true                          # Test for master/non-master
+models        = main.find type:'Model'                         # Test based on type
+slide2_assets = main.find slide:2                              # Test based on slide presence
+rectangles    = main.find attributes:{sourcepath:'#Rectangle'} # Test based on attribute values
+master_models = main.find type:'Model', master:true            # Combine any tests
 slide2_rects  = main.find type:'Model', slide:2, attributes:{sourcepath:'#Rectangle'}
-gamecovers    = main.find attributes:{name:'Game Cover'}
+gamecovers    = main.find name:'Game Cover'
+pistons       = main.find name:/^Piston/                       # Regexes allow easy batch finding
 bottom_row    = main.find attributes:{position:[nil,-200,nil]}
 red_materials = main.find type:'Material', attributes:{diffuse:[1,0,0] }
 group_models  = main.find under:main/"Scene.Layer.Group", type:'Model'
 ```
+
+Notes:
+* `nil` inside an array is a "wildcard" value, allowing you to test only specific values
+* Numbers (both in vectors/colors/rotations and float/long values) must only be within `0.001` to match.
+  * _For example, `attributes:{diffuse:[1,0,0]}` will match a color with `diffuse=".9997 0.0003 0"`_
+* Results of `find` are always in scene-graph order.
+
 
 ## Working with References
 
