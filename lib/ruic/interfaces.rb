@@ -18,15 +18,15 @@ end
 
 module UIC::ElementBacked
 	attr_accessor :owner, :el
-  def self.included(base)
-    base.extend(ClassMethods)
-  end
-  module ClassMethods
+	def self.included(base)
+		base.extend(ClassMethods)
+	end
+	module ClassMethods
 		def xmlattribute(name,&block)
 			define_method(name){ @el[name] }
 			define_method("#{name}=", &(block || ->(new_value){ @el[name]=new_value.to_s }))
 		end
-  end	
+	end	
 end
 
 module UIC::PresentableHash
