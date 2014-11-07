@@ -41,12 +41,18 @@ class UIC::Presentation
 		@slides_by_el = {} # indexed by slide state element
 	end
 
+	def to_xml
+		@doc.to_xml( indent:1, indent_text:"\t" )
+		    .gsub( %r{(<\w+(?: [\w:]+="[^"]*")*)(/?>)}i, '\1 \2' )
+		    .sub('"?>','" ?>')
+	end
+
 	def save!
-		File.open(file,'w:utf-8'){ |f|
-			f << @doc.to_xml( indent:1, indent_text:"\t" )
-			         .gsub( %r{(<\w+(?: [\w:]+="[^"]*")*)(/?>)}i, '\1 \2' )
-			         .sub('"?>','" ?>')
-		}
+		File.open(file,'w:utf-8'){ |f| f << to_xml }
+	end
+
+	def save_as(new_file)
+		File.open(new_file,'w:utf-8'){ |f| f << to_xml }
 	end
 
 	def rebuild_caches_from_document

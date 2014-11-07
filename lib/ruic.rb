@@ -26,17 +26,19 @@ class RUIC
 		end
 
 		if opts[:repl]
-			ruic ||= self.new.tap{ |r| r.uia(opts[:uia]) if opts[:uia] }
-
-			require 'ripl'
-			require 'ripl/multi_line'
-			require 'ripl/multi_line/live_error.rb'
-			Ripl::MultiLine.engine = Ripl::MultiLine::LiveError
-			Ripl::Shell.include Ripl::MultiLine.engine
-			Ripl.config.merge! prompt:'    ', result_prompt:'#=> ', multi_line_prompt:'      '
-			ARGV.clear # So that RIPL doesn't try to interpret the options
-			puts "(starting interactive RUIC session; 'quit' or ctrl-d to end)"
-			Ripl.start binding:ruic.instance_eval{ binding }
+			location = (ruic && ruic.app && ruic.app.respond_to?(:file) && ruic.app.file) || opts[:uia] || opts[:script] || '.'
+			Dir.chdir( File.dirname(location) ) do
+				ruic ||= self.new.tap{ |r| r.uia(opts[:uia]) if opts[:uia] }
+				require 'ripl'
+				require 'ripl/multi_line'
+				require 'ripl/multi_line/live_error.rb'
+				Ripl::MultiLine.engine = Ripl::MultiLine::LiveError
+				Ripl::Shell.include Ripl::MultiLine.engine
+				Ripl.config.merge! prompt:'    ', result_prompt:'#=> ', multi_line_prompt:'      '
+				ARGV.clear # So that RIPL doesn't try to interpret the options
+				puts "(starting interactive RUIC session; 'quit' or ctrl-d to end)"
+				Ripl.start binding:ruic.instance_eval{ binding }
+			end
 		end
 	end
 
