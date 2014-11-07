@@ -105,7 +105,11 @@ gamecovers    = main.find name:'Game Cover'
 pistons       = main.find name:/^Piston/                       # Regexes allow easy batch finding
 bottom_row    = main.find attributes:{position:[nil,-200,nil]}
 red_materials = main.find type:'Material', attributes:{diffuse:[1,0,0] }
-group_models  = main.find under:main/"Scene.Layer.Group", type:'Model'
+
+# Restricting the search to a sub-tree
+group        = main/"Scene.Layer.Group"
+group_models = group.find type:'Model'             # Original asset is never in the results
+group_models = main.find under:group, type:'Model' # Alternative sub-tree limit using `under`
 ```
 
 Notes:

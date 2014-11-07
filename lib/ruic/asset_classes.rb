@@ -48,6 +48,11 @@ class UIC::Asset
 			presentation.child_assets(@el)
 		end
 
+		def find(criteria={})
+			criteria[:under] ||= self
+			presentation.find(criteria)
+		end
+
 		# Find the owning component (even if you are a component)
 		def component
 			presentation.owning_component(@el)

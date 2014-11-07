@@ -17,9 +17,14 @@ assert main.find( under:main/"Scene.Layer.Sphere1" ).length==1
 assert main.find( attributes:{name:'Material'} ).length==4
 assert main.find( attributes:{name:/^Sphere/} ).length==2
 
+# You can use name not as an attribute
 assert main.find( name:'Material' ).length==4
 assert main.find( name:/^Sphere/ ).length==2
 
 # Return values are in Scene graph order
 assert main.find.first == main/"Scene"
 assert main.find.last  == main/"Scene.Layer.NonMaster.Material"
+
+# Any asset can be used as the 'root'
+sphere = main/"Scene.Layer.Sphere1"
+assert sphere.find.length==1
