@@ -188,6 +188,13 @@ _In decreasing priority…_
 
 # History
 
+## v0.2.0 - 2014-Nov-7
+* Add Presentation#save_as
+* REPL working directory is same as .uia
+
+## v0.1.0 - 2014-Nov-7
+* Add REPL mode for ruic binary
+
 ## v0.0.1 - 2014-Nov-7
 * Initial gem release
 * Crawl presentations and modify attributes
