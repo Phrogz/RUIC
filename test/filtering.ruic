@@ -1,0 +1,16 @@
+metadata 'MetaData.xml'
+
+uia 'projects/SimpleScene/SimpleScene.uia'
+show app.errors if app.errors?
+
+main = app.main_presentation
+
+assert main.find( type:'Model' ).length==4
+assert main.find( type:'Model', slide:0 ).length==3
+assert main.find( type:'Model', slide:1 ).length==4
+assert main.find( type:'Model', slide:1, nonmaster:true ).length==1
+assert main.find( type:'Model', attributes:{position:[-150,60,0]} ).length==2
+assert main.find( type:'Model', attributes:{position:[-150,60,0]} ).length==2
+assert main.find( type:'Model', attributes:{position:[nil,60,nil]} ).length==4
+assert main.find( type:'Model', attributes:{sourcepath:'#Cube'} ).length==1
+
