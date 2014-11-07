@@ -28,3 +28,12 @@ assert main.find.last  == main/"Scene.Layer.NonMaster.Material"
 # Any asset can be used as the 'root'
 sphere = main/"Scene.Layer.Sphere1"
 assert sphere.find.length==1
+
+# Supplying a block will iterate, including the index
+expected = main.find type:'Model'
+found = 0
+main.find type:'Model' do |mod,i|
+	found += 1
+	assert mod == expected[i]
+end
+assert found==4

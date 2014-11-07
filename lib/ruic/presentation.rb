@@ -291,6 +291,7 @@ class UIC::Presentation
 	end
 
 	def find(options={})
+		index = -1
 		start = options[:under] ? options[:under].el : @graph
 		(options[:attributes]||={})[:name]=options[:name] if options[:name]
 		[].tap do |result|
@@ -308,6 +309,7 @@ class UIC::Presentation
 						else value != val
 					end if asset.properties[att.to_s]
 				}
+				yield asset, index+=1 if block_given?
 				result << asset
 			end
 		end
