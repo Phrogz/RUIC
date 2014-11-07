@@ -301,13 +301,15 @@ class UIC::Presentation
 				next if options.key?(:master) && master?(el)!= options[:master]
 				asset = asset_for_el(el)
 				next if options.key?(:attributes) && options[:attributes].any?{ |att,val|
-					value = asset[att.to_s].value
-					case val
-						when Regexp  then val !~ value.to_s
-						when Numeric then (val-value).abs >= 0.001
-						when Array   then value.to_a.zip(val).map{ |a,b| b && (a-b).abs>=0.001 }.any?
-						else value != val
-					end if asset.properties[att.to_s]
+					if asset.properties[att.to_s]
+						value = asset[att.to_s].value
+						case val
+							when Regexp  then val !~ value.to_s
+							when Numeric then (val-value).abs >= 0.001
+							when Array   then value.to_a.zip(val).map{ |a,b| b && (a-b).abs>=0.001 }.any?
+							else value != val
+						end
+					end
 				}
 				yield asset, index+=1 if block_given?
 				result << asset
