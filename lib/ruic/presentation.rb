@@ -289,6 +289,18 @@ class UIC::Presentation
 	def master?(graph_element)
 		(graph_element == @scene) || !!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
 	end
+
+	def find(options={})
+		start = options[:under] || @scene
+		@graph_by_id.values.map do |el|
+			asset = asset_for_el(el)
+			asset = nil if asset && options.key?(:type)   && asset.type!=options[:type]
+			asset = nil if asset && options.key?(:slide)  && !has_slide?(el,options[:slide])
+			asset = nil if asset && options.key?(:master) && asset.master?!=options[:master]
+			asset = nil if asset && options.key?(:attributes) && options[:attributes].any?{ |att,val| asset.properties[att.to_s] && asset[att.to_s].value!=val }
+			asset
+		end.compact
+	end
 end
 
 def UIC.Presentation( uip_path )

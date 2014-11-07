@@ -352,10 +352,15 @@ class UIC::Property
 			"<#{@asset.path}.#{@property.name}: #{self}>"
 		end
 		def to_s
-			[x,y,z].join(' ')
+			to_a.join(' ')
+		end
+		def to_a
+			[x,y,z]
+		end
+		def ==(o)
+			to_a.zip(o.to_a).map{ |a,b| !b || (a-b).abs<0.001 }.all?
 		end
 	end
-
 end
 
 class UIC::SlideCollection
