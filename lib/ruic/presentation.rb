@@ -292,6 +292,7 @@ class UIC::Presentation
 
 	def find(options={})
 		start = options[:under] ? options[:under].el : @graph
+		(options[:attributes]||={})[:name]=options[:name] if options[:name]
 		[].tap do |result|
 			start.xpath('./descendant::*').each do |el|
 				next if options.key?(:type)   && el.name    != options[:type]
