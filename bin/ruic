@@ -9,15 +9,17 @@ end
 
 USAGE = <<ENDUSAGE
 Usage:
-   ruic [-h] [-v] [-m /path/to/MetaData.xml] myscript.ruic
+   ruic [-h] [-v] [-i] [-m path/to/MetaData.xml] [-u path/to/my.uia] [myscript.ruic]
 ENDUSAGE
 
 HELP = <<ENDHELP
-   -h, --help       Show this help.
-   -v, --version    Show the version number (#{RUIC::VERSION}).
-   -m, --metadata   The path to use for MetaData.xml
-                    Default: #{RUIC::DEFAULTMETADATA}
-                    Will be overridden by any `metadata` call in your script.
+   -h, --help         Show this help.
+   -v, --version      Show the version number (#{RUIC::VERSION}).
+   -i, --interactive  Enter an interactive REPL after running the script (if any).
+   -m, --metadata     The path to use for MetaData.xml
+                      Default: #{RUIC::DEFAULTMETADATA}
+                      Will be overridden by any `metadata` call in your script.
+   -u, --uia          An application to load.
 ENDHELP
 
 ARGS = {}
@@ -25,9 +27,11 @@ UNFLAGGED_ARGS = [ :script ]
 next_arg = UNFLAGGED_ARGS.first
 ARGV.each do |arg|
 	case arg
-		when '-h','--help'      then ARGS[:help]    = true
-		when '-v','--version'   then ARGS[:version] = true
-		when '-m','--metadata'  then next_arg = :meta
+		when '-h','--help'        then ARGS[:help]        = true
+		when '-v','--version'     then ARGS[:version]     = true
+		when '-i','--interactive' then ARGS[:interactive] = true
+		when '-m','--metadata'    then next_arg = :meta
+		when '-u','--uia'         then next_arg = :uia
 		else
 			if next_arg
 				ARGS[next_arg] = arg
@@ -39,14 +43,18 @@ end
 
 puts "RUIC v#{RUIC::VERSION}" if ARGS[:version]
 
-if ARGS[:help] || !ARGS[:script]
-	puts USAGE unless ARGS[:version]
-	puts HELP if ARGS[:help]
-	exit ARGS[:help] ? 0 : 1
+if ARGS[:help]
+	puts USAGE, HELP
+	exit 0
 end
 
 if ARGS[:meta]
 	RUIC::DEFAULTMETADATA.replace File.expand_path(ARGS[:meta])
 end
 
-RUIC(ARGS[:script])
+if ARGS[:script] && File.extname(ARGS[:script])==".uia"
+	ARGS[:uia] = ARGS[:script]
+	ARGS[:script] = nil
+end
+
+RUIC script:ARGS[:script], uia:ARGS[:uia], repl:ARGS[:interactive] || !ARGS[:script]

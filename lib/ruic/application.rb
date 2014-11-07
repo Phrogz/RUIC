@@ -1,6 +1,10 @@
 class UIC::Application
 	include UIC::FileBacked
 
+	def inspect
+		"<UIC::Application '#{File.basename(file)}'>"
+	end
+
 	attr_reader :metadata
 	def initialize(metadata,uia_path)
 		@metadata = metadata

@@ -316,6 +316,10 @@ class UIC::Presentation
 			end
 		end
 	end
+
+	def inspect
+		"<#{self.class} #{File.basename(file)}>"
+	end
 end
 
 def UIC.Presentation( uip_path )
@@ -342,10 +346,6 @@ class UIC::Application::Presentation < UIC::Presentation
 
 	def path_to( el, from=nil )
 		"#{id}:#{super}"
-	end
-
-	def inspect
-		"<presentation #{file}>"
 	end
 end
 

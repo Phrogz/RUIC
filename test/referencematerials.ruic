@@ -49,5 +49,4 @@ ref['referencedmaterial'].unlink
 	ref['referencedmaterial',s+1].type = :path
 end
 
-
 app.save_all!
