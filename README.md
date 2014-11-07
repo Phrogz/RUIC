@@ -187,6 +187,7 @@ _In decreasing priority…_
 
 
 # History
+
 ## v0.0.1 - 2014-Nov-7
 * Initial gem release
 * Crawl presentations and modify attributes

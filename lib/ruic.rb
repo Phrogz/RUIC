@@ -4,7 +4,8 @@ module UIC; end
 
 require 'nokogiri'
 require_relative 'ruic/version'
-require_relative 'ruic/asset_classes'
+require_relative 'ruic/attributes'
+require_relative 'ruic/assets'
 require_relative 'ruic/interfaces'
 require_relative 'ruic/application'
 require_relative 'ruic/behaviors'
