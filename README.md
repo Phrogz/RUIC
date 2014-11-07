@@ -110,6 +110,11 @@ red_materials = main.find type:'Material', attributes:{diffuse:[1,0,0] }
 group        = main/"Scene.Layer.Group"
 group_models = group.find type:'Model'             # Original asset is never in the results
 group_models = main.find under:group, type:'Model' # Alternative sub-tree limit using `under`
+
+# Iterate the results as they are found
+main.find type:'Model', name:/^Piston/ do |model, index|
+	show "Model #{index} is named #{model.name}"
+end
 ```
 
 Notes:
