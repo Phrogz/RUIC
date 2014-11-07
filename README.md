@@ -94,25 +94,30 @@ assert car.component==sub.scene          # Ask for the owning component; may be 
 uia 'MyApp.uia'
 main = app.main_presentation
 
-every_asset   = main.find                                      # Returns an array of matching assets
-master_assets = main.find master:true                          # Test for master/non-master
-models        = main.find type:'Model'                         # Test based on type
-slide2_assets = main.find slide:2                              # Test based on slide presence
-rectangles    = main.find attributes:{sourcepath:'#Rectangle'} # Test based on attribute values
-master_models = main.find type:'Model', master:true            # Combine any tests
-slide2_rects  = main.find type:'Model', slide:2, attributes:{sourcepath:'#Rectangle'}
-gamecovers    = main.find name:'Game Cover'
-pistons       = main.find name:/^Piston/                       # Regexes allow easy batch finding
-bottom_row    = main.find attributes:{position:[nil,-200,nil]}
-red_materials = main.find type:'Material', attributes:{diffuse:[1,0,0] }
+every_asset   = main.find                                      # Array of matching assets
+master_assets = main.find master:true                          # Test for master/nonmaster
+models        = main.find type:'Model'                         # …or based on type
+gamecovers    = main.find name:'Game Cover'                    # …or based on name
+slide2_assets = main.find slide:2                              # …or presence on slide
+rectangles    = main.find attributes:{sourcepath:'#Rectangle'} # …or attribute values
 
-# Restricting the search to a sub-tree
+# Combine tests to get more specific
+master_models = main.find type:'Model', master:true            
+slide2_rects  = main.find type:'Model', slide:2, attributes:{sourcepath:'#Rectangle'}
+nonmaster_s2  = main.find slide:2, master:false
+red_materials = main.find type:'Material', attributes:{ diffuse:[1,0,0] }
+
+# You can match values more loosely
+pistons       = main.find name:/^Piston/                       # Regex for batch finding
+bottom_row    = main.find attributes:{position:[nil,-200,nil]} # nil for wildcards
+
+# Restrict the search to a sub-tree
 group        = main/"Scene.Layer.Group"
-group_models = group.find type:'Model'             # Original asset is never in the results
-group_models = main.find under:group, type:'Model' # Alternative sub-tree limit using `under`
+group_models = group.find type:'Model'                 # Original asset is never included
+group_models = main.find under:group, type:'Model'     # Or use `under` for sub-tree
 
 # Iterate the results as they are found
-main.find type:'Model', name:/^Piston/ do |model, index|
+main.find type:'Model', name:/^Piston/ do |model, index|    # Using the index is optional
 	show "Model #{index} is named #{model.name}"
 end
 ```
@@ -170,14 +175,10 @@ _In decreasing priority…_
 - Report unused assets (in a format suitable for automated destruction)
 - Report missing assets (and who was looking for them)
 - Gobs more unit tests
-- Parse .material files
-- Navigate through scene graph hierarchy (parent, children)
-- Parse .lua files (in case one references an image)
+- Parse .lua headers (in case one references an image)
 - Parse render plugins
 - Read/edit animation tracks
 - Find all colors, and where they are used
-- Path to element
-- `element/'relative.path.resolving'`
 - Visual actions for State Machines
 - Create new presentation assets (e.g. add a new sphere)
 - Modify the scene graph of presentations
@@ -186,7 +187,11 @@ _In decreasing priority…_
 
 
 # History
-* _In development, no releases yet._
+## v0.0.1 - 2014-Nov-7
+* Initial gem release
+* Crawl presentations and modify attributes
+* Batch find assets
+* Save presentation changes back to disk
 
 
 
