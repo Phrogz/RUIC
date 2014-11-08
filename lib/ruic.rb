@@ -14,30 +14,34 @@ require_relative 'ruic/presentation'
 
 class RUIC
 	DEFAULTMETADATA = 'C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml'
-	def self.run(opts={})
-		ruic = nil
-		if opts[:script]
-			script = File.read(opts[:script],encoding:'utf-8')
-			Dir.chdir(File.dirname(opts[:script])) do
-				ruic = self.new
-				ruic.uia(opts[:uia]) if opts[:uia]
-				ruic.instance_eval(script,opts[:script])
+	def self.run(_RUICRUNOPTS_={})
+		# Use instance variables to not pollute the binding
+		@opts = _RUICRUNOPTS_
+		@ruic = nil
+		@env  = nil
+		if @opts[:script]
+			@script = File.read(@opts[:script],encoding:'utf-8')
+			Dir.chdir(File.dirname(@opts[:script])) do
+				@ruic = self.new
+				@ruic.uia(@opts[:uia]) if @opts[:uia]
+				@env = @ruic.instance_eval{ binding }
+				@env.eval(@script,@opts[:script])
 			end
 		end
 
-		if opts[:repl]
-			location = (ruic && ruic.app && ruic.app.respond_to?(:file) && ruic.app.file) || opts[:uia] || opts[:script] || '.'
-			Dir.chdir( File.dirname(location) ) do
-				ruic ||= self.new.tap{ |r| r.uia(opts[:uia]) if opts[:uia] }
-				require 'ripl'
+		if @opts[:repl]
+			@location = (@ruic && @ruic.app && @ruic.app.respond_to?(:file) && @ruic.app.file) || @opts[:uia] || @opts[:script] || '.'
+			Dir.chdir( File.dirname(@location) ) do
+				@ruic ||= self.new.tap{ |r| r.uia(@opts[:uia]) if @opts[:uia] }
+				require 'ripl/irb'
 				require 'ripl/multi_line'
 				require 'ripl/multi_line/live_error.rb'
 				Ripl::MultiLine.engine = Ripl::MultiLine::LiveError
 				Ripl::Shell.include Ripl::MultiLine.engine
-				Ripl.config.merge! prompt:'    ', result_prompt:'#=> ', multi_line_prompt:'      '
+				Ripl.config.merge! prompt:"\n", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false
 				ARGV.clear # So that RIPL doesn't try to interpret the options
 				puts "(starting interactive RUIC session; 'quit' or ctrl-d to end)"
-				Ripl.start binding:ruic.instance_eval{ binding }
+				Ripl.start binding:(@env || @ruic.instance_eval{ binding })
 			end
 		end
 	end
