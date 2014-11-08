@@ -18,6 +18,7 @@ _Some of the features above are planned, but not yet implemented; see Known Limi
   * [Working with References](#working-with-references)
   * [Writing Assertions](#writing-assertions)
   * [Locating MetaData.xml](#locating-metadataxml)
+* [Interactive RUIC](#interactive-ruic)
 * [Known Limitations (aka TODO)](#known-limitations-aka-todo)
 * [History](#history)
 * [License & Contact](#license--contact)
@@ -166,6 +167,36 @@ If this file is in another location, you can tell the script where to find it ei
 * in your ruic script: `metadata 'path/to/MetaData.xml' # before any 'app' commands`
 
 
+# Interactive RUIC
+In addition to executing a standalone script, RUIC also has a REPL (like IRB) that allows you to
+interactively execute and test changes to your application/presentations before saving.
+There are two ways to enter interactive mode:
+
+* If you invoke the `ruic` binary with a `.uia` file as the argument the interpreter will load
+  the application and enter the REPL:
+  ```
+  $ ruic myapp.uia
+  (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
+
+  uia "test/projects/SimpleScene/SimpleScene.uia"
+  #=> <UIC::Application 'SimpleScene.uia'>
+  ```
+
+* Alternatively, you can have RUIC execute a script and then enter the interactive REPL
+  by supplying the `-i` command-line switch:
+  ```
+  $ ruic -i test/referencematerials.ruic
+  (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
+
+  app
+  #=> <UIC::Application 'ReferencedMaterials.uia'>
+
+  cubemat
+  #=> <asset Material#Material_002>
+  ```
+  As shown above, all local variables created by the script continue to be available
+  in the interactive session.
+
 
 # Known Limitations (aka TODO)
 _In decreasing priority…_
@@ -187,6 +218,9 @@ _In decreasing priority…_
 
 
 # History
+
+## v0.2.2 - 2014-Nov-7
+* REPL shows version number when it starts
 
 ## v0.2.1 - 2014-Nov-7
 * REPL mode after script maintains binding of script (all local variables remain available)
