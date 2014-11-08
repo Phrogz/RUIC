@@ -188,6 +188,10 @@ _In decreasing priority…_
 
 # History
 
+## v0.2.1 - 2014-Nov-7
+* REPL mode after script maintains binding of script (all local variables remain available)
+* Customized `.irbrc` files will not cause warnings.
+
 ## v0.2.0 - 2014-Nov-7
 * Add Presentation#save_as
 * REPL working directory is same as .uia
