@@ -40,7 +40,7 @@ class RUIC
 				Ripl::Shell.include Ripl::MultiLine.engine
 				Ripl.config.merge! prompt:"\n", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false
 				ARGV.clear # So that RIPL doesn't try to interpret the options
-				puts "(starting interactive RUIC session; 'quit' or ctrl-d to end)"
+				puts "(RUIC v#{RUIC::VERSION} interactive session; 'quit' or ctrl-d to end)"
 				Ripl.start binding:(@env || @ruic.instance_eval{ binding })
 			end
 		end
