@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP version="3">
+	<Project>
+		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False"/>
+		<Graph>
+			<Scene id="Scene">
+				<Layer id="Layer">
+					<Camera id="Camera"/>
+					<Light id="Light"/>
+					<Model id="Sphere"><Material id="Material"/></Model>
+					<Model id="Sphere2"><Material id="Material_001"/></Model>
+					<Model id="Cube"><Material id="Material_002"/></Model>
+					<Model id="Sphere3"><Material id="Material_003"/></Model>
+				</Layer>
+			</Scene>
+		</Graph>
+		<Logic>
+			<State name="Master Slide" component="#Scene">
+				<Add ref="#Layer"/>
+				<Add ref="#Camera"/>
+				<Add ref="#Light"/>
+				<Add ref="#Sphere"  name="Sphere1" position="-150 60 0" sourcepath="#Sphere"/>
+				<Add ref="#Material" diffuse="0 0.752941 0"/>
+				<Add ref="#Sphere2" name="Sphere2" position="150 60.0004 0" sourcepath="#Sphere"/>
+				<Add ref="#Material_001" diffuse="0 0.75287 0"/>
+				<Add ref="#Cube" name="Cube" position="0 60 0" rotation="-30 60 -20" sourcepath="#Cube"/>
+				<Add ref="#Material_002" name="Material" diffuse="0.5 0 0"/>
+				<State id="Scene-Slide1" name="Slide1">
+					<Add ref="#Sphere3"  name="NonMaster" position="-150 60 0" sourcepath="#Sphere"/>
+					<Add ref="#Material_003" diffuse="0 0.752941 0"/>
+				</State>
+			</State>
+		</Logic>
+	</Project>
+</UIP>
