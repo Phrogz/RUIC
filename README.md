@@ -219,12 +219,15 @@ _In decreasing priority…_
 
 # History
 
+## v0.2.3 - 2014-Nov-7
+* Cleaner mechanism for creating a truly blank binding
+
 ## v0.2.2 - 2014-Nov-7
 * REPL shows version number when it starts
 
 ## v0.2.1 - 2014-Nov-7
 * REPL mode after script maintains binding of script (all local variables remain available)
-* Customized `.irbrc` files will not cause warnings.
+* Customized `.irbrc` files will not cause warnings
 
 ## v0.2.0 - 2014-Nov-7
 * Add Presentation#save_as
