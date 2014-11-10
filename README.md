@@ -219,6 +219,10 @@ _In decreasing priority…_
 
 # History
 
+## v0.2.4 - 2014-Nov-10
+* Fix bug with history editing in REPL (prompts no longer have a blank line before)
+* Add temporary hack to make projects using Float2 load correctly
+
 ## v0.2.3 - 2014-Nov-7
 * Cleaner mechanism for creating a truly blank binding
 
