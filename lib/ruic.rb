@@ -36,7 +36,7 @@ class RUIC
 				require 'ripl/multi_line/live_error.rb'
 				Ripl::MultiLine.engine = Ripl::MultiLine::LiveError
 				Ripl::Shell.include Ripl::MultiLine.engine
-				Ripl.config.merge! prompt:"\n", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false
+				Ripl.config.merge! prompt:"", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false
 				ARGV.clear # So that RIPL doesn't try to interpret the options
 				puts "(RUIC v#{RUIC::VERSION} interactive session; 'quit' or ctrl-d to end)"
 				Ripl.start binding:ruic.env
