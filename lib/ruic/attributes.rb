@@ -53,6 +53,7 @@ class UIC::Property
 	end
 	Rotation = Vector
 	Color    = Vector
+	Float2   = Vector
 	class Image < self
 		self.default = nil
 		def get(asset,slide)
