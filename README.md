@@ -47,7 +47,7 @@ After this you can access the application as `app`:
 
 ```ruby
 uia '../MyApp.uia'      # Relative to the ruic script file, or absolute
-   
+
 show app.file           #=> /var/projects/UIC/MyApp/main/MyApp.uia
 show app.filename       #=> MyApp.uia
 
@@ -85,7 +85,7 @@ show car.type #=> Model                  # Scene, Layer, Camera, Light, Group, M
                                          # Image, Behavior, Effect, ReferencedMaterial, Text,
                                          # RenderPlugin, Component, (custom materials)
 
-show car.component?  #=> false           # Ask if an element is a component 
+show car.component?  #=> false           # Ask if an element is a component
 assert car.component==sub.scene          # Ask for the owning component; may be the scene
 ```
 
@@ -95,30 +95,30 @@ assert car.component==sub.scene          # Ask for the owning component; may be 
 uia 'MyApp.uia'
 main = app.main_presentation
 
-every_asset   = main.find                                      # Array of matching assets
-master_assets = main.find master:true                          # Test for master/nonmaster
-models        = main.find type:'Model'                         # …or based on type
-gamecovers    = main.find name:'Game Cover'                    # …or based on name
-slide2_assets = main.find slide:2                              # …or presence on slide
-rectangles    = main.find attributes:{sourcepath:'#Rectangle'} # …or attribute values
+every_asset   = main.find                                  # Array of matching assets
+master_assets = main.find master:true                      # Test for master/nonmaster
+models        = main.find type:'Model'                     # …or based on type
+gamecovers    = main.find name:'Game Cover'                # …or based on name
+slide2_assets = main.find slide:2                          # …or presence on slide
+rectangles    = main.find attr:{sourcepath:'#Rectangle'}   # …or attribute values
 
 # Combine tests to get more specific
-master_models = main.find type:'Model', master:true            
-slide2_rects  = main.find type:'Model', slide:2, attributes:{sourcepath:'#Rectangle'}
+master_models = main.find type:'Model', master:true
+slide2_rects  = main.find type:'Model', slide:2, attr:{sourcepath:'#Rectangle'}
 nonmaster_s2  = main.find slide:2, master:false
-red_materials = main.find type:'Material', attributes:{ diffuse:[1,0,0] }
+red_materials = main.find type:'Material', attr:{ diffuse:[1,0,0] }
 
 # You can match values more loosely
-pistons       = main.find name:/^Piston/                       # Regex for batch finding
-bottom_row    = main.find attributes:{position:[nil,-200,nil]} # nil for wildcards
+pistons       = main.find name:/^Piston/                   # Regex for batch finding
+bottom_row    = main.find attr:{position:[nil,-200,nil]}   # nil for wildcards in vectors
 
 # Restrict the search to a sub-tree
 group        = main/"Scene.Layer.Group"
-group_models = group.find type:'Model'                 # Original asset is never included
-group_models = main.find under:group, type:'Model'     # Or use `under` for sub-tree
+group_models = group.find type:'Model'                     # Orig asset is never included
+group_models = main.find under:group, type:'Model'         # Or use `under` for sub-tree
 
 # Iterate the results as they are found
-main.find type:'Model', name:/^Piston/ do |model, index|    # Using the index is optional
+main.find type:'Model', name:/^Piston/ do |model, index|   # Using the index is optional
 	show "Model #{index} is named #{model.name}"
 end
 ```
@@ -126,7 +126,7 @@ end
 Notes:
 * `nil` inside an array is a "wildcard" value, allowing you to test only specific values
 * Numbers (both in vectors/colors/rotations and float/long values) must only be within `0.001` to match.
-  * _For example, `attributes:{diffuse:[1,0,0]}` will match a color with `diffuse=".9997 0.0003 0"`_
+  * _For example, `attr:{diffuse:[1,0,0]}` will match a color with `diffuse=".9997 0.0003 0"`_
 * Results of `find` are always in scene-graph order.
 
 
@@ -158,12 +158,12 @@ app.save_all!                                 #=> Write presentations in place
 
 ## Locating MetaData.xml
 RUIC needs access to a UIC `MetaData.xml` file to understand the properties in the various XML files.
-By default RUIC will look in the location specified by `RUIC::DEFAULTMETADATA`, e.g.  
+By default RUIC will look in the location specified by `RUIC::DEFAULTMETADATA`, e.g.
 `C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml`
 
 If this file is in another location, you can tell the script where to find it either:
 
-* on the command line: `ruic -m path/to/MetaData.xml myscript.ruic` 
+* on the command line: `ruic -m path/to/MetaData.xml myscript.ruic`
 * in your ruic script: `metadata 'path/to/MetaData.xml' # before any 'app' commands`
 
 
@@ -218,6 +218,11 @@ _In decreasing priority…_
 
 
 # History
+
+## v0.3.0 - 2014-Nov-10
+* Switch attribute filtering to use `attr:{ … }` instead of `attributes:{ … }`
+* Attribute matching now requires that a requested attribute be present, or else the asset matching fails.
+  * _For example, `main.find attr:{ diffusecolor:[nil,nil,nil] }` will now only find assets with a `diffusecolor` attribute._
 
 ## v0.2.5 - 2014-Nov-10
 * Re-adds blank line after REPL result.

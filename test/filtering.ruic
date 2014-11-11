@@ -9,13 +9,13 @@ assert main.find( type:'Model' ).length==4
 assert main.find( type:'Model', slide:0 ).length==3
 assert main.find( type:'Model', slide:1 ).length==4
 assert main.find( type:'Model', slide:1, master:false ).length==1
-assert main.find( type:'Model', attributes:{position:[-150,60,0]} ).length==2
-assert main.find( type:'Model', attributes:{position:[-150,60,0]} ).length==2
-assert main.find( type:'Model', attributes:{position:[nil,60,nil]} ).length==4
-assert main.find( type:'Model', attributes:{sourcepath:'#Cube'} ).length==1
+assert main.find( type:'Model', attr:{position:[-150,60,0]} ).length==2
+assert main.find( type:'Model', attr:{position:[-150,60,0]} ).length==2
+assert main.find( type:'Model', attr:{position:[nil,60,nil]} ).length==4
+assert main.find( type:'Model', attr:{sourcepath:'#Cube'} ).length==1
 assert main.find( under:main/"Scene.Layer.Sphere1" ).length==1
-assert main.find( attributes:{name:'Material'} ).length==4
-assert main.find( attributes:{name:/^Sphere/} ).length==2
+assert main.find( attr:{name:'Material'} ).length==4
+assert main.find( attr:{name:/^Sphere/} ).length==2
 
 # You can use name not as an attribute
 assert main.find( name:'Material' ).length==4

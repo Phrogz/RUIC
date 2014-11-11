@@ -299,21 +299,21 @@ class UIC::Presentation
 	def find(options={})
 		index = -1
 		start = options[:under] ? options[:under].el : @graph
-		(options[:attributes]||={})[:name]=options[:name] if options[:name]
+		(options[:attr]||={})[:name]=options[:name] if options[:name]
 		[].tap do |result|
 			start.xpath('./descendant::*').each do |el|
 				next if options.key?(:type)   && el.name    != options[:type]
 				next if options.key?(:slide)  && !has_slide?(el,options[:slide])
 				next if options.key?(:master) && master?(el)!= options[:master]
 				asset = asset_for_el(el)
-				next if options.key?(:attributes) && options[:attributes].any?{ |att,val|
+				next if options.key?(:attr) && !options[:attr].all?{ |att,val|
 					if asset.properties[att.to_s]
 						value = asset[att.to_s].value
 						case val
-							when Regexp  then val !~ value.to_s
-							when Numeric then (val-value).abs >= 0.001
-							when Array   then value.to_a.zip(val).map{ |a,b| b && (a-b).abs>=0.001 }.any?
-							else value != val
+							when Regexp  then val =~ value.to_s
+							when Numeric then (val-value).abs < 0.001
+							when Array   then value.to_a.zip(val).map{ |a,b| !b || (a-b).abs<0.001 }.all?
+							else value == val
 						end
 					end
 				}
