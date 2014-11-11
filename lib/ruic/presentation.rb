@@ -298,25 +298,27 @@ class UIC::Presentation
 
 	def find(options={})
 		index = -1
-		start = options[:under] ? options[:under].el : @graph
-		(options[:attr]||={})[:name]=options[:name] if options[:name]
+		start = options.key?(:_under) ? options.delete(:_under).el : @graph
 		[].tap do |result|
 			start.xpath('./descendant::*').each do |el|
-				next if options.key?(:type)   && el.name    != options[:type]
-				next if options.key?(:slide)  && !has_slide?(el,options[:slide])
-				next if options.key?(:master) && master?(el)!= options[:master]
 				asset = asset_for_el(el)
-				next if options.key?(:attr) && !options[:attr].all?{ |att,val|
-					if asset.properties[att.to_s]
-						value = asset[att.to_s].value
-						case val
-							when Regexp  then val =~ value.to_s
-							when Numeric then (val-value).abs < 0.001
-							when Array   then value.to_a.zip(val).map{ |a,b| !b || (a-b).abs<0.001 }.all?
-							else value == val
-						end
+				next unless options.all? do |att,val|
+					case att
+						when :_type   then el.name == val
+						when :_slide  then has_slide?(el,val)
+						when :_master then master?(el)==val
+						else
+							if asset.properties[att.to_s]
+								value = asset[att.to_s].value
+								case val
+									when Regexp  then val =~ value.to_s
+									when Numeric then (val-value).abs < 0.001
+									when Array   then value.to_a.zip(val).map{ |a,b| !b || (a-b).abs<0.001 }.all?
+									else value == val
+								end
+							end
 					end
-				}
+				end
 				yield asset, index+=1 if block_given?
 				result << asset
 			end

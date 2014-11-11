@@ -47,7 +47,7 @@ class UIC::Asset
 		end
 
 		def find(criteria={},&block)
-			criteria[:under] ||= self
+			criteria[:_under] ||= self
 			presentation.find(criteria,&block)
 		end
 

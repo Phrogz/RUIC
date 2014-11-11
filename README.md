@@ -96,29 +96,29 @@ uia 'MyApp.uia'
 main = app.main_presentation
 
 every_asset   = main.find                                  # Array of matching assets
-master_assets = main.find master:true                      # Test for master/nonmaster
-models        = main.find type:'Model'                     # …or based on type
-gamecovers    = main.find name:'Game Cover'                # …or based on name
-slide2_assets = main.find slide:2                          # …or presence on slide
-rectangles    = main.find attr:{sourcepath:'#Rectangle'}   # …or attribute values
+master_assets = main.find _master:true                     # Test for master/nonmaster
+models        = main.find _type:'Model'                    # …or based on type
+slide2_assets = main.find _slide:2                         # …or presence on slide
+rectangles    = main.find sourcepath:'#Rectangle'          # …or attribute values
+gamecovers    = main.find name:'Game Cover'                # …including the name
 
 # Combine tests to get more specific
-master_models = main.find type:'Model', master:true
-slide2_rects  = main.find type:'Model', slide:2, attr:{sourcepath:'#Rectangle'}
-nonmaster_s2  = main.find slide:2, master:false
-red_materials = main.find type:'Material', attr:{ diffuse:[1,0,0] }
+master_models = main.find _type:'Model', _master:true
+slide2_rects  = main.find _type:'Model', _slide:2, sourcepath:'#Rectangle'
+nonmaster_s2  = main.find _slide:2, _master:false
+red_materials = main.find _type:'Material', diffuse:[1,0,0]
 
 # You can match values more loosely
 pistons       = main.find name:/^Piston/                   # Regex for batch finding
-bottom_row    = main.find attr:{position:[nil,-200,nil]}   # nil for wildcards in vectors
+bottom_row    = main.find position:[nil,-200,nil]          # nil for wildcards in vectors
 
 # Restrict the search to a sub-tree
 group        = main/"Scene.Layer.Group"
-group_models = group.find type:'Model'                     # Orig asset is never included
-group_models = main.find under:group, type:'Model'         # Or use `under` for sub-tree
+group_models = group.find _type:'Model'                    # Orig asset is never included
+group_models = main.find _under:group, _type:'Model'       # Or, use `_under` to limit
 
 # Iterate the results as they are found
-main.find type:'Model', name:/^Piston/ do |model, index|   # Using the index is optional
+main.find _type:'Model', name:/^Piston/ do |model, index|  # Using the index is optional
 	show "Model #{index} is named #{model.name}"
 end
 ```
