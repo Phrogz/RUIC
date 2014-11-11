@@ -41,6 +41,8 @@ class RUIC
 				Ripl.config.merge! prompt:"", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false, after_result:"\n"
 				ARGV.clear # So that RIPL doesn't try to interpret the options
 				puts "(RUIC v#{RUIC::VERSION} interactive session; 'quit' or ctrl-d to end)"
+				ruic.instance_eval{ puts @apps.map{ |n,app| "(#{n} is #{app.inspect})" } }
+				puts "" # blank line before first input
 				Ripl.start binding:ruic.env
 			end
 		end
