@@ -219,6 +219,9 @@ _In decreasing priority…_
 
 # History
 
+## v0.2.5 - 2014-Nov-10
+* Re-adds blank line after REPL result.
+
 ## v0.2.4 - 2014-Nov-10
 * Fix bug with history editing in REPL (prompts no longer have a blank line before)
 * Add temporary hack to make projects using Float2 load correctly
