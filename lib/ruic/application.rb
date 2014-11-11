@@ -2,13 +2,14 @@ class UIC::Application
 	include UIC::FileBacked
 
 	def inspect
-		"<UIC::Application '#{File.basename(file)}'>"
+		"<UIC::Application '#{File.basename(file)}'#{:' FILENOTFOUND' unless file_found?}>"
 	end
 
 	attr_reader :metadata
 	def initialize(metadata,uia_path)
 		@metadata = metadata
 		self.file = uia_path
+		@assets = {}
 		load_from_file if file_found?
 	end
 
