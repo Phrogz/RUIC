@@ -19,7 +19,7 @@ HELP = <<ENDHELP
    -m, --metadata     The path to use for MetaData.xml
                       Default: #{RUIC::DEFAULTMETADATA}
                       Will be overridden by any `metadata` call in your script.
-   -u, --uia          An application to load.
+   -u, --uia          A UIC application file (.uia) to load.
 ENDHELP
 
 ARGS = {}
