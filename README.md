@@ -219,6 +219,9 @@ _In decreasing priority…_
 
 # History
 
+## v0.4.0 - 2014-Nov-11
+* Switch attribute filtering again; now all attributes are inline in the `find()` hash, and the four special keys are prefixed with an underscore: `_type`, `_slide`, `_master`, and `_under`.
+
 ## v0.3.0 - 2014-Nov-10
 * Switch attribute filtering to use `attr:{ … }` instead of `attributes:{ … }`
 * Attribute matching now requires that a requested attribute be present, or else the asset matching fails.
