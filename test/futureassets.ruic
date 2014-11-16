@@ -1,0 +1,9 @@
+metadata 'MetaData-simple.xml'
+uia 'projects/CustomClasses/CustomClasses.uia'  # required before other commands
+show app.errors if app.errors?
+
+future = app["#future"]
+
+assert xyzzy=future.find(_type:'XYZZY').first
+assert xyzzy.type == 'XYZZY'
+assert xyzzy['eyeball',0]==true # Unknown assets inherit from Asset

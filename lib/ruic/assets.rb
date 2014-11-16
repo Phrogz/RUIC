@@ -187,7 +187,8 @@ class UIC::Asset
 	end
 
 	def new_instance(presentation,el)
-		@by_name[el.name].new(presentation,el)
+		klass = @by_name[el.name] || create_class(el,@by_name['Asset'],el.name)
+		klass.new(presentation,el)
 	end
 
 	def hack_in_slide_names!(doc)

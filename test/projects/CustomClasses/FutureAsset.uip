@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP version="3" >
+	<Project >
+		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False" />
+		<Graph >
+			<Scene id="Scene" >
+				<XYZZY id="future"/>
+			</Scene>
+		</Graph>
+		<Logic >
+			<State name="Master Slide" component="#Scene" >
+				<Add ref="#future" />
+				<State id="Scene-Slide1" name="Slide1" />
+			</State>
+		</Logic>
+	</Project>
+</UIP>
