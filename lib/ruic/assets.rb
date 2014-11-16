@@ -135,8 +135,8 @@ class UIC::Asset
 
 	HIER = {}
 	%w[Asset Slide Scene].each{ |s| HIER[s] = 'Root' }
-	%w[Node Behavior Effect Image Layer MaterialBase RenderPlugin].each{ |s| HIER[s]='Asset' }
-	%w[Camera Component Group Light Model Text].each{ |s| HIER[s]='Node' }
+	%w[Node Behavior Effect Image Layer MaterialBase PathAnchorPoint RenderPlugin].each{ |s| HIER[s]='Asset' }
+	%w[Alias Camera Component Group Light Model Text Path].each{ |s| HIER[s]='Node' }
 	%w[Material ReferencedMaterial].each{ |s| HIER[s]='MaterialBase' }
 
 	def initialize(xml)
@@ -168,6 +168,11 @@ class UIC::Asset
 				type=='ReferencedMaterial' ? self : presentation.replace_asset( self, 'ReferencedMaterial', name:name )
 			end
 		end
+
+		@by_name['Path'].instance_eval do
+			define_method(:anchors){ find _type:'PathAnchorPoint' }
+		end
+
 	end
 
 	# Creates a class from MetaData.xml with accessors for the <Property> listed.

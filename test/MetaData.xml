@@ -18,7 +18,7 @@
 		<Property name="shy" formalName="Shy" type="Boolean" hidden="True" />
 		<Property name="sourcepath" type="String" hidden="True" />
     <Property name="importfile" type="String" hidden="True" />
-		
+
 		<Handler name="Set Property" category="Asset" description="Set a property to a new value.">
 			<Argument name="Property Name" formalName="Property" description="Property to change" type="Slide" argumentType="Property" />
 			<Argument name="Property Value" formalName="New Value" description="New value for the property" type="None" argumentType="Dependent" />
@@ -140,7 +140,7 @@
 		<Property name="scale" formalName="Scale" description="Scale" type="Vector" default="1 1 1" hidden="True" />
 		<Property name="pivot" formalName="Pivot" description="Pivot" type="Vector" hidden="True" />
 		<Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" />
-		
+
 		<Property name="aostrength" formalName="Ambient Occlusion" description="Amount of ambient occlusion shading to apply" min="0" max="100" default="0">
 			<ShowIfEqual property="sourcepath" value=""/>
 		</Property>
@@ -162,9 +162,9 @@
 		</Property>
 		<Property name="aodither" formalName="AO Detail" description="Use close-range detail AO" type="Boolean" default="True">
 			<HideIfEqual property="aostrength" value="0"/>
-			<ShowIfEqual property="sourcepath" value=""/>		
+			<ShowIfEqual property="sourcepath" value=""/>
 		</Property>
-		
+
 		<Property name="shadowstrength" formalName="Shadow Strength" description="Amount of shadowing to apply" min="0" max="100" default="0" hidden="True">
 			<ShowIfEqual property="sourcepath" value=""/>
 		</Property>
@@ -180,8 +180,9 @@
 			<HideIfEqual property="shadowstrength" value="0"/>
 			<ShowIfEqual property="sourcepath" value=""/>
 		</Property>
-		
+
 		<Property name="lightprobe" formalName="Light Probe" description="Image used for image-based lighting and reflections" type="Image" />
+		<Property name="probebright" formalName="IBL brightness" description="Brightness factor for image-based lighting and reflections" default="100" />
 		<Property name="fastibl" formalName="Fast IBL" description="Use a faster approximation to image-based lighting" type="Boolean" default="True" hidden="True" />
 		<Property name="probehorizon" formalName="IBL Horizon Cutoff" description="Upper limit for horizon darkening of the light probe" min="-1" max="-0.001" default="-1">
 			<HideIfEqual property="lightprobe" value=""/>
@@ -191,7 +192,7 @@
 		</Property>
 		<Property name="probe2fade" formalName="Probe Crossfade" description="Blend amount between the primary and seconary probes" min="0.0" max="1.0" default="1.0">
 			<HideIfEqual property="lightprobe" value=""/>
-			<HideIfEqual property="lightprobe2" value=""/>		
+			<HideIfEqual property="lightprobe2" value=""/>
 		</Property>
 		<Property name="probe2window" formalName="Secondary Probe Window" description="Texture-U window size used for the moving window (for scrolling textures" min="0.01" max="1.0" default="1.0" hidden="True">
 			<HideIfEqual property="lightprobe" value=""/>
@@ -215,10 +216,10 @@
 		<Property name="lightspecular" formalName="Specular Color" description="Color of specular lighting highlights" type="Color" default="1 1 1"/>
 		<Property name="lightambient" formalName="Ambient Color" description="Color of unlit areas (black for none)" type="Color"/>
 		<Property name="brightness" formalName="Brightness" description="Strength of the light" default="100"/>
-		<Property name="linearfade" formalName="Linear Fade" description="Falloff of the point light" min="0" max="100">
+		<Property name="linearfade" formalName="Linear Fade" description="Falloff of the point light" min="0" max="1000">
 			<ShowIfEqual property="lighttype" value="Point"/>
 		</Property>
-		<Property name="expfade" formalName="Exponential Fade" description="Additional falloff" min="0" max="100">
+		<Property name="expfade" formalName="Exponential Fade" description="Additional falloff" min="0" max="1000">
 			<ShowIfEqual property="lighttype" value="Point"/>
 		</Property>
 		<Property name="areawidth" formalName="Width" description="Width of the surface of the area light" min="0" default="100" hidden="True">
@@ -227,13 +228,25 @@
 		<Property name="areaheight" formalName="Height" description="Height of the surface of the area light" min="0" default="100" hidden="True">
 			<ShowIfEqual property="lighttype" value="Area"/>
 		</Property>
+		<Property name="castshadow" formalName="Cast Shadows" description="Enable shadow casting for this light" type="Boolean" default="False">
+			<HideIfEqual property="lighttype" value="Point"/>
+		</Property>
+		<Property name="shadowbias" formalName="Shadow Depth Bias" description="Slight offset to avoid self-shadowing artifacts" default="0">
+			<HideIfEqual property="lighttype" value="Point"/>
+			<ShowIfEqual property="castshadow" value="True"/>
+		</Property>
+		<Property name="shadowfactor" formalName="Shadow Darken Factor" description="Factor used to darken shadows" default="5.0" min="1.0" max="100.0">
+			<HideIfEqual property="lighttype" value="Point"/>
+			<ShowIfEqual property="castshadow" value="True"/>
+		</Property>
 	</Light>
 	<MaterialBase>
 		<Property name="name" formalName="Name" type="String" default="MaterialBase" hidden="True" />
+		<Property name="iblprobe" formalName="IBL Override" description="IBL probe to use in place of the layer probe for this material" type="Image" />
 	</MaterialBase>
 	<Material>
 		<Property name="name" formalName="Name" type="String" default="Material" hidden="True" />
-		<Property name="shaderlighting" formalName="Lighting" description="Light model; (vertex is faster but does not support some effects)" list="Vertex:Pixel:None" default="Vertex" />
+		<Property name="shaderlighting" formalName="Lighting" description="Light model" list="Pixel:None" default="Pixel" />
 		<Property name="blendmode" formalName="Blending Mode" description="How this material blends with content behind it" list="Normal:Screen:Multiply" default="Normal" />
 		<Property name="diffuse" formalName="Diffuse Color" description="Color when lit from any direction" type="Color" default="1 1 1" />
 		<Property name="diffusemap" formalName="Diffuse Map" description="Image to multiply with diffuse color" type="Image" />
@@ -264,8 +277,10 @@
 		</Property>
 		<Property name="opacity" formalName="Opacity" description="Visibility of the geometry for this material." min="0" max="100" default="100" />
 		<Property name="opacitymap" formalName="Opacity Map" description="Image to vary the opacity across the material" type="Image" />
+		<Property name="emissivecolor" formalName="Emissive Color" description="Color of self-illumination for this material" type="Color" default="1 1 1" />
 		<Property name="emissivepower" formalName="Emissive Power" description="Amount of self-illumination for this material (will not light other objects)" />
 		<Property name="emissivemap" formalName="Emissive Map" description="Image to vary the emissive power across the material" type="Image" />
+		<Property name="emissivemap2" formalName="Emissive Map 2" description="Second image to modulate the emissive power across the material" type="Image" />
 		<Property name="translucencymap" formalName="Translucency Map" description="Grayscale image controlling how much light can pass through the material from behind" type="Image"/>
 		<Property name="translucentfalloff" formalName="Translucent Falloff" type="float" default="1">
 			<HideIfEqual property="translucencymap" value=""/>
@@ -309,7 +324,7 @@
 		<Event name="onTwoPointSwipeLeft" category="Gesture" />
 		<Event name="onTwoPointSwipeRight" category="Gesture" />
 		<Event name="onTwoPointSwipeUp" category="Gesture" />
-		<Event name="onTwoPointSwipeDown" category="Gesture" />		
+		<Event name="onTwoPointSwipeDown" category="Gesture" />
 
 		<Property name="position" formalName="Position" description="Location in local space" type="Vector"/>
 		<Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" />
@@ -321,6 +336,39 @@
 		<Property name="boneid" type="Long" hidden="True" default="-1" />
 		<Property name="ignoresparent" type="Boolean" hidden="True" default="False" />
 	</Node>
+	<Path>
+		<Property name="name" formalName="Name" type="String" default="Path" hidden="True" />
+		<Property name='width' formalName="Width" default='5'/>
+		<Property name="opacity" formalName="Opacity" description="How much the element (and its children) occlude items behind them" min="0" max="100" default="100" />
+		<Property name='linearerror' formalName="CPU Error" default='1000'/>
+		<Property name='edgetessamount' formalName="Edge GPU Tess Amount" default='8' min='1' max='64' />
+		<Property name='innertessamount' formalName="Inner GPU Tess Amount" default='1' min='1' max='64' />
+		<Property name='begincap' formalName="Begin Capping" list="None:Taper" default="None"/>
+		<Property name='begincapoffset' formalName='Begin Capping Start Offset' default='10'>
+			<ShowIfEqual property='begincap' value='Taper'/>
+		</Property>
+		<Property name='begincapopacity' formalName='Begin Cap Final Opacity' min='0' max='1'>
+			<ShowIfEqual property='begincap' value='Taper'/>
+		</Property>
+		<Property name='begincapwidth' formalName='Begin Cap Final Width' default='0'>
+			<ShowIfEqual property='begincap' value='Taper'/>
+		</Property>
+		<Property name='endcap' formalName="End Capping" list="None:Taper" default="None"/>
+		<Property name='endcapoffset' formalName='End Capping Start Offset' default='10'>
+			<ShowIfEqual property='endcap' value='Taper'/>
+		</Property>
+		<Property name='endcapopacity' formalName='End Cap Final Opacity' min='0' max='1'>
+			<ShowIfEqual property='endcap' value='Taper'/>
+		</Property>
+		<Property name='endcapwidth' formalName='End Cap Final Width' default='0'>
+			<ShowIfEqual property='endcap' value='Taper'/>
+		</Property>
+	</Path>
+	<PathAnchorPoint>
+		<Property name='position' formalName='Position' type='Float2'/>
+		<Property name='incomingcontrol' formalName='Incoming Control Point' type='Float2'/>
+		<Property name='outgoingcontrol' formalName='Outgoing Control Point' type='Float2'/>
+	</PathAnchorPoint>
 	<RenderPlugin>
 		<Property name="name" formalName="Name" type="String" default="RenderPlugin" hidden="True" />
 	</RenderPlugin>
@@ -348,7 +396,7 @@
 		<Event name="onTwoPointSwipeLeft" category="Gesture" />
 		<Event name="onTwoPointSwipeRight" category="Gesture" />
 		<Event name="onTwoPointSwipeUp" category="Gesture" />
-		<Event name="onTwoPointSwipeDown" category="Gesture" />		
+		<Event name="onTwoPointSwipeDown" category="Gesture" />
 	</Scene>
 	<Slide>
 		<Property name="playmode" formalName="Play Mode" description="Action to take when reaching the end of all timebars on this slide" list="Stop at end:Looping:PingPong:Ping:Play Through To..." default="Stop at end" animatable="False" />

@@ -1,0 +1,19 @@
+#!/usr/bin/env ruic
+metadata 'MetaData.xml'         # optional; also may be set via -m flag
+uia 'projects/Paths/Paths.uia'  # required before other commands
+
+show "Uh oh!", app.errors if app.errors?
+
+main = app.main
+paths = main.find _type:'Path'
+assert paths.length == 5
+assert paths.first == main/"Scene.Layer.Path1"
+assert paths.first['width'].value == 17
+
+assert main.find(_type:'PathAnchorPoint').length == 25
+
+assert paths.first.anchors
+assert paths.first.anchors.first == paths.first.find(_type:'PathAnchorPoint').first
+
+
+show "All assertions successful"
