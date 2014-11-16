@@ -69,7 +69,7 @@ class UIC::Property
 	class Texture < String
 		def get(asset,slide)
 			if path=super
-				path.empty? ? nil : path
+				path.empty? ? nil : path.gsub( '\\', '/' ).sub( /^.\// ,'' )
 			end
 		end
 	end
