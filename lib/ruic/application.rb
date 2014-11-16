@@ -64,6 +64,7 @@ class UIC::Application
 		presos = presentations
 		presos.find{ |pres| pres.id==initial_id } || presos.first
 	end
+	alias_method :main, :main_presentation
 
 	def main_presentation=(presentation)
 		# TODO: set to Presentation or PresentationAsset
