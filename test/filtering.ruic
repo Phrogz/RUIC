@@ -33,3 +33,12 @@ main.find _type:'Model' do |mod,i|
 	assert mod == expected[i]
 end
 assert found==4
+
+#
+['NOPE',false,/NOPE/,-1,[-1],nil].each do |v|
+	assert main.find(__type:v).length==0
+	assert main.find(NOPE:v).length==0
+	assert main.find('NOPE'=>v).length==0
+end
+
+show "All #{File.basename(__FILE__)} assertions successful."
