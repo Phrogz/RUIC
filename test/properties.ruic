@@ -17,6 +17,7 @@ assert app['#logic']==app['../BMW_Cluster/states/logic.scxml']
 
 main = app['#main']                         # Look up a presentation by asset id
 assert main == app.main_presentation        # …or ask for the main rendered presentation
+assert main == app.main                     # …also available as a shortcut name
 assert main.filename == 'BMW_Cluster.uip'   # You can also ask for the full path via .file
 assert main == app['BMW_Cluster.uip']       # Look up a presentation by asset id
 
