@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData>
+  <Alias/>
+  <Asset>
+    <Property name="eyeball" formalName="Visible" type="Boolean" default="True" hidden="True" />
+  </Asset>
+  <Behavior/>
+  <Camera/>
+  <Component/>
+  <Effect/>
+  <Group/>
+  <Image/>
+  <Layer/>
+  <Light/>
+  <MaterialBase/>
+  <Material/>
+  <ReferencedMaterial/>
+  <Model/>
+  <Node/>
+  <Path/>
+  <PathAnchorPoint/>
+  <RenderPlugin/>
+  <Scene/>
+  <Slide/>
+  <SlideOwner/>
+  <Text/>
+  <XYZZY/>
+</MetaData>
