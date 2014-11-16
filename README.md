@@ -219,6 +219,14 @@ _In decreasing priority…_
 
 # History
 
+## v0.4.1 - 2014-Nov-16
+
+* Update `MetaData.xml` for tests to newest version.
+* Source paths for images/textures normalize the path (forward slashes and no leading `./`).
+* Added `app.main` as a simpler alias for `app.main_presentation`.
+* Add support for paths and anchor points, including `mypath.anchors` as an array of anchor points.
+* Assets present in MetaData and presentation, but not yet hand-entered into the hierarchy, now work and default to inherit from `Asset`.
+
 ## v0.4.0 - 2014-Nov-11
 * Switch attribute filtering again; now all attributes are inline in the `find()` hash, and the four special keys are prefixed with an underscore: `_type`, `_slide`, `_master`, and `_under`.
 
