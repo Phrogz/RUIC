@@ -1,4 +1,5 @@
 #encoding:utf-8
+
 class RUIC; end
 module UIC; end
 
@@ -12,9 +13,38 @@ require_relative 'ruic/behaviors'
 require_relative 'ruic/statemachine'
 require_relative 'ruic/presentation'
 
+# The `RUIC` class provides the interface for running scripts using the special DSL,
+# and for running the interactive REPL.
+# See the {file:README.md README} file for description of the DSL.
 class RUIC
 	DEFAULTMETADATA = 'C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml'
 
+	# Execute a script and/or launch the interactive REPL.
+	#
+	# If you both run a `:script` and then enter the `:repl` all local variables created
+	# by the script will be available in the REPL.
+	#
+	#     # Just run a script
+	#     RUIC.run script:'my.ruic'
+	#
+	#     # Load an application and then enter the REPL
+	#     RUIC.run uia:'my.uia', repl:true
+	#
+	#     # Run a script and then drop into the REPL
+	#     RUIC.run script:'my.ruic', repl:true
+	#
+	# The working directory for scripts is set to the directory of the script.
+	#
+	# The working directory for the repl is set to the directory of the first
+	# loaded application (if any);
+	# failing that, the directory of the script (if any);
+	# failing that, the current directory.
+	#
+	# @param opts [Hash] Options controlling what to run.
+	# @option opts [String] :script A path to a `.ruic` script to run _(optional)_.
+	# @option opts [String] :uia An `.uia` file to load (before running the script and/or REPL) _(optional)_.
+	# @option opts [Boolean] :repl Pass `true` to enter the command-line REPL after executing the script (if any).
+	# @return [nil]
 	def self.run(opts={})
 		opts = opts
 		ruic = nil
@@ -48,43 +78,68 @@ class RUIC
 		end
 	end
 
+	# Creates a new environment for executing a RUIC script.
+	# @param metadata [String] Path to the `MetaData.xml` file to use.
 	def initialize( metadata=DEFAULTMETADATA )
 		@metadata = metadata
 		@apps = {}
 	end
 
+	# Set the metadata to use; generally called from the RUIC DSL.
+	# @param path [String] Path to the `MetaData.xml` file, either absolute or relative to the working directory.
 	def metadata(path)
 		@metadata = path
 	end
 
+	# Load an application, making it available as `app`, `app2`, etc.
+	# @param path [String] Path to the `*.uia` application file.
+	# @return [UIC::Application] The new application loaded.
 	def uia(path)
 		meta = UIC.Meta @metadata
 		name = @apps.empty? ? :app : :"app#{@apps.length+1}"
 		@apps[name] = UIC.App(meta,path)
 	end
 
+	# @return [Binding] the shared binding used for evaluating the script and REPL
 	def env
 		@env ||= binding
 	end
 
-	module SelfInspecting
-		def inspect
-			to_s
-		end
-	end
+	module SelfInspecting; def inspect; to_s; end; end
 
+	# Used to resolve bare `app` and `app2` calls to a loaded {UIC::Application Application}.
+	# @return [UIC::Application] the new application loaded.
 	def method_missing(name,*a)
 		@apps[name] || (name=~/^app\d*/ ? "(no #{name} loaded)".extend(SelfInspecting) : super)
 	end
 
+	# Simple assertion mechanism to be used within scripts.
+	#
+	# @example 1) Simple Call Syntax
+	#     # Provides a generic failure message
+	#     assert a==b
+	#     #=> assertion failed (my.ruic line 17)
+	#
+	#     # Provides a custom failure message
+	#     assert a==b, "a should equal b"
+	#     #=> a should equal b : assertion failed (my.ruic line 17)
+	#
+	# @example 2) Block and string syntax
+	#     # The code in the string to eval is also the failure message
+	#     assert{ "a==b" }
+	#     #=> a==b : assertion failed (my.ruic line 17)
+	#
+	# @param condition [Boolean] the value to evaluate.
+	# @param msg [String] the nice error message to display.
+	# @yieldreturn [String] the code to evaluate as a condition.
 	def assert(condition=:CONDITIONNOTSUPPLIED,msg=nil,&block)
-		if block && condition==:CONDITIONNOTSUPPLIED || condition.is_a?(String)
-			msg = condition.is_a?(String) ? condition : yield
+		if block && condition==:CONDITIONNOTSUPPLIED
+			msg = yield
 			condition = msg.is_a?(String) ? eval(msg,block.binding) : msg
 		end
-		unless condition
+		condition || begin
 			file, line, _ = caller.first.split(':')
-			puts "#{msg && "#{msg} : "}assertion failed (#{file} line #{line})"
+			puts "#{"#{msg} : " unless msg.nil?}assertion failed (#{file} line #{line})"
 			exit 1
 		end
 	end
