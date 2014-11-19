@@ -103,6 +103,7 @@ class UIC::Presentation
 
 	# @param child_asset [MetaData::AssetBase] an asset in the presentation.
 	# @return [MetaData::AssetBase] the scene graph parent of the child asset, or `nil` for the Scene.
+	# @see MetaData::AssetBase#parent
 	def parent_asset( child_asset )
 		child_graph_el = child_asset.el
 		unless child_graph_el==@scene || child_graph_el.parent.nil?
@@ -112,6 +113,7 @@ class UIC::Presentation
 
 	# @param parent_asset [MetaData::AssetBase] an asset in the presentation.
 	# @return [Array<MetaData::AssetBase>] array of scene graph children of the specified asset.
+	# @see MetaData::AssetBase#children
 	def child_assets( parent_asset )
 		parent_asset.el.element_children.map{ |child| asset_for_el(child) }
 	end
@@ -181,9 +183,23 @@ class UIC::Presentation
 	# * If `from_asset` is supplied the path will be relative to that asset (e.g. `"parent.parent.Group.Model"`).
 	# * If `from_asset` is omitted the path will be absolute (e.g. `"Scene.Layer.Group.Model"`).
 	#
+	# This is used internally by {MetaData::AssetBase#path} and {MetaData::AssetBase#path_to};
+	# those methods are usually more convenient to use.
+	#
+	# @example
+	#  preso = app.main
+	#  preso.scene.children.each{ |child| show preso.path_to(child) }
+	#  #=> "main:Scene.MyAppBehavior"
+	#  #=> "main:Scene.UILayer"
+	#  #=> "main:Scene.ContentLayer"
+	#  #=> "main:Scene.BGLayer"
+	#
 	# @param asset [MetaData::AssetBase] the asset to find the path to.
 	# @param from_asset [MetaData::AssetBase] the asset to find the path relative to.
 	# @return [String] the script path to the element.
+	#
+	# @see MetaData::AssetBase#path
+	# @see MetaData::AssetBase#path_to
 	def path_to( asset, from_asset=nil )
 		el = asset.el
 
@@ -269,6 +285,8 @@ class UIC::Presentation
 	# @param asset [MetaData::AssetBase] the asset to fetch the attribute for.
 	# @param attr_name [String] the name of the attribute to get the value of.
 	# @param slide_name_or_index [String,Integer] the string name or integer index of the slide.
+	# @return [Object] the value of the asset on the slide
+	# @see MetaData::AssetBase#[]
 	def get_attribute( asset, attr_name, slide_name_or_index )
 		graph_element = asset.el
 		((addsets=@addsets_by_graph[graph_element]) && ( # State (slide) don't have any addsets
@@ -295,6 +313,7 @@ class UIC::Presentation
 	# @param asset [MetaData::AssetBase] the asset to fetch the attribute for.
 	# @param attr_name [String] the name of the attribute to get the value of.
 	# @param slide_name_or_index [String,Integer] the string name or integer index of the slide.
+	# @see MetaData::AssetBase#[]=
 	def set_attribute( asset, property_name, slide_name_or_index, str )
 		graph_element = asset.el
 		if attribute_linked?( asset, property_name )
@@ -325,13 +344,18 @@ class UIC::Presentation
 	end
 
 	# @return [MetaData::AssetBase] the component asset that owns the supplied asset.
-	# @see MetaData::AssetBase#component
+	#         If the graph_element **is** a component this will return its parent component or Scene.
+	# @see owning_or_self_component_element
+	# @api private
 	def owning_component_element( graph_element )
 		graph_element.at_xpath('(ancestor::Component[1] | ancestor::Scene[1])[last()]')
 	end
 	private :owning_component_element
 
 	# @return [Nokogiri::XML::Element] the "time context" scene graph element that owns the supplied element.
+	#         If the graph_element **is** a component this will return the element itself.
+	# @see owning_component_element
+	# @api private
 	def owning_or_self_component_element( graph_element )
 		graph_element.at_xpath('(ancestor-or-self::Component[1] | ancestor-or-self::Scene[1])[last()]')
 	end
@@ -425,6 +449,7 @@ class UIC::Presentation
 	end
 
 	# @return [Boolean] `true` if the asset is added on the master slide.
+	# @see MetaData::AssetBase#master?
 	def master?(asset)
 		graph_element = asset.el
 		(graph_element == @scene) || !!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
@@ -517,16 +542,20 @@ class UIC::Presentation
 	end
 end
 
-def UIC.Presentation( uip_path )
+# @param uip_path [String] Path to the `.uip` presentation file on disk to load.
+# @return [Presentation] Shortcut for `UIC::Presentation.new`
+def UIC.Presentation( uip_path=nil )
 	UIC::Presentation.new( uip_path )
 end
 
+# An {Application::Presentation} is a {Presentation} that is associated with a specific `.uia` application.
+# In addition to normal {Presentation} methods it has additional methods related to its presense in the application.
 class UIC::Application::Presentation < UIC::Presentation
 	include UIC::ElementBacked
 	# @!parse extend UIC::ElementBacked::ClassMethods
 
 	# @!attribute [rw] id
-	#   @return [String] the id of the presentation asset
+	#   @return [String] the id of the presentation asset in the `.uia`
 	xmlattribute :id do |new_id|
 		main_preso = app.main_presentation
 		super(new_id)
@@ -538,11 +567,13 @@ class UIC::Application::Presentation < UIC::Presentation
 	xmlattribute :src
 
 	# @!attribute active
-	#   @return [Boolean] is the presentation initially active?
-	xmlattribute :active, ->(val){ val=="True" } do |new_val|
+	#   @return [Boolean] Is the presentation initially active in the application?
+	xmlattribute :active, ->(val){ val=="True" || val=="" } do |new_val|
 		new_val ? 'True' : 'False'
 	end
 
+	# @param application [Application] the {Application} object owning this presentation.
+	# @param el [Nokogiri::XML::Element] the XML element in the `.uia` representing this presentation.
 	def initialize(application,el)
 		self.owner = application
 		self.el    = el
@@ -550,8 +581,9 @@ class UIC::Application::Presentation < UIC::Presentation
 	end
 	alias_method :app, :owner
 
+	# Overrides {UIC::Presentation#path_to} to prefix all absolute paths with the {#id}
 	def path_to( el, from=nil )
-		"#{id}:#{super}"
+		from ? super : "#{id}:#{super}"
 	end
 end
 
