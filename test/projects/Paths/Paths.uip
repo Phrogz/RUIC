@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP version="3" >
+	<Project >
+		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False" />
+		<Graph >
+			<Scene id="Scene" >
+				<Layer id="Layer" >
+					<Camera id="Camera" />
+					<Light id="Light" />
+					<Path id="Path" >
+						<Material id="M1" />
+						<PathAnchorPoint id="AnchorPoint" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_001" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_002" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_003" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_004" name="AnchorPoint" />
+					</Path>
+					<Path id="Path2" >
+						<Material id="M2" />
+						<PathAnchorPoint id="AnchorPoint_005" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_006" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_007" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_008" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_009" name="AnchorPoint" />
+					</Path>
+					<Path id="Path3" >
+						<Material id="M3" />
+						<PathAnchorPoint id="AnchorPoint_010" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_011" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_012" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_013" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_014" name="AnchorPoint" />
+					</Path>
+					<Path id="Path4" >
+						<Material id="M4" />
+						<PathAnchorPoint id="AnchorPoint_015" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_016" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_017" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_018" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_019" name="AnchorPoint" />
+					</Path>
+					<Path id="Path5" >
+						<Material id="M5" />
+						<PathAnchorPoint id="AnchorPoint_020" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_021" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_022" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_023" name="AnchorPoint" />
+						<PathAnchorPoint id="AnchorPoint_024" name="AnchorPoint" />
+					</Path>
+				</Layer>
+			</Scene>
+		</Graph>
+		<Logic >
+			<State name="Master Slide" component="#Scene" >
+				<Add ref="#Layer" multisampleaa="4x" />
+				<Add ref="#Camera" fov="58.1806" position="437 499 -600" />
+				<Add ref="#Light" brightness="50" />
+				<State id="Scene-Slide1" name="Slide1" >
+					<Add ref="#Path" name="Path1" diffuse="2 0 0" opacity="50" width="17" />
+					<Add ref="#M1" name="Path" />
+					<Add ref="#AnchorPoint" incomingcontrol="0 0" outgoingcontrol="-69.5 -36.6" position="1211.2 501.3" />
+					<Add ref="#AnchorPoint_001" incomingcontrol="103.9 2.39999" outgoingcontrol="-103.9 -2.4" position="968.3 425.6" />
+					<Add ref="#AnchorPoint_002" incomingcontrol="199.1 -19.6" outgoingcontrol="-199.1 19.7" position="631.3 465" />
+					<Add ref="#AnchorPoint_003" incomingcontrol="161.1 12.6" outgoingcontrol="-161.1 -12.6" position="90.5 391.5" />
+					<Add ref="#AnchorPoint_004" incomingcontrol="81.8 -50" outgoingcontrol="234.1 -478.8" position="-234.1 478.8" />
+					<Add ref="#Path2" name="Path2" diffuse="3 1.66274 1.50196" opacity="50" position="110 0 0" rotation="-20 -20 0" />
+					<Add ref="#M2" name="Path" />
+					<Add ref="#AnchorPoint_005" incomingcontrol="0 0" outgoingcontrol="-51.5 28.9" position="1218.2 431.5" />
+					<Add ref="#AnchorPoint_006" incomingcontrol="119 9.79999" outgoingcontrol="-119.1 -9.8" position="996.1 479.5" />
+					<Add ref="#AnchorPoint_007" incomingcontrol="188.6 -14.6" outgoingcontrol="-188.6 14.5" position="649.3 411.6" />
+					<Add ref="#AnchorPoint_008" incomingcontrol="161 12.6" outgoingcontrol="-161.1 -12.6" position="95.6 544.9" />
+					<Add ref="#AnchorPoint_009" incomingcontrol="77.7 58.3" outgoingcontrol="221 -415.7" position="-221 415.7" />
+					<Add ref="#Path3" name="Path3" diffuse="2.62745 0 0" opacity="50" rotation="10 10 0" />
+					<Add ref="#M3" name="Path" />
+					<Add ref="#AnchorPoint_010" incomingcontrol="0 0" outgoingcontrol="-87.5 -41.8" position="1259.8 557.6" />
+					<Add ref="#AnchorPoint_011" incomingcontrol="119.1 9.79999" outgoingcontrol="-119.1 -9.8" position="965.7 464.2" />
+					<Add ref="#AnchorPoint_012" incomingcontrol="199.1 -19.7" outgoingcontrol="-199.1 19.7" position="581.4 487.6" />
+					<Add ref="#AnchorPoint_013" incomingcontrol="155 19.4" outgoingcontrol="-155 -19.4" position="60.2 505.5" />
+					<Add ref="#AnchorPoint_014" incomingcontrol="73.4 63.6" outgoingcontrol="241.5 -359" position="-241.5 359" />
+					<Add ref="#Path4" name="Path4" diffuse="3 1.85882 0" opacity="50" rotation="11 0 0" />
+					<Add ref="#M4" name="Path" />
+					<Add ref="#AnchorPoint_015" incomingcontrol="0 0" outgoingcontrol="-71.9 51.6" position="1297.3 406.2" />
+					<Add ref="#AnchorPoint_016" incomingcontrol="139.1 2.5" outgoingcontrol="-139.1 -2.4" position="1014.4 506.9" />
+					<Add ref="#AnchorPoint_017" incomingcontrol="225.7 -1.40002" outgoingcontrol="-225.7 1.4" position="600.7 414.7" />
+					<Add ref="#AnchorPoint_018" incomingcontrol="211.8 47.8" outgoingcontrol="-211.8 -47.8" position="46.7 474.7" />
+					<Add ref="#AnchorPoint_019" incomingcontrol="79.9 95.4" outgoingcontrol="325 -236" position="-325 236" />
+					<Add ref="#Path5" name="Path5" diffuse="2 2 0" opacity="50" rotation="9 6.9 7.9" />
+					<Add ref="#M5" name="Path" />
+					<Add ref="#AnchorPoint_020" incomingcontrol="0 0" outgoingcontrol="-81.5 -61.8" position="1271.6 516.8" />
+					<Add ref="#AnchorPoint_021" incomingcontrol="103.9 2.40002" outgoingcontrol="-103.9 -2.4" position="1004.8 390.8" />
+					<Add ref="#AnchorPoint_022" incomingcontrol="199 -19.7" outgoingcontrol="-199.1 19.7" position="638.9 445.8" />
+					<Add ref="#AnchorPoint_023" incomingcontrol="161.1 12.6" outgoingcontrol="-161.1 -12.6" position="66.8 352.6" />
+					<Add ref="#AnchorPoint_024" incomingcontrol="85 -71.9" outgoingcontrol="264.3 -483.7" position="-264.3 483.7" />
+				</State>
+			</State>
+		</Logic>
+	</Project>
+</UIP>

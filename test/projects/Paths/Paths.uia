@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://nvidia.com/uicomposer">
+	<assets><presentation id="main"	src="Paths.uip"/></assets>
+</application>
