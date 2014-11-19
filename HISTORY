@@ -1,0 +1,52 @@
+## v0.4.5 - 2014-Nov-19
+
+* Added a large amount of documentation.
+* Minor code refactoring:
+  * Most (internal) Presentation methods that took a scene graph element as the argument now take an asset.
+  * All `FileBacked` assets now have `save!` and `save_as`.
+
+## v0.4.1 - 2014-Nov-16
+
+* Update `MetaData.xml` for tests to newest version.
+* Source paths for images/textures normalize the path (forward slashes and no leading `./`).
+* Added `app.main` as a simpler alias for `app.main_presentation`.
+* Add support for paths and anchor points, including `mypath.anchors` as an array of anchor points.
+* Assets present in MetaData and presentation, but not yet hand-entered into the hierarchy, now work and default to inherit from `Asset`.
+
+## v0.4.0 - 2014-Nov-11
+* Switch attribute filtering again; now all attributes are inline in the `find()` hash, and the four special keys are prefixed with an underscore: `_type`, `_slide`, `_master`, and `_under`.
+
+## v0.3.0 - 2014-Nov-10
+* Switch attribute filtering to use `attr:{ … }` instead of `attributes:{ … }`
+* Attribute matching now requires that a requested attribute be present, or else the asset matching fails.
+  * _For example, `main.find attr:{ diffusecolor:[nil,nil,nil] }` will now only find assets with a `diffusecolor` attribute._
+
+## v0.2.5 - 2014-Nov-10
+* Re-adds blank line after REPL result.
+
+## v0.2.4 - 2014-Nov-10
+* Fix bug with history editing in REPL (prompts no longer have a blank line before)
+* Add temporary hack to make projects using Float2 load correctly
+
+## v0.2.3 - 2014-Nov-7
+* Cleaner mechanism for creating a truly blank binding
+
+## v0.2.2 - 2014-Nov-7
+* REPL shows version number when it starts
+
+## v0.2.1 - 2014-Nov-7
+* REPL mode after script maintains binding of script (all local variables remain available)
+* Customized `.irbrc` files will not cause warnings
+
+## v0.2.0 - 2014-Nov-7
+* Add Presentation#save_as
+* REPL working directory is same as .uia
+
+## v0.1.0 - 2014-Nov-7
+* Add REPL mode for ruic binary
+
+## v0.0.1 - 2014-Nov-7
+* Initial gem release
+* Crawl presentations and modify attributes
+* Batch find assets
+* Save presentation changes back to disk

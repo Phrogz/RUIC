@@ -9,19 +9,11 @@ RUIC is a Ruby API for reading, analyzing, and manipulating application assets c
 
 _Some of the features above are planned, but not yet implemented; see Known Limitations below._
 
-## Table of Contents
-* [Installing RUIC](#installing-ruic)
-* [Using the RUIC DSL](#using-the-ruic-dsl)
-  * [Creating and Accessing Applications](#creating-and-accessing-applications)
-  * [Working with Presentations](#working-with-presentations)
-  * [Finding Many Assets](#finding-many-assets)
-  * [Working with References](#working-with-references)
-  * [Writing Assertions](#writing-assertions)
-  * [Locating MetaData.xml](#locating-metadataxml)
-* [Interactive RUIC](#interactive-ruic)
-* [Known Limitations (aka TODO)](#known-limitations-aka-todo)
-* [History](#history)
-* [License & Contact](#license--contact)
+
+# Documentation
+
+In addition to the examples in this file full API documentation is available at:
+http://www.rubydoc.info/gems/RUIC/
 
 
 
@@ -124,6 +116,7 @@ end
 ```
 
 Notes:
+
 * `nil` inside an array is a "wildcard" value, allowing you to test only specific values
 * Numbers (both in vectors/colors/rotations and float/long values) must only be within `0.001` to match.
   * _For example, `attr:{diffuse:[1,0,0]}` will match a color with `diffuse=".9997 0.0003 0"`_
@@ -153,8 +146,6 @@ assert mat1 == mat3                           #=> They are the same! It worked!
 app.save_all!                                 #=> Write presentations in place
 ```
 
-## Writing Assertions
-
 
 ## Locating MetaData.xml
 RUIC needs access to a UIC `MetaData.xml` file to understand the properties in the various XML files.
@@ -174,28 +165,28 @@ There are two ways to enter interactive mode:
 
 * If you invoke the `ruic` binary with a `.uia` file as the argument the interpreter will load
   the application and enter the REPL:
-  ```
-  $ ruic myapp.uia
-  (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
 
-  uia "test/projects/SimpleScene/SimpleScene.uia"
-  #=> <UIC::Application 'SimpleScene.uia'>
-  ```
+      $ ruic myapp.uia
+      (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
+
+      uia "test/projects/SimpleScene/SimpleScene.uia"
+      #=> <UIC::Application 'SimpleScene.uia'>
 
 * Alternatively, you can have RUIC execute a script and then enter the interactive REPL
   by supplying the `-i` command-line switch:
-  ```
-  $ ruic -i test/referencematerials.ruic
-  (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
 
-  app
-  #=> <UIC::Application 'ReferencedMaterials.uia'>
+      $ ruic -i test/referencematerials.ruic
+      (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
 
-  cubemat
-  #=> <asset Material#Material_002>
-  ```
+      app
+      #=> <UIC::Application 'ReferencedMaterials.uia'>
+
+      cubemat
+      #=> <asset Material#Material_002>
+
   As shown above, all local variables created by the script continue to be available
   in the interactive session.
+
 
 
 # Known Limitations (aka TODO)
@@ -215,55 +206,6 @@ _In decreasing priority…_
 - Modify the scene graph of presentations
 - Create new presentations/applications from code
 - Report on image asset file formats (e.g. find PNGs, find DXT1 vs DXT3 vs DXT Luminance…)
-
-
-# History
-
-## v0.4.1 - 2014-Nov-16
-
-* Update `MetaData.xml` for tests to newest version.
-* Source paths for images/textures normalize the path (forward slashes and no leading `./`).
-* Added `app.main` as a simpler alias for `app.main_presentation`.
-* Add support for paths and anchor points, including `mypath.anchors` as an array of anchor points.
-* Assets present in MetaData and presentation, but not yet hand-entered into the hierarchy, now work and default to inherit from `Asset`.
-
-## v0.4.0 - 2014-Nov-11
-* Switch attribute filtering again; now all attributes are inline in the `find()` hash, and the four special keys are prefixed with an underscore: `_type`, `_slide`, `_master`, and `_under`.
-
-## v0.3.0 - 2014-Nov-10
-* Switch attribute filtering to use `attr:{ … }` instead of `attributes:{ … }`
-* Attribute matching now requires that a requested attribute be present, or else the asset matching fails.
-  * _For example, `main.find attr:{ diffusecolor:[nil,nil,nil] }` will now only find assets with a `diffusecolor` attribute._
-
-## v0.2.5 - 2014-Nov-10
-* Re-adds blank line after REPL result.
-
-## v0.2.4 - 2014-Nov-10
-* Fix bug with history editing in REPL (prompts no longer have a blank line before)
-* Add temporary hack to make projects using Float2 load correctly
-
-## v0.2.3 - 2014-Nov-7
-* Cleaner mechanism for creating a truly blank binding
-
-## v0.2.2 - 2014-Nov-7
-* REPL shows version number when it starts
-
-## v0.2.1 - 2014-Nov-7
-* REPL mode after script maintains binding of script (all local variables remain available)
-* Customized `.irbrc` files will not cause warnings
-
-## v0.2.0 - 2014-Nov-7
-* Add Presentation#save_as
-* REPL working directory is same as .uia
-
-## v0.1.0 - 2014-Nov-7
-* Add REPL mode for ruic binary
-
-## v0.0.1 - 2014-Nov-7
-* Initial gem release
-* Crawl presentations and modify attributes
-* Batch find assets
-* Save presentation changes back to disk
 
 
 
