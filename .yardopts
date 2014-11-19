@@ -1,4 +1,4 @@
 --no-private
 --markup markdown
 lib/**/*.rb -
-README.md LICENSE
+README.md LICENSE HISTORY
