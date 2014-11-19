@@ -548,8 +548,8 @@ def UIC.Presentation( uip_path=nil )
 	UIC::Presentation.new( uip_path )
 end
 
-# An {Application::Presentation} is a {Presentation} that is associated with a specific `.uia` application.
-# In addition to normal {Presentation} methods it has additional methods related to its presense in the application.
+# An {Application::Presentation Application::Presentation} is a {UIC::Presentation UIC::Presentation} that is associated with a specific `.uia` application.
+# In addition to normal {UIC::Presentation} methods it adds methods related to its presence in the application.
 class UIC::Application::Presentation < UIC::Presentation
 	include UIC::ElementBacked
 	# @!parse extend UIC::ElementBacked::ClassMethods

@@ -63,6 +63,7 @@ module UIC::ElementBacked
 	end
 
 	module ClassMethods
+		# Add methods to instances of the class which gets/sets from an XML attribute.
 		# @param name [String] the name of an XML attribute to expose.
 		# @param getblock [Proc] a proc to run
 		def xmlattribute(name,getblock=nil,&setblock)
