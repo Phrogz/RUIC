@@ -1,27 +1,47 @@
 #encoding: utf-8
 class UIC::MetaData
-	class AnyAsset
+
+	# The base class for all assets. All other classes are dynamically created when a `MetaData.xml` file is loaded.
+	class AssetBase
 		@properties = {}
+		@name = "AssetBase"
+
 		class << self
+			# @return [String] The scene graph name of the asset.
 			attr_reader :name
+
+			# @return [Hash] a hash mapping attribute names to {Property} instances.
 			def properties
 				(ancestors[1].respond_to?(:properties) ? ancestors[1].properties : {}).merge(@properties)
 			end
 
-			def each
-				(@by_name.values - [self]).each{ |klass| yield klass }
-			end
-			include Enumerable
-
+			# @private
 			def inspect
 				"<#{@name}>"
 			end
 		end
 
+		# @return [Hash] a hash mapping attribute names to {Property} instances.
 		def properties
 			self.class.properties
 		end
 
+		# Find an asset by relative scripting path.
+		#
+		# @example
+		#  preso = app.main
+		#  layer = preso/"Scene.Layer"
+		#  cam1  = app/"main:Scene.Layer.Camera"
+		#  cam2  = preso/"Scene.Layer.Camera"
+		#  cam3  = layer/"Camera"
+		#  cam4  = cam1/"parent.Camera"
+		#
+		#  assert cam1==cam2 && cam2==cam3 && cam3==cam4
+		#
+		# @return [MetaData::AssetBase] The found asset, or `nil` if it cannot be found.
+		#
+		# @see Application#at
+		# @see Presentation#at
 		def at(sub_path)
 			presentation.at(sub_path,@el)
 		end
@@ -134,13 +154,15 @@ class UIC::MetaData
 	attr_reader :by_name
 
 	HIER = {}
-	%w[Asset Slide Scene].each{ |s| HIER[s] = 'AnyAsset' }
+
+	%w[Asset Slide Scene].each{ |s| HIER[s] = 'AssetBase' }
 	%w[Node Behavior Effect Image Layer MaterialBase PathAnchorPoint RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Alias Camera Component Group Light Model Text Path].each{ |s| HIER[s]='Node' }
 	%w[Material ReferencedMaterial].each{ |s| HIER[s]='MaterialBase' }
 
 	def initialize(xml)
-		@by_name = {'AnyAsset'=>AnyAsset}
+
+		@by_name = {'AssetBase'=>AssetBase}
 
 		doc = Nokogiri.XML(xml)
 		hack_in_slide_names!(doc)
@@ -236,7 +258,8 @@ end
 class UIC::ValuesPerSlide
 	def initialize(presentation,asset,property)
 		raise unless presentation.is_a?(UIC::Presentation)
-		raise unless asset.is_a?(UIC::MetaData::AnyAsset)
+
+		raise unless asset.is_a?(UIC::MetaData::AssetBase)
 		raise unless property.is_a?(UIC::Property)
 		@preso    = presentation
 		@asset    = asset

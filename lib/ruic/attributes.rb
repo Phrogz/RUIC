@@ -101,7 +101,7 @@ class UIC::Property
 			@type     = type
 		end
 		def object=(new_object)
-			raise "ObjectRef must be set to an asset (not a #{new_object.class.name})" unless new_object.is_a?(UIC::MetaData::AnyAsset)
+			raise "ObjectRef must be set to an asset (not a #{new_object.class.name})" unless new_object.is_a?(UIC::MetaData::AssetBase)
 			@object = new_object
 			write_value!
 		end

@@ -87,12 +87,12 @@ class UIC::Presentation
 
 	# Find an asset in the presentation based on its internal XML identifier.
 	# @param id [String] the id of the asset (not an idref), e.g. `"Material_003"`.
-	# @return [MetaData::AnyAsset] the found asset, or `nil` if could not be found.
+	# @return [MetaData::AssetBase] the found asset, or `nil` if could not be found.
 	def asset_by_id( id )
 		(@graph_by_id[id] && asset_for_el( @graph_by_id[id] ))
 	end
 
-	# @param asset [MetaData::AnyAsset] an asset in the presentation
+	# @param asset [MetaData::AssetBase] an asset in the presentation
 	# @return [Integer] the index of the first slide where an asset is added (0 for master, non-zero for non-master).
 	def slide_index(asset)
 		# TODO: probably faster to .find the first @addsets_by_graph
@@ -101,8 +101,8 @@ class UIC::Presentation
 		(slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0) # the Scene is never added
 	end
 
-	# @param child_asset [MetaData::AnyAsset] an asset in the presentation.
-	# @return [MetaData::AnyAsset] the scene graph parent of the child asset, or `nil` for the Scene.
+	# @param child_asset [MetaData::AssetBase] an asset in the presentation.
+	# @return [MetaData::AssetBase] the scene graph parent of the child asset, or `nil` for the Scene.
 	def parent_asset( child_asset )
 		child_graph_el = child_asset.el
 		unless child_graph_el==@scene || child_graph_el.parent.nil?
@@ -110,8 +110,8 @@ class UIC::Presentation
 		end
 	end
 
-	# @param parent_asset [MetaData::AnyAsset] an asset in the presentation.
-	# @return [Array<MetaData::AnyAsset>] array of scene graph children of the specified asset.
+	# @param parent_asset [MetaData::AssetBase] an asset in the presentation.
+	# @return [Array<MetaData::AssetBase>] array of scene graph children of the specified asset.
 	def child_assets( parent_asset )
 		parent_asset.el.element_children.map{ |child| asset_for_el(child) }
 	end
@@ -181,8 +181,8 @@ class UIC::Presentation
 	# * If `from_asset` is supplied the path will be relative to that asset (e.g. `"parent.parent.Group.Model"`).
 	# * If `from_asset` is omitted the path will be absolute (e.g. `"Scene.Layer.Group.Model"`).
 	#
-	# @param asset [MetaData::AnyAsset] the asset to find the path to.
-	# @param from_asset [MetaData::AnyAsset] the asset to find the path relative to.
+	# @param asset [MetaData::AssetBase] the asset to find the path to.
+	# @param from_asset [MetaData::AssetBase] the asset to find the path relative to.
 	# @return [String] the script path to the element.
 	def path_to( asset, from_asset=nil )
 		el = asset.el
@@ -240,7 +240,10 @@ class UIC::Presentation
 	#
 	#  assert layer1==layer2 && layer2==layer3 && layer3==layer4
 	#
-	# @return [MetaData::AnyAsset] The found asset, or `nil` if it cannot be found.
+	# @return [MetaData::AssetBase] The found asset, or `nil` if it cannot be found.
+	#
+	# @see Application#at
+	# @see MetaData::AssetBase#at
 	def at(path,root=@graph)
 		name,path = path.split('.',2)
 		root = root.el if root.respond_to?(:el)
@@ -263,7 +266,7 @@ class UIC::Presentation
 	#
 	#  assert preso.get_attribute(camera,'position',0) == camera['position',0]
 	#
-	# @param asset [MetaData::AnyAsset] the asset to fetch the attribute for.
+	# @param asset [MetaData::AssetBase] the asset to fetch the attribute for.
 	# @param attr_name [String] the name of the attribute to get the value of.
 	# @param slide_name_or_index [String,Integer] the string name or integer index of the slide.
 	def get_attribute( asset, attr_name, slide_name_or_index )
@@ -289,7 +292,7 @@ class UIC::Presentation
 	#  # …and the shorter way
 	#  camera['endtime',0] = 1000
 	#
-	# @param asset [MetaData::AnyAsset] the asset to fetch the attribute for.
+	# @param asset [MetaData::AssetBase] the asset to fetch the attribute for.
 	# @param attr_name [String] the name of the attribute to get the value of.
 	# @param slide_name_or_index [String,Integer] the string name or integer index of the slide.
 	def set_attribute( asset, property_name, slide_name_or_index, str )
@@ -315,14 +318,14 @@ class UIC::Presentation
 		end
 	end
 
-	# @return [MetaData::AnyAsset] the component (or Scene) asset that owns the supplied asset.
-	# @see MetaData::AnyAsset#component
+	# @return [MetaData::AssetBase] the component (or Scene) asset that owns the supplied asset.
+	# @see MetaData::AssetBase#component
 	def owning_component( asset )
 		asset_for_el( owning_component_element( asset.el ) )
 	end
 
-	# @return [MetaData::AnyAsset] the component asset that owns the supplied asset.
-	# @see MetaData::AnyAsset#component
+	# @return [MetaData::AssetBase] the component asset that owns the supplied asset.
+	# @see MetaData::AssetBase#component
 	def owning_component_element( graph_element )
 		graph_element.at_xpath('(ancestor::Component[1] | ancestor::Scene[1])[last()]')
 	end
@@ -341,9 +344,9 @@ class UIC::Presentation
 	end
 	private :master_slide_for
 
-	# @param asset [MetaData::AnyAsset] the asset to get the slides for.
+	# @param asset [MetaData::AssetBase] the asset to get the slides for.
 	# @return [SlideCollection] an array-like collection of all slides that the asset is available on.
-	# @see MetaData::AnyAsset#slides
+	# @see MetaData::AssetBase#slides
 	def slides_for( asset )
 		graph_element = asset.el
 		@slides_for[graph_element] ||= begin
@@ -357,7 +360,7 @@ class UIC::Presentation
 	end
 
 	# @return [Boolean] true if the asset exists on the supplied slide.
-	# @see MetaData::AnyAsset#has_slide?
+	# @see MetaData::AssetBase#has_slide?
 	def has_slide?( asset, slide_name_or_index )
 		graph_element = asset.el
 		if graph_element == @scene
@@ -385,7 +388,7 @@ class UIC::Presentation
 
 	# Unlinks a master attribute, yielding distinct values on each slide. If the asset is not on the master slide, or the attribute is already unlinked, no change occurs.
 	#
-	# @param asset [MetaData::AnyAsset] the master asset to unlink the attribute on.
+	# @param asset [MetaData::AssetBase] the master asset to unlink the attribute on.
 	# @param attribute_name [String] the name of the attribute to unlink.
 	# @return [Boolean] `true` if the attribute was previously linked; `false` otherwise.
 	def unlink_attribute(asset,attribute_name)
@@ -405,10 +408,10 @@ class UIC::Presentation
 
 	# Replace an existing asset with a new kind of asset.
 	#
-	# @param existing_asset [MetaData::AnyAsset] the existing asset to replace.
+	# @param existing_asset [MetaData::AssetBase] the existing asset to replace.
 	# @param new_type [String] the name of the asset type, e.g. `"ReferencedMaterial"` or `"Group"`.
 	# @param attributes [Hash] initial attribute values for the new asset.
-	# @return [MetaData::AnyAsset] the newly-created asset.
+	# @return [MetaData::AssetBase] the newly-created asset.
 	def replace_asset( existing_asset, new_type, attributes={} )
 		old_el = existing_asset.el
 		new_el = old_el.replace( "<#{new_type}/>" ).first
@@ -467,7 +470,7 @@ class UIC::Presentation
 	# @option criteria :_type [String] asset must be of specified type, e.g. `"Model"` or `"Material"` or `"PathAnchorPoint"`.
 	# @option criteria :_slide [Integer,String] slide number or name that the asset must be present on.
 	# @option criteria :_master [Boolean] `true` for only master assets, `false` for only non-master assets.
-	# @option criteria :_under [MetaData::AnyAsset] a root asset to require as an ancestor; this asset will never be in the search results.
+	# @option criteria :_under [MetaData::AssetBase] a root asset to require as an ancestor; this asset will never be in the search results.
 	# @option criteria :attribute_name [Numeric] numeric attribute value must be within `0.001` of the supplied value.
 	# @option criteria :attribute_name [String] string attribute value must match the supplied string exactly.
 	# @option criteria :attribute_name [Regexp] supplied regex must match the string attribute value.
@@ -476,9 +479,9 @@ class UIC::Presentation
 	#
 	# @yield [asset,index] Yields each found asset (and its index in the results) to the block (if supplied) as they are found.
 	#
-	# @return [Array<MetaData::AnyAsset>] array of all matching assets (may be empty).
+	# @return [Array<MetaData::AssetBase>] array of all matching assets (may be empty).
 	#
-	# @see MetaData::AnyAsset#find
+	# @see MetaData::AssetBase#find
 	def find(criteria={},&block)
 		index = -1
 		start = criteria.key?(:_under) ? criteria.delete(:_under).el : @graph
