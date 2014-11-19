@@ -12,7 +12,12 @@ module UIC::FileBacked
 	def file=( new_path )
 		@file = File.expand_path(new_path)
 		@file_not_found = !File.exist?(new_path)
-		# warn "Could not find file '#{new_path}'" unless file_found?
+	end
+	def to_xml
+		doc.to_xml( indent:1, indent_text:"\t" )
+	end
+	def save!
+		File.open(file,'w:utf-8'){ |f| f << to_xml }
 	end
 end
 
@@ -26,7 +31,7 @@ module UIC::ElementBacked
 			define_method(name){ @el[name] }
 			define_method("#{name}=", &(block || ->(new_value){ @el[name]=new_value.to_s }))
 		end
-	end	
+	end
 end
 
 module UIC::PresentableHash

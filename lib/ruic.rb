@@ -40,7 +40,6 @@ class RUIC
 	# failing that, the directory of the script (if any);
 	# failing that, the current directory.
 	#
-	# @param opts [Hash] Options controlling what to run.
 	# @option opts [String] :script A path to a `.ruic` script to run _(optional)_.
 	# @option opts [String] :uia An `.uia` file to load (before running the script and/or REPL) _(optional)_.
 	# @option opts [Boolean] :repl Pass `true` to enter the command-line REPL after executing the script (if any).
@@ -95,9 +94,9 @@ class RUIC
 	# @param path [String] Path to the `*.uia` application file.
 	# @return [UIC::Application] The new application loaded.
 	def uia(path)
-		meta = UIC.Meta @metadata
+		meta = UIC.MetaData @metadata
 		name = @apps.empty? ? :app : :"app#{@apps.length+1}"
-		@apps[name] = UIC.App(meta,path)
+		@apps[name] = UIC.Application(meta,path)
 	end
 
 	# @return [Binding] the shared binding used for evaluating the script and REPL
@@ -105,6 +104,7 @@ class RUIC
 		@env ||= binding
 	end
 
+	# @private used as a one-off
 	module SelfInspecting; def inspect; to_s; end; end
 
 	# Used to resolve bare `app` and `app2` calls to a loaded {UIC::Application Application}.
@@ -115,7 +115,7 @@ class RUIC
 
 	# Simple assertion mechanism to be used within scripts.
 	#
-	# @example 1) Simple Call Syntax
+	# @example 1) simple call syntax
 	#     # Provides a generic failure message
 	#     assert a==b
 	#     #=> assertion failed (my.ruic line 17)
@@ -124,7 +124,7 @@ class RUIC
 	#     assert a==b, "a should equal b"
 	#     #=> a should equal b : assertion failed (my.ruic line 17)
 	#
-	# @example 2) Block and string syntax
+	# @example 2) block with string syntax
 	#     # The code in the string to eval is also the failure message
 	#     assert{ "a==b" }
 	#     #=> a==b : assertion failed (my.ruic line 17)
@@ -144,6 +144,8 @@ class RUIC
 		end
 	end
 
+	# Nicer name for `puts` to be used in the DSL, printing the
+	# 'nice' string equivalent for all supplied arguments.
 	def show(*a); puts *a.map(&:to_s); end
 
 	def inspect
@@ -151,6 +153,18 @@ class RUIC
 	end
 end
 
+# Run a series of commands inside the RUIC DSL.
+#
+# @example
+#   require 'ruic'
+#   RUIC do
+#     uia 'test/MyProject/MyProject.uia'
+#     show app
+#     #=>UIC::Application 'MyProject.uia'>
+#   end
+#
+# If no block is supplied, this is the same as {RUIC.run RUIC.run(opts)}.
+# @option opts [String] :uia Optionally load an application before running the script.
 def RUIC(opts={},&block)
 	if block
 		Dir.chdir(File.dirname($0)) do

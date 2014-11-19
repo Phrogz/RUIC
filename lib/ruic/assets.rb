@@ -1,5 +1,5 @@
 #encoding: utf-8
-class UIC::Asset
+class UIC::MetaData
 	class Root
 		@properties = {}
 		class << self
@@ -39,11 +39,11 @@ class UIC::Asset
 		end
 
 		def parent
-			presentation.parent_asset(@el)
+			presentation.parent_asset(self)
 		end
 
 		def children
-			presentation.child_assets(@el)
+			presentation.child_assets(self)
 		end
 
 		def find(criteria={},&block)
@@ -53,7 +53,7 @@ class UIC::Asset
 
 		# Find the owning component (even if you are a component)
 		def component
-			presentation.owning_component(@el)
+			presentation.owning_component(self)
 		end
 
 		def component?
@@ -61,7 +61,7 @@ class UIC::Asset
 		end
 
 		def master?
-			presentation.master?(@el)
+			presentation.master?(self)
 		end
 
 		def slide?
@@ -69,11 +69,11 @@ class UIC::Asset
 		end
 
 		def has_slide?(slide_name_or_index)
-			presentation.has_slide?(@el,slide_name_or_index)
+			presentation.has_slide?(self,slide_name_or_index)
 		end
 
 		def slides
-			presentation.slides_for(@el)
+			presentation.slides_for(self)
 		end
 
 		def on_slide(slide_name_or_index)
@@ -83,15 +83,15 @@ class UIC::Asset
 		end
 
 		def path
-			@path ||= @presentation.path_to(@el)
+			@path ||= @presentation.path_to(self)
 		end
 
 		def name
-			properties['name'].get( self, presentation.slide_index(@el) )
+			properties['name'].get( self, presentation.slide_index(self) )
 		end
 
 		def name=( new_name )
-			properties['name'].set( self, new_name, presentation.slide_index(@el) )
+			properties['name'].set( self, new_name, presentation.slide_index(self) )
 		end
 
 		# Get the value(s) of an attribute
@@ -149,7 +149,6 @@ class UIC::Asset
 			parent_class = @by_name[parent_class_name]
 			el = doc.root.at(class_name)
 			@by_name[class_name] = create_class(el,parent_class,el.name)
-			UIC::Asset.const_set( el.name, @by_name[class_name] ) # give the class instance a name by pointing a constant to it :/
 		end
 
 		# Extend well-known classes with script interfaces after they are created
@@ -181,13 +180,16 @@ class UIC::Asset
 	# Also used to create classes from effects, materials, and behavior preambles.
 	def create_class(el,parent_class,name='CustomAsset')
 		Class.new(parent_class) do
-			@name = name
+			@name = name.to_s
 			@properties = Hash[ el.css("Property").map do |e|
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
 				property = UIC::Property.const_get(type).new(e)
 				[ property.name, UIC::Property.const_get(type).new(e) ]
 			end ]
+			def self.inspect
+				@name
+			end
 		end
 	end
 
@@ -201,8 +203,8 @@ class UIC::Asset
 	end
 end
 
-def UIC.Meta(metadata_path)
-	UIC::Asset.new(File.read(metadata_path,encoding:'utf-8'))
+def UIC.MetaData(metadata_path)
+	UIC::MetaData.new(File.read(metadata_path,encoding:'utf-8'))
 end
 
 class UIC::SlideCollection
@@ -234,7 +236,7 @@ end
 class UIC::ValuesPerSlide
 	def initialize(presentation,asset,property)
 		raise unless presentation.is_a?(UIC::Presentation)
-		raise unless asset.is_a?(UIC::Asset::Root)
+		raise unless asset.is_a?(UIC::MetaData::Root)
 		raise unless property.is_a?(UIC::Property)
 		@preso    = presentation
 		@asset    = asset
@@ -251,13 +253,13 @@ class UIC::ValuesPerSlide
 		@property.set( @asset, new_value, slide_name_or_index )
 	end
 	def linked?
-		@preso.attribute_linked?(@el,@property.name)
+		@preso.attribute_linked?( @asset, @property.name )
 	end
 	def unlink
-		@preso.unlink_attribute( @el, @property.name )
+		@preso.unlink_attribute( @asset, @property.name )
 	end
 	def link
-		@preso.link_attribute( @el, @property.name )
+		@preso.link_attribute( @asset, @property.name )
 	end
 	def values
 		@asset.slides.map{ |s| self[s.name] }

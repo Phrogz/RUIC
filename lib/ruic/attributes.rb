@@ -11,11 +11,11 @@ class UIC::Property
 	def default; @def ||= (@el['default'] || self.class.default); end
 	def get(asset,slide)
 		if asset.slide? || asset.has_slide?(slide)
-			asset.presentation.get_attribute(asset.el,name,slide) || default
+			asset.presentation.get_attribute(asset,name,slide) || default
 		end
 	end
 	def set(asset,new_value,slide_name_or_index)
-		asset.presentation.set_attribute(asset.el,name,slide_name_or_index,new_value)
+		asset.presentation.set_attribute(asset,name,slide_name_or_index,new_value)
 	end
 	def inspect
 		"<#{type} '#{name}'>"
@@ -82,7 +82,7 @@ class UIC::Property
 			obj  = nil
 			unless ref=='' || ref.nil?
 				type = ref[0]=='#' ? :absolute : :path
-				ref = type==:absolute ? asset.presentation.asset_by_id( ref[1..-1] ) : asset.presentation.at( ref, asset.el )
+				ref = type==:absolute ? asset.presentation.asset_by_id( ref[1..-1] ) : asset.presentation.at( ref, asset )
 			end
 			ObjectReference.new(asset,self,slide,ref,type)
 		end
@@ -101,7 +101,7 @@ class UIC::Property
 			@type     = type
 		end
 		def object=(new_object)
-			raise "ObjectRef must be set to an asset (not a #{new_object.class.name})" unless new_object.is_a?(UIC::Asset::Root)
+			raise "ObjectRef must be set to an asset (not a #{new_object.class.name})" unless new_object.is_a?(UIC::MetaData::Root)
 			@object = new_object
 			write_value!
 		end
@@ -116,11 +116,11 @@ class UIC::Property
 				when NilClass then ""
 				else case @type
 					when :absolute then "##{@object.el['id']}"
-					when :path     then @asset.presentation.path_to( @object.el, @asset.el ).sub(/^[^:.]+:/,'')
-					# when :root     then @asset.presentation.path_to( @object.el ).sub(/^[^:.]+:/,'')
+					when :path     then @asset.presentation.path_to( @object, @asset ).sub(/^[^:.]+:/,'')
+					# when :root     then @asset.presentation.path_to( @object ).sub(/^[^:.]+:/,'')
 				end
 			end
-			@asset.presentation.set_attribute( @asset.el, @name, @slide, path )
+			@asset.presentation.set_attribute( @asset, @name, @slide, path )
 		end
 	end
 
