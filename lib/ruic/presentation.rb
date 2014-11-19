@@ -520,14 +520,25 @@ end
 
 class UIC::Application::Presentation < UIC::Presentation
 	include UIC::ElementBacked
-	xmlattribute :id
-	xmlattribute :src
+	# @!parse extend UIC::ElementBacked::ClassMethods
+
+	# @!attribute [rw] id
+	#   @return [String] the id of the presentation asset
 	xmlattribute :id do |new_id|
 		main_preso = app.main_presentation
 		super(new_id)
 		app.main_presentation=self if main_preso==self
 	end
-	xmlattribute :active
+
+	# @!attribute src
+	#   @return [String] the path to the presentation file
+	xmlattribute :src
+
+	# @!attribute active
+	#   @return [Boolean] is the presentation initially active?
+	xmlattribute :active, ->(val){ val=="True" } do |new_val|
+		new_val ? 'True' : 'False'
+	end
 
 	def initialize(application,el)
 		self.owner = application

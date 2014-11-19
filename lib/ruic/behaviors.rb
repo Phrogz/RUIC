@@ -21,6 +21,7 @@ end
 
 class UIC::Application::Behavior < UIC::Behavior
 	include UIC::ElementBacked
+	# @!parse extend UIC::ElementBacked::ClassMethods
 	xmlattribute :id
 	xmlattribute :src
 	def initialize(application,el)

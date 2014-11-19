@@ -20,6 +20,7 @@ end
 
 class UIC::Application::StateMachine < UIC::StateMachine
 	include UIC::ElementBacked
+	# @!parse extend UIC::ElementBacked::ClassMethods
 	xmlattribute :id
 	xmlattribute :src
 	xmlattribute :datamodel
@@ -65,7 +66,7 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		end
 		def [](id)
 			if el=@wrap.at("state[@ref='#{id}']")
-				@by_el[el] ||= VisualState.new(el)	
+				@by_el[el] ||= VisualState.new(el)
 			end
 		end
 		def length
@@ -86,7 +87,7 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		end
 		def [](id)
 			if el=@wrap.at("transition[@ref='#{id}']")
-				@by_el[el] ||= VisualTransition.new(el)	
+				@by_el[el] ||= VisualTransition.new(el)
 			end
 		end
 		def length
