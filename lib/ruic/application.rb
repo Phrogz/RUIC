@@ -164,7 +164,7 @@ class UIC::Application
 	#     layer4 = app.main/"Scene.Layer"
 	#
 	#     assert layer1==layer2 && layer2==layer3 && layer3==layer4
-	# @return [UIC::MetaData::Root] The found asset, or `nil` if it cannot be found.
+	# @return [MetaData::AnyAsset] The found asset, or `nil` if it cannot be found.
 	def at(path)
 		parts = path.split(':')
 		preso = parts.length==2 ? self["##{parts.first}"] : main_presentation

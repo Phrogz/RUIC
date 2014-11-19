@@ -1,6 +1,6 @@
 #encoding: utf-8
 class UIC::MetaData
-	class Root
+	class AnyAsset
 		@properties = {}
 		class << self
 			attr_reader :name
@@ -134,13 +134,13 @@ class UIC::MetaData
 	attr_reader :by_name
 
 	HIER = {}
-	%w[Asset Slide Scene].each{ |s| HIER[s] = 'Root' }
+	%w[Asset Slide Scene].each{ |s| HIER[s] = 'AnyAsset' }
 	%w[Node Behavior Effect Image Layer MaterialBase PathAnchorPoint RenderPlugin].each{ |s| HIER[s]='Asset' }
 	%w[Alias Camera Component Group Light Model Text Path].each{ |s| HIER[s]='Node' }
 	%w[Material ReferencedMaterial].each{ |s| HIER[s]='MaterialBase' }
 
 	def initialize(xml)
-		@by_name = {'Root'=>Root}
+		@by_name = {'AnyAsset'=>AnyAsset}
 
 		doc = Nokogiri.XML(xml)
 		hack_in_slide_names!(doc)
@@ -236,7 +236,7 @@ end
 class UIC::ValuesPerSlide
 	def initialize(presentation,asset,property)
 		raise unless presentation.is_a?(UIC::Presentation)
-		raise unless asset.is_a?(UIC::MetaData::Root)
+		raise unless asset.is_a?(UIC::MetaData::AnyAsset)
 		raise unless property.is_a?(UIC::Property)
 		@preso    = presentation
 		@asset    = asset

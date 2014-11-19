@@ -19,6 +19,12 @@ module UIC::FileBacked
 	def save!
 		File.open(file,'w:utf-8'){ |f| f << to_xml }
 	end
+
+	# Save to the supplied file path. Subsequent calls to {#save!} will save to the new file, not the original file name.
+	def save_as(new_file)
+		File.open(new_file,'w:utf-8'){ |f| f << to_xml }
+		self.file = new_file
+	end
 end
 
 module UIC::ElementBacked

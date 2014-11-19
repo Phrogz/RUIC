@@ -52,14 +52,11 @@ class UIC::Presentation
 		@slides_by_el = {} # indexed by slide state element
 	end
 
+	# @return [String] the xml representation of this presentation. Formatted to match UI Composer Studio's formatting as closely as possible (for minimal diffs after update).
 	def to_xml
 		doc.to_xml( indent:1, indent_text:"\t" )
 		   .gsub( %r{(<\w+(?: [\w:]+="[^"]*")*)(/?>)}i, '\1 \2' )
 		   .sub('"?>','" ?>')
-	end
-
-	def save_as(new_file)
-		File.open(new_file,'w:utf-8'){ |f| f << to_xml }
 	end
 
 	# Update the presentation to be in-sync with the document.
@@ -90,12 +87,12 @@ class UIC::Presentation
 
 	# Find an asset in the presentation based on its internal XML identifier.
 	# @param id [String] the id of the asset (not an idref), e.g. `"Material_003"`.
-	# @return [MetaData::Root] the found asset, or `nil` if could not be found.
+	# @return [MetaData::AnyAsset] the found asset, or `nil` if could not be found.
 	def asset_by_id( id )
 		(@graph_by_id[id] && asset_for_el( @graph_by_id[id] ))
 	end
 
-	# @param asset [MetaData::Root] an asset in the presentation
+	# @param asset [MetaData::AnyAsset] an asset in the presentation
 	# @return [Integer] the index of the first slide where an asset is added (0 for master, non-zero for non-master).
 	def slide_index(asset)
 		# TODO: probably faster to .find the first @addsets_by_graph
@@ -104,8 +101,8 @@ class UIC::Presentation
 		(slide ? slide.xpath('count(ancestor::State) + count(preceding-sibling::State[ancestor::State])').to_i : 0) # the Scene is never added
 	end
 
-	# @param child_asset [MetaData::Root] an asset in the presentation.
-	# @return [MetaData::Root] the scene graph parent of the child asset, or `nil` for the Scene.
+	# @param child_asset [MetaData::AnyAsset] an asset in the presentation.
+	# @return [MetaData::AnyAsset] the scene graph parent of the child asset, or `nil` for the Scene.
 	def parent_asset( child_asset )
 		child_graph_el = child_asset.el
 		unless child_graph_el==@scene || child_graph_el.parent.nil?
@@ -113,8 +110,8 @@ class UIC::Presentation
 		end
 	end
 
-	# @param parent_asset [MetaData::Root] an asset in the presentation.
-	# @return [Array<MetaData::Root>] array of scene graph children of the specified asset.
+	# @param parent_asset [MetaData::AnyAsset] an asset in the presentation.
+	# @return [Array<MetaData::AnyAsset>] array of scene graph children of the specified asset.
 	def child_assets( parent_asset )
 		parent_asset.el.element_children.map{ |child| asset_for_el(child) }
 	end
@@ -166,14 +163,13 @@ class UIC::Presentation
 	end
 	private :asset_for_el
 
-
-	def referenced_files
-		(
-			(images + behaviors + effects + meshes + materials ).map(&:file)
-			+ effects.flat_map(&:images)
-			+ fonts
-		).sort_by{ |f| parts = f.split(/[\/\\]/); [parts.length,parts] }
-	end
+	# def referenced_files
+	# 	(
+	# 		(images + behaviors + effects + meshes + materials ).map(&:file)
+	# 		+ effects.flat_map(&:images)
+	# 		+ fonts
+	# 	).sort_by{ |f| parts = f.split(/[\/\\]/); [parts.length,parts] }
+	# end
 
 	# @return [MetaData::Scene] the root scene asset for the presentation.
 	def scene
@@ -185,8 +181,8 @@ class UIC::Presentation
 	# * If `from_asset` is supplied the path will be relative to that asset (e.g. `"parent.parent.Group.Model"`).
 	# * If `from_asset` is omitted the path will be absolute (e.g. `"Scene.Layer.Group.Model"`).
 	#
-	# @param asset [MetaData::Root] the asset to find the path to.
-	# @param from_asset [MetaData::Root] the asset to find the path relative to.
+	# @param asset [MetaData::AnyAsset] the asset to find the path to.
+	# @param from_asset [MetaData::AnyAsset] the asset to find the path relative to.
 	# @return [String] the script path to the element.
 	def path_to( asset, from_asset=nil )
 		el = asset.el
@@ -244,7 +240,7 @@ class UIC::Presentation
 	#
 	#  assert layer1==layer2 && layer2==layer3 && layer3==layer4
 	#
-	# @return [MetaData::Root] The found asset, or `nil` if it cannot be found.
+	# @return [MetaData::AnyAsset] The found asset, or `nil` if it cannot be found.
 	def at(path,root=@graph)
 		name,path = path.split('.',2)
 		root = root.el if root.respond_to?(:el)
@@ -267,7 +263,7 @@ class UIC::Presentation
 	#
 	#  assert preso.get_attribute(camera,'position',0) == camera['position',0]
 	#
-	# @param asset [MetaData::Root] the asset to fetch the attribute for.
+	# @param asset [MetaData::AnyAsset] the asset to fetch the attribute for.
 	# @param attr_name [String] the name of the attribute to get the value of.
 	# @param slide_name_or_index [String,Integer] the string name or integer index of the slide.
 	def get_attribute( asset, attr_name, slide_name_or_index )
@@ -293,7 +289,7 @@ class UIC::Presentation
 	#  # …and the shorter way
 	#  camera['endtime',0] = 1000
 	#
-	# @param asset [MetaData::Root] the asset to fetch the attribute for.
+	# @param asset [MetaData::AnyAsset] the asset to fetch the attribute for.
 	# @param attr_name [String] the name of the attribute to get the value of.
 	# @param slide_name_or_index [String,Integer] the string name or integer index of the slide.
 	def set_attribute( asset, property_name, slide_name_or_index, str )
@@ -319,14 +315,14 @@ class UIC::Presentation
 		end
 	end
 
-	# @return [MetaData::Root] the component (or Scene) asset that owns the supplied asset.
-	# @see MetaData::Root#component
+	# @return [MetaData::AnyAsset] the component (or Scene) asset that owns the supplied asset.
+	# @see MetaData::AnyAsset#component
 	def owning_component( asset )
 		asset_for_el( owning_component_element( asset.el ) )
 	end
 
-	# @return [MetaData::Root] the component asset that owns the supplied asset.
-	# @see MetaData::Root#component
+	# @return [MetaData::AnyAsset] the component asset that owns the supplied asset.
+	# @see MetaData::AnyAsset#component
 	def owning_component_element( graph_element )
 		graph_element.at_xpath('(ancestor::Component[1] | ancestor::Scene[1])[last()]')
 	end
@@ -345,9 +341,9 @@ class UIC::Presentation
 	end
 	private :master_slide_for
 
-	# @param asset [MetaData::Root] the asset to get the slides for.
+	# @param asset [MetaData::AnyAsset] the asset to get the slides for.
 	# @return [SlideCollection] an array-like collection of all slides that the asset is available on.
-	# @see MetaData::Root#slides
+	# @see MetaData::AnyAsset#slides
 	def slides_for( asset )
 		graph_element = asset.el
 		@slides_for[graph_element] ||= begin
@@ -361,7 +357,7 @@ class UIC::Presentation
 	end
 
 	# @return [Boolean] true if the asset exists on the supplied slide.
-	# @see MetaData::Root#has_slide?
+	# @see MetaData::AnyAsset#has_slide?
 	def has_slide?( asset, slide_name_or_index )
 		graph_element = asset.el
 		if graph_element == @scene
@@ -389,7 +385,7 @@ class UIC::Presentation
 
 	# Unlinks a master attribute, yielding distinct values on each slide. If the asset is not on the master slide, or the attribute is already unlinked, no change occurs.
 	#
-	# @param asset [MetaData::Root] the master asset to unlink the attribute on.
+	# @param asset [MetaData::AnyAsset] the master asset to unlink the attribute on.
 	# @param attribute_name [String] the name of the attribute to unlink.
 	# @return [Boolean] `true` if the attribute was previously linked; `false` otherwise.
 	def unlink_attribute(asset,attribute_name)
@@ -409,10 +405,10 @@ class UIC::Presentation
 
 	# Replace an existing asset with a new kind of asset.
 	#
-	# @param existing_asset [MetaData::Root] the existing asset to replace.
+	# @param existing_asset [MetaData::AnyAsset] the existing asset to replace.
 	# @param new_type [String] the name of the asset type, e.g. `"ReferencedMaterial"` or `"Group"`.
 	# @param attributes [Hash] initial attribute values for the new asset.
-	# @return [MetaData::Root] the newly-created asset.
+	# @return [MetaData::AnyAsset] the newly-created asset.
 	def replace_asset( existing_asset, new_type, attributes={} )
 		old_el = existing_asset.el
 		new_el = old_el.replace( "<#{new_type}/>" ).first
@@ -431,13 +427,65 @@ class UIC::Presentation
 		(graph_element == @scene) || !!(@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
 	end
 
-	def find(options={})
+	# Find assets in this presentation matching criteria.
+	#
+	# @example 1) Searching for simple values
+	#  every_asset   = preso.find                          # Every asset in the presentation
+	#  master_assets = preso.find _master:true             # Test for master/nonmaster
+	#  models        = preso.find _type:'Model'            # …or based on type
+	#  slide2_assets = preso.find _slide:2                 # …or presence on a specific slide
+	#  rectangles    = preso.find sourcepath:'#Rectangle'  # …or attribute values
+	#  gamecovers    = preso.find name:'Game Cover'        # …including the name
+	#
+	# @example 2) Combine tests to get more specific
+	#  master_models = preso.find _type:'Model', _master:true
+	#  slide2_rects  = preso.find _type:'Model', _slide:2, sourcepath:'#Rectangle'
+	#  nonmaster_s2  = preso.find _slide:2, _master:false
+	#  red_materials = preso.find _type:'Material', diffuse:[1,0,0]
+	#
+	# @example 3) Matching values more loosely
+	#  pistons       = preso.find name:/^Piston/           # Regex for batch finding
+	#  bottom_row    = preso.find position:[nil,-200,nil]  # nil for wildcards in vectors
+	#
+	# @example 4) Restrict the search to a sub-tree
+	#  group        = preso/"Scene.Layer.Group"
+	#  group_models = preso.find _under:group, _type:'Model'  # All models under the group
+	#  group_models = group.find _type:'Model'                # alternatively start from the asset
+	#
+	# @example 5) Iterate the results as they are found
+	#  preso.find _type:'Model', name:/^Piston/ do |model, index|
+	#     show "Model #{index} is named #{model.name}"
+	#  end
+	#
+	#  # You do not need to receive the index if you do not need its value
+	#  group.find _type:'Model' do |model|
+	#     scale = model['scale'].value
+	#     scale.x = scale.y = scale.z = 1
+	#  end
+	#
+	# @param criteria [Hash] Attribute names and values, along with a few special keys.
+	# @option criteria :_type [String] asset must be of specified type, e.g. `"Model"` or `"Material"` or `"PathAnchorPoint"`.
+	# @option criteria :_slide [Integer,String] slide number or name that the asset must be present on.
+	# @option criteria :_master [Boolean] `true` for only master assets, `false` for only non-master assets.
+	# @option criteria :_under [MetaData::AnyAsset] a root asset to require as an ancestor; this asset will never be in the search results.
+	# @option criteria :attribute_name [Numeric] numeric attribute value must be within `0.001` of the supplied value.
+	# @option criteria :attribute_name [String] string attribute value must match the supplied string exactly.
+	# @option criteria :attribute_name [Regexp] supplied regex must match the string attribute value.
+	# @option criteria :attribute_name [Array] each component of the attribute's vector value must be within `0.001` of the supplied value in the array;
+	#                                          if a value in the array is `nil` that component of the vector may have any value.
+	#
+	# @yield [asset,index] Yields each found asset (and its index in the results) to the block (if supplied) as they are found.
+	#
+	# @return [Array<MetaData::AnyAsset>] array of all matching assets (may be empty).
+	#
+	# @see MetaData::AnyAsset#find
+	def find(criteria={},&block)
 		index = -1
-		start = options.key?(:_under) ? options.delete(:_under).el : @graph
+		start = criteria.key?(:_under) ? criteria.delete(:_under).el : @graph
 		[].tap do |result|
 			start.xpath('./descendant::*').each do |el|
 				asset = asset_for_el(el)
-				next unless options.all? do |att,val|
+				next unless criteria.all? do |att,val|
 					case att
 						when :_type   then el.name == val
 						when :_slide  then has_slide?(asset,val)
@@ -460,6 +508,7 @@ class UIC::Presentation
 		end
 	end
 
+	# @private
 	def inspect
 		"<#{self.class} #{File.basename(file)}>"
 	end
@@ -492,6 +541,7 @@ class UIC::Application::Presentation < UIC::Presentation
 	end
 end
 
+# @private no need to document this monkeypatch
 class Nokogiri::XML::Element
 	def index(kind='*') # Find the index of this element amongs its siblings
 		xpath("count(./preceding-sibling::#{kind})").to_i
