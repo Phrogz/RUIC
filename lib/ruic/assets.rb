@@ -244,14 +244,10 @@ class UIC::MetaData
 		end
 
 		# @private no need to document this
-		def inspect
-			"<asset #{@el.name}##{@el['id']}>"
-		end
-
-		# @private no need to document this
 		def to_s
 			"<#{type} #{path}>"
 		end
+		alias_method :inspect, :to_s
 
 		# @private no need to document this
 		def ==(other)
@@ -404,6 +400,7 @@ class UIC::ValuesPerSlide
 end
 
 class UIC::SlideValues
+	attr_reader :asset
 	def initialize( asset, slide )
 		@asset = asset
 		@slide = slide
