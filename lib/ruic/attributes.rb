@@ -59,7 +59,8 @@ class UIC::Property
 		def get(asset,slide)
 			if idref = super
 				result = asset.presentation.asset_by_id( idref[1..-1] )
-				slide ? result.on_slide( slide ) : result
+				# slide ? result.on_slide( slide ) : result
+				# Getting the asset on a particular slide makes it weird
 			end
 		end
 		def set(asset,new_value,slide)
