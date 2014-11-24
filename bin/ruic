@@ -17,8 +17,8 @@ HELP = <<ENDHELP
    -v, --version      Show the version number (#{RUIC::VERSION}).
    -i, --interactive  Enter an interactive REPL after running the script (if any).
    -m, --metadata     The path to use for MetaData.xml
-                      Default: #{RUIC::DEFAULTMETADATA}
                       Will be overridden by any `metadata` call in your script.
+                      Default: #{RUIC::DEFAULTMETADATA}
    -u, --uia          A UIC application file (.uia) to load.
 ENDHELP
 
@@ -27,10 +27,10 @@ UNFLAGGED_ARGS = [ :script ]
 next_arg = UNFLAGGED_ARGS.first
 ARGV.each do |arg|
 	case arg
-		when '-h','--help'        then ARGS[:help]        = true
-		when '-v','--version'     then ARGS[:version]     = true
-		when '-i','--interactive' then ARGS[:interactive] = true
-		when '-m','--metadata'    then next_arg = :meta
+		when '-h','--help'        then ARGS[:help]    = true
+		when '-v','--version'     then ARGS[:version] = true
+		when '-i','--interactive' then ARGS[:repl]    = true
+		when '-m','--metadata'    then next_arg = :metadata
 		when '-u','--uia'         then next_arg = :uia
 		else
 			if next_arg
@@ -41,15 +41,14 @@ ARGV.each do |arg|
 	end
 end
 
-puts "RUIC v#{RUIC::VERSION}" if ARGS[:version]
+if ARGS.delete(:version)
+	puts "RUIC v#{RUIC::VERSION}"
+	exit 0 if ARGS.empty?
+end
 
 if ARGS[:help]
 	puts USAGE, HELP
 	exit 0
-end
-
-if ARGS[:meta]
-	RUIC::DEFAULTMETADATA.replace File.expand_path(ARGS[:meta])
 end
 
 if ARGS[:script] && File.extname(ARGS[:script])==".uia"
@@ -57,4 +56,6 @@ if ARGS[:script] && File.extname(ARGS[:script])==".uia"
 	ARGS[:script] = nil
 end
 
-RUIC script:ARGS[:script], uia:ARGS[:uia], repl:ARGS[:interactive] || !ARGS[:script]
+%w[uia script metadata].each{ |arg| ARGS[arg]=File.expand_path(ARGS[arg]) if ARGS[arg=arg.to_sym] }
+ARGS[:repl] ||= !ARGS[:script]
+RUIC(ARGS)

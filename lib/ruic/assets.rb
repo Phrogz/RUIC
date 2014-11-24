@@ -335,6 +335,7 @@ class UIC::MetaData
 end
 
 def UIC.MetaData(metadata_path)
+	raise %Q{Cannot find MetaData.xml at "#{metadata_path}"} unless File.exist?(metadata_path)
 	UIC::MetaData.new(File.read(metadata_path,encoding:'utf-8'))
 end
 

@@ -51,7 +51,8 @@ class RUIC
 			script = File.read(opts[:script],encoding:'utf-8')
 			Dir.chdir(File.dirname(opts[:script])) do
 				ruic = self.new
-				ruic.uia(opts[:uia]) if opts[:uia]
+				ruic.metadata opts[:metadata] if opts[:metadata]
+				ruic.uia      opts[:uia]      if opts[:uia]
 				ruic.env.eval(script,opts[:script])
 			end
 		end
@@ -59,7 +60,10 @@ class RUIC
 		if opts[:repl]
 			location = (ruic && ruic.app && ruic.app.respond_to?(:file) && ruic.app.file) || opts[:uia] || opts[:script] || '.'
 			Dir.chdir( File.dirname(location) ) do
-				ruic ||= self.new.tap{ |r| r.uia(opts[:uia]) if opts[:uia] }
+				ruic ||= self.new.tap do |r|
+					r.metadata opts[:metadata] if opts[:metadata]
+					r.uia      opts[:uia]      if opts[:uia]
+				end
 				require 'ripl/irb'
 				require 'ripl/multi_line'
 				require 'ripl/multi_line/live_error.rb'
@@ -168,7 +172,10 @@ end
 def RUIC(opts={},&block)
 	if block
 		Dir.chdir(File.dirname($0)) do
-			RUIC.new.tap{ |r| r.uia(opts[:uia]) if opts[:uia] }.instance_eval(&block)
+			RUIC.new.tap do |r|
+				r.metadata opts[:metadata] if opts[:metadata]
+				r.uia      opts[:uia]      if opts[:uia]
+			end.instance_eval(&block)
 		end
 	else
 		RUIC.run(opts)
