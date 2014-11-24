@@ -80,8 +80,8 @@ class UIC::Application
 	def referenced_files
 		# TODO: state machines can reference external scripts
 		# TODO: behaviors can reference external scripts
-		assets.map{ |asset| path_to(asset.src) }
-		+ presentations.flat_map{ |pres| pres.presentation.referenced_files }
+		assets.map{ |asset| resolve_file_path(asset.src) }
+		+ presentations.flat_map{ |pres| pres.referenced_files }
 	end
 
 	# @return [Array] all assets referenced by the application. Ordered by the order they appear in the `.uia`.

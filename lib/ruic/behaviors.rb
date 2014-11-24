@@ -27,6 +27,6 @@ class UIC::Application::Behavior < UIC::Behavior
 	def initialize(application,el)
 		self.owner = application
 		self.el    = el
-		super( application.path_to(src) )
+		super( application.resolve_file_path(src) )
 	end
 end

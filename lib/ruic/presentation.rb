@@ -23,7 +23,7 @@ class UIC::Presentation
 
 		@class_by_ref = {}
 		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
-			path = app.path_to(reference['sourcepath'])
+			path = app.resolve_file_path(reference['sourcepath'])
 			raise "Cannot find file '#{path}' referenced by #{self.inspect}" unless File.exist?( path )
 			metaklass = case reference.name
 				when 'CustomMaterial'
@@ -577,7 +577,7 @@ class UIC::Application::Presentation < UIC::Presentation
 	def initialize(application,el)
 		self.owner = application
 		self.el    = el
-		super( application.path_to(src) )
+		super( application.resolve_file_path(src) )
 	end
 	alias_method :app, :owner
 

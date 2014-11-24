@@ -8,7 +8,7 @@ module UIC::FileBacked
 
 	# @param relative [String] a file path relative to this file.
 	# @return [String] the full path resolved relative to this file.
-	def path_to( relative )
+	def resolve_file_path( relative )
 		File.expand_path( relative.gsub('\\','/'), File.dirname(file) )
 	end
 

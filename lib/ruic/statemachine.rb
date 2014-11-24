@@ -29,7 +29,7 @@ class UIC::Application::StateMachine < UIC::StateMachine
 	def initialize(application,el)
 		self.owner = application
 		self.el    = el
-		self.file  = application.path_to(src)
+		self.file  = application.resolve_file_path(src)
 		super( File.read( file, encoding:'utf-8' ) )
 		@visuals = @doc.at( "/application/statemachine[@ref='##{id}']/visual-states" )
 		@visuals ||= @doc.root.add_child("<statemachine ref='##{id}'><visual-states/></statemachine>")
