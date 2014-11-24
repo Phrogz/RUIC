@@ -536,6 +536,51 @@ class UIC::Presentation
 		end
 	end
 
+	# @return [Array<MetaData::AssetBase>] array of layers in the presentation.
+	def layers; find _type:'Layer'; end
+
+	# @return [Array<MetaData::AssetBase>] array of groups in the presentation.
+	def groups; find _type:'Group'; end
+
+	# @return [Array<MetaData::AssetBase>] array of cameras in the presentation.
+	def cameras; find _type:'Camera'; end
+
+	# @return [Array<MetaData::AssetBase>] array of lights in the presentation.
+	def lights; find _type:'Light'; end
+
+	# @return [Array<MetaData::AssetBase>] array of components in the presentation (not including the Scene).
+	def components; find _type:'Component'; end
+
+	# @return [Array<MetaData::AssetBase>] array of model nodes in the presentation.
+	def models; find _type:'Model'; end
+
+	# @return [Array<MetaData::AssetBase>] array of materials in the presentation (includes Referenced and Custom Materials).
+	def materials
+		# Loop through all assets so that the resulting array of multiple sub-classes is in scene graph order
+		material = app.metadata.by_name 'MaterialBase'
+		find.select{ |asset| asset.is_a?(material) }
+	end
+
+	# @return [Array<MetaData::AssetBase>] array of image elements in the presentation.
+	def images; find _type:'Image'; end
+
+	# @return [Array<MetaData::AssetBase>] array of behavior elements in the presentation.
+	def behaviors; find _type:'Behavior'; end
+
+	# @return [Array<MetaData::AssetBase>] array of alias nodes in the presentation.
+	def aliases; find _type:'Alias'; end
+
+	# @return [Array<MetaData::AssetBase>] array of path nodes in the presentation.
+	def paths; find _type:'Path'; end
+
+	# @return [Array<MetaData::AssetBase>] array of path anchor points in the presentation.
+	def anchor_points; find _type:'PathAnchorPoint'; end
+
+	# @return [Array<MetaData::AssetBase>] array of text elements in the presentation.
+	def texts; find _type:'Text'; end
+
+
+
 	# @private
 	def inspect
 		"<#{self.class} #{File.basename(file)}>"
