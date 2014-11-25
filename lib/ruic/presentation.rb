@@ -41,8 +41,12 @@ class UIC::Presentation
 					from = app.metadata.by_name[ 'Behavior' ]
 					app.metadata.create_class( meta, from, reference.name )
 			end
+			reference.attributes.each do |attr_name,attribute|
+				if prop=metaklass.properties[attr_name] then
+					prop.default = attribute.value
+				end
+			end
 			@class_by_ref[ "##{reference['id']}" ] = metaklass
-			nil
 		end
 
 		rebuild_caches_from_document
@@ -50,6 +54,8 @@ class UIC::Presentation
 		@asset_by_el  = {} # indexed by asset graph element
 		@slides_for   = {} # indexed by asset graph element
 		@slides_by_el = {} # indexed by slide state element
+
+		nil
 	end
 
 	# @return [String] the xml representation of this presentation. Formatted to match UI Composer Studio's formatting as closely as possible (for minimal diffs after update).
@@ -165,13 +171,13 @@ class UIC::Presentation
 	end
 	private :asset_for_el
 
-	# def referenced_files
-	# 	(
-	# 		(images + behaviors + effects + meshes + materials ).map(&:file)
-	# 		+ effects.flat_map(&:images)
-	# 		+ fonts
-	# 	).sort_by{ |f| parts = f.split(/[\/\\]/); [parts.length,parts] }
-	# end
+	def referenced_files
+		(
+			(images + behaviors + effects + meshes + materials ).map(&:file)
+			+ effects.flat_map(&:images)
+			+ fonts
+		).sort_by{ |f| parts = f.split(/[\/\\]/); [parts.length,parts] }
+	end
 
 	# @return [MetaData::Scene] the root scene asset for the presentation.
 	def scene
@@ -539,6 +545,9 @@ class UIC::Presentation
 	# @return [Array<MetaData::AssetBase>] array of layers in the presentation.
 	def layers; find _type:'Layer'; end
 
+	# @return [Array<MetaData::AssetBase>] array of effects in the presentation.
+	def effects; find _type:'Effect'; end
+
 	# @return [Array<MetaData::AssetBase>] array of groups in the presentation.
 	def groups; find _type:'Group'; end
 
@@ -553,11 +562,12 @@ class UIC::Presentation
 
 	# @return [Array<MetaData::AssetBase>] array of model nodes in the presentation.
 	def models; find _type:'Model'; end
+	alias_method :meshes, :models
 
 	# @return [Array<MetaData::AssetBase>] array of materials in the presentation (includes Referenced and Custom Materials).
 	def materials
 		# Loop through all assets so that the resulting array of multiple sub-classes is in scene graph order
-		material = app.metadata.by_name 'MaterialBase'
+		material = app.metadata.by_name['MaterialBase']
 		find.select{ |asset| asset.is_a?(material) }
 	end
 
