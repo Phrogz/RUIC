@@ -1,6 +1,10 @@
 #encoding: utf-8
 class UIC::Property
+	# Each property has a generic default value
 	class << self; attr_accessor :default; end
+
+	# …and instances of a particular property can have their own default value
+	attr_accessor :default
 	def initialize(el); @el = el; end
 	def name; @name||=@el['name']; end
 	def type; @type||=@el['type']; end
@@ -8,7 +12,7 @@ class UIC::Property
 	def min; @el['min']; end
 	def max; @el['max']; end
 	def description; @desc||=@el['description']; end
-	def default; @def ||= (@el['default'] || self.class.default); end
+	def default; @default ||= (@el['default'] || self.class.default); end
 	def get(asset,slide)
 		if asset.slide? || asset.has_slide?(slide)
 			asset.presentation.get_attribute(asset,name,slide) || default
