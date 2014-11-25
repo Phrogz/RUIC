@@ -21,34 +21,7 @@ class UIC::Presentation
 		@scene = @graph.at('Scene')
 		@logic = @doc.at('Logic')
 
-		@class_by_ref = {}
-		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
-			path = app.resolve_file_path(reference['sourcepath'])
-			raise "Cannot find file '#{path}' referenced by #{self.inspect}" unless File.exist?( path )
-			metaklass = case reference.name
-				when 'CustomMaterial'
-					meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
-					from = app.metadata.by_name[ 'MaterialBase' ]
-					app.metadata.create_class( meta, from, reference.name )
-				when 'Effect'
-					meta = Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
-					from = app.metadata.by_name[ 'Effect' ]
-					app.metadata.create_class( meta, from, reference.name )
-				when 'Behavior'
-					lua  = File.read(path,encoding:'utf-8')
-					meta = lua[ /--\[\[(.+?)(?:--)?\]\]/m, 1 ]
-					meta = Nokogiri.XML("<MetaData>#{meta}</MetaData>").root
-					from = app.metadata.by_name[ 'Behavior' ]
-					app.metadata.create_class( meta, from, reference.name )
-			end
-			reference.attributes.each do |attr_name,attribute|
-				if prop=metaklass.properties[attr_name] then
-					prop.default = attribute.value
-				end
-			end
-			@class_by_ref[ "##{reference['id']}" ] = metaklass
-		end
-
+		generate_custom_classes
 		rebuild_caches_from_document
 
 		@asset_by_el  = {} # indexed by asset graph element
@@ -63,6 +36,35 @@ class UIC::Presentation
 		doc.to_xml( indent:1, indent_text:"\t" )
 		   .gsub( %r{(<\w+(?: [\w:]+="[^"]*")*)(/?>)}i, '\1 \2' )
 		   .sub('"?>','" ?>')
+	end
+
+	# Scan the .uip for custom classes that will be needed to generate assets.
+	# Called once during initial load of the file.
+	# @return [nil]
+	def generate_custom_classes
+		parent_class_name = {
+			'CustomMaterial' => 'MaterialBase',
+			'Effect'         => 'Effect',
+			'Behavior'       => 'Behavior'
+		}
+		@class_by_ref = {}
+		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
+			path = resolve_file_path( reference['sourcepath'] )
+			raise "Cannot find file '#{path}' referenced by #{self.inspect}" unless File.exist?( path )
+			parent_class = app.metadata.by_name[ parent_class_name[reference.name] ]
+			parent_props = parent_class.properties
+			new_defaults = Hash[ reference.attributes.map{ |name,attr| [name,attr.value] }.select{ |name,val| parent_props[name] } ]
+			property_el = case reference.name
+				when 'CustomMaterial', 'Effect'
+					Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
+				when 'Behavior'
+					lua  = File.read(path,encoding:'utf-8')
+					meta = lua[ /--\[\[(.+?)(?:--)?\]\]/m, 1 ]
+					Nokogiri.XML("<MetaData>#{meta}</MetaData>").root
+			end
+			@class_by_ref[ "##{reference['id']}" ] = app.metadata.create_class( property_el, parent_class, reference.name, new_defaults )
+		end
+		nil
 	end
 
 	# Update the presentation to be in-sync with the document.

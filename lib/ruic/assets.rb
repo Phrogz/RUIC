@@ -305,15 +305,28 @@ class UIC::MetaData
 	# Instances of the class are associated with a presentation and know how to
 	# get/set values in that XML based on value types, slides, defaults.
 	# Also used to create classes from effects, materials, and behavior preambles.
-	def create_class(el,parent_class,name='CustomAsset')
+	# @param el [Nokogiri::XML::Element] the element in MetaData.xml representing this class.
+	# @param parent_class [Class] the asset class to inherit from.
+	# @param name [String] the name of this class.
+	# @param new_defaults [Hash] hash mapping attribute name to a custom default value (as string) for this class.
+	def create_class(el,parent_class,name,new_defaults={})
 		Class.new(parent_class) do
 			@name = name.to_s
 			@properties = Hash[ el.css("Property").map do |e|
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
 				property = UIC::Property.const_get(type).new(e)
-				[ property.name, UIC::Property.const_get(type).new(e) ]
+				new_defaults.delete(property.name)
+				[ property.name, property ]
 			end ]
+
+			new_defaults.each do |name,value|
+				if prop=properties[name] # look in ancestor classes
+					@properties[name] = prop.dup
+					@properties[name].default = value
+				end
+			end
+
 			def self.inspect
 				@name
 			end
