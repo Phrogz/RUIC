@@ -1,3 +1,14 @@
+## v0.5.0 - 2014-Nov-26
+
+* Fix bug that prevented loading an application from the command line in another directory.
+* Compatibility: `FileBacked#path_to` is now `FileBacked#resolve_file_path` to prevent conflict with `Presentation#path_to`.
+* Make `inspect` representation of assets more useful.
+* Add convenience methods for collections of assets by type on presentations:
+  `.layers`, `.groups`, `.cameras`, `.lights`, `.components`, `.models`, `.materials`,
+  `.images`, `.behaviors`, `.aliases`, `.paths`, `.anchor_points`, `.texts`
+* Fix bug that prevented behavior instances from having proper `name` or `sourcepath` attribute values.
+* Added `.hierarchy` to presentations and assets for printing the scene graph.
+
 ## v0.4.5 - 2014-Nov-19
 
 * Added a large amount of documentation.
