@@ -180,7 +180,7 @@ class UIC::MetaData
 
 		# @return [String] the name of this asset in the scene graph.
 		def name
-			properties['name'].get( self, presentation.slide_index(self) )
+			properties['name'] ? properties['name'].get( self, presentation.slide_index(self) ) : type
 		end
 
 		# Change the name of the asset in the scene graph.
@@ -271,7 +271,6 @@ class UIC::MetaData
 	%w[Material ReferencedMaterial].each{ |s| HIER[s]='MaterialBase' }
 
 	def initialize(xml)
-
 		@by_name = {'AssetBase'=>AssetBase}
 
 		doc = Nokogiri.XML(xml)
