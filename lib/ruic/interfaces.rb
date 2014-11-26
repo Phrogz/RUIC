@@ -78,3 +78,24 @@ module UIC::PresentableHash
 		flat_map{ |k,v| [ k, *(v.is_a?(Array) ? v.map{|v2| "\t#{v2.to_s}" } : v) ] }
 	end
 end
+
+# Create an array of rows representing a tree of elements.
+# @param root [Object] the root of the tree.
+# @param children [Block] a block that returns an array of child objects when passed an item in the tree.
+# @return [Array<Array>] array of lines pairing the indent string for the line with the element, or `nil` if the indent line is a separator.
+def UIC.tree_hierarchy( root, &children )
+	queue = [[root,"",true]]
+	[].tap do |results|
+		until queue.empty?
+			item,indent,last = queue.pop
+			kids = children[item]
+			extra = indent.empty? ? '' : last ? '└╴' : '├╴'
+			results << [ indent+extra, item ]
+			# results << [ indent, nil ] if last and kids.empty?
+			indent += last ? '  ' : '│ '
+			parts = kids.map{ |k| [k,indent,false] }.reverse
+			parts.first[2] = true unless parts.empty?
+			queue.concat parts
+		end
+	end
+end

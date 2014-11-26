@@ -78,6 +78,11 @@ class UIC::MetaData
 			presentation.child_assets(self)
 		end
 
+		# @return [String] the hierarchy under the element (for debugging purposes).
+		def hierarchy
+			presentation.hierarchy(self)
+		end
+
 		# Find descendant assets matching criteria.
 		# This method is the same as (but more convenient than) {Presentation#find} using the `:_under` criteria.
 		# See that method for documentation of the `criteria`.

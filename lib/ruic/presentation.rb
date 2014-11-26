@@ -591,7 +591,16 @@ class UIC::Presentation
 	# @return [Array<MetaData::AssetBase>] array of text elements in the presentation.
 	def texts; find _type:'Text'; end
 
-
+	# @param root [MetaData::AssetBase] the asset to find the hierarchy under.
+	# @return [String] a visual hierarchy under the specified asset.
+	def hierarchy( root=scene )
+		elide = ->(str){ str.length>64 ? str.sub(/(^.{30}).+?(.{30})$/,'\1...\2') : str }
+		hier = UIC.tree_hierarchy(root){ |e| e.children }
+		cols = hier.map{ |i,a| a ? [ [i,a.name].join, a.type, elide[a.path] ] : [i,"",""] }
+		maxs = cols.transpose.map{ |col| col.map(&:length).max }
+		tmpl = maxs.map{ |n| "%-#{n}s" }.join('  ')
+		cols.map{ |a| tmpl % a }.join("\n").prepend("\n").extend(RUIC::SelfInspecting)
+	end
 
 	# @private
 	def inspect
