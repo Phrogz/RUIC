@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application xmlns="http://nvidia.com/uicomposer">
-	<assets initial="CustomClasses">
-		<presentation id="CustomClasses"	src="CustomClasses.uip"/>
+	<assets initial="main">
+		<presentation id="main"	src="CustomClasses.uip"/>
 		<presentation id="future"	src="FutureAsset.uip"/>
 	</assets>
 </application>

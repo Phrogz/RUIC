@@ -19,3 +19,13 @@ assert material.name == "Material"
 assert material['uEnvironmentMappingEnabled']
 assert !material['ATTRIBUTE-DOES-NOT-EXIST']
 assert material['uEnvironmentTexture',1] == 'maps/materials/spherical_checker.png'
+
+b1 = main/'Scene.TimeDrivenAttribute'
+assert b1.name == 'TimeDrivenAttribute'
+assert b1['sourcepath',0][/[^\/\\]+$/]=='TimeDrivenAttribute.lua'
+
+b2 = main/'Scene.Layer.DataDrivenTime'
+assert b2.name == 'DataDrivenTime'
+assert b2['sourcepath',0][/[^\/\\]+$/]=='DataDrivenTime.lua'
+
+show "(all assertions successful)"

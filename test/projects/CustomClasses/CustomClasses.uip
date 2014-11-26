@@ -5,24 +5,30 @@
 		<Classes >
 			<Effect id="Brush Strokes" name="Brush Strokes" sourcepath=".\Brush Strokes.effect" />
 			<CustomMaterial id="copper" name="copper" sourcepath=".\copper.material" />
+			<Behavior id="DataDrivenTime" name="DataDrivenTime" sourcepath=".\scripts\DataDrivenTime.lua" />
+			<Behavior id="TimeDrivenAttribute" name="TimeDrivenAttribute" sourcepath=".\scripts\TimeDrivenAttribute.lua" />
 		</Classes>
 		<Graph >
 			<Scene id="Scene" >
+				<Behavior id="TimeDrivenAttribute_001" class="#TimeDrivenAttribute" />
 				<Layer id="Layer" >
 					<Camera id="Camera" />
 					<Light id="Light" />
-					<Effect id="Brush Strokes_001" class="#Brush Strokes" />
 					<Model id="Rectangle" >
 						<CustomMaterial id="Material" class="#copper" />
 					</Model>
+					<Behavior id="DataDrivenTime_001" class="#DataDrivenTime" />
+					<Effect id="Brush Strokes_001" class="#Brush Strokes" />
 				</Layer>
 			</Scene>
 		</Graph>
 		<Logic >
 			<State name="Master Slide" component="#Scene" >
+				<Add ref="#TimeDrivenAttribute_001" />
 				<Add ref="#Layer" />
 				<Add ref="#Camera" />
 				<Add ref="#Light" />
+				<Add ref="#DataDrivenTime_001" />
 				<State id="Scene-Slide1" name="Slide1" >
 					<Add ref="#Brush Strokes_001" name="Brush Strokes" />
 					<Add ref="#Rectangle" name="Rectangle" rotation="-4.94025 -10.2291 -12.3676" scale="5 5 5" sourcepath="#Rectangle" />
