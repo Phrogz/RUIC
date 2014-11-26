@@ -89,10 +89,10 @@ def UIC.tree_hierarchy( root, &children )
 		until queue.empty?
 			item,indent,last = queue.pop
 			kids = children[item]
-			extra = indent.empty? ? '' : last ? '└╴' : '├╴'
+			extra = indent.empty? ? '' : last ? '\\-' : '|-'
 			results << [ indent+extra, item ]
-			# results << [ indent, nil ] if last and kids.empty?
-			indent += last ? '  ' : '│ '
+			results << [ indent, nil ] if last and kids.empty?
+			indent += last ? '  ' : '| '
 			parts = kids.map{ |k| [k,indent,false] }.reverse
 			parts.first[2] = true unless parts.empty?
 			queue.concat parts
