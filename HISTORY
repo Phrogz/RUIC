@@ -1,3 +1,8 @@
+## Main
+
+* Fix bug that caused some properties to report their type as `nil` or `float` instead of `Float`.
+* Added working `Presentation#referenced_files`
+
 ## v0.5.0 - 2014-Nov-26
 
 * Fix bug that prevented loading an application from the command line in another directory.

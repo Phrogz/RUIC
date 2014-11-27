@@ -173,12 +173,19 @@ class UIC::Presentation
 	end
 	private :asset_for_el
 
+	# Which files are used by the presentation.
+	# @return [Hash] a mapping of absolute file path to an array of assets referencing that file.
 	def referenced_files
-		(
-			(images + behaviors + effects + meshes + materials ).map(&:file)
-			+ effects.flat_map(&:images)
-			+ fonts
-		).sort_by{ |f| parts = f.split(/[\/\\]/); [parts.length,parts] }
+		%w[sourcepath importfile texture].flat_map do |att|
+			find(att=>/./).flat_map do |asset|
+				asset[att].values.compact.map do |path|
+					path.sub!(/#.+/,'')
+					{ resolve_file_path(path) => asset } unless path.empty?
+				end.compact
+			end
+		end.inject({}) do |result,pair|
+			result.merge(pair){ |_,a,b| [*a,*b].uniq }
+		end
 	end
 
 	# @return [MetaData::Scene] the root scene asset for the presentation.
