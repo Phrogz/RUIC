@@ -7,7 +7,7 @@ class UIC::Property
 	attr_accessor :default
 	def initialize(el); @el = el; end
 	def name; @name||=@el['name']; end
-	def type; @type||=@el['type']; end
+	def type; @type||=@el['type'] ? (@el['type']=='float' ? 'Float' : @el['type']) : 'Float'; end
 	def formal; @formal||=@el['formalName'] || @el['name']; end
 	def min; @el['min']; end
 	def max; @el['max']; end
