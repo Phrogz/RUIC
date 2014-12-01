@@ -1,7 +1,41 @@
-metadata 'MetaData.xml'                     # optional; also may be set via -m flag
-# uia 'projects/CustomClasses/CustomClasses.uia'  # required before other commands
-uia 'projects/BMW_Cluster/BMW_Cluster.uia'  # required before other commands
-show app.errors if app.errors?
+metadata 'MetaData.xml'
+uia 'projects/MissingAssets/MissingAssets.uia'
+
+missing = app.missing_files.map(&app.method(:relative_path))
+show missing
+%w[
+	Missing.uip
+	maps/missing.png
+	maps/missing2.png
+	maps/missing3.png
+	materials/missing.material
+	effects/missing.effect
+	scripts/missing1.lua
+	scripts/missing2.lua
+	scripts/missing.so
+	states/missing.scxml
+].each{ |path| warn "File '#{path}' should be reported as missing, but it is not." unless missing.include?(path) }
+
+unused = app.unused_files.map(&app.method(:relative_path))
+show "Unused"
+show unused
+%w[
+	MissingAssets.uia
+	Existing.uip
+	scripts/existing1.lua
+	scripts/existing2.lua
+	states/existing.scxml
+	maps/existing.png
+	maps/existing2.png
+].each{ |path| warn "File '#{path}' should be reported as used, but it is not." if unused.include?(path) }
+
+assert !missing.include?("maps/existing.png")
+
+exit
+
+unused = app.unused_files
+
+assert unused.grep
 
 show app.image_usage      # hash mapping image paths, relative to uia, to arrays of things referencing them: materials; scxml visual actions; effects;
 show app.image_paths      # Just the paths

@@ -1,7 +1,6 @@
 #!/usr/bin/env ruic
 metadata 'MetaData.xml'                         # optional; also may be set via -m flag
 uia 'projects/CustomClasses/CustomClasses.uia'  # required before other commands
-show app.errors if app.errors?
 
 main = app.main_presentation
 

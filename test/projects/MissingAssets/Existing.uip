@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP version="3" >
+	<Project >
+		<ProjectSettings author="" company="" presentationWidth="800" presentationHeight="480" maintainAspect="False" />
+		<Classes >
+			<Effect id="existing_001" name="existing" sourcepath=".\effects\existing.effect" />
+			<Effect id="missing_001" name="missing" sourcepath=".\effects\missing.effect" />
+			<CustomMaterial id="concrete" name="concrete" sourcepath=".\materials\concrete.material" />
+			<CustomMaterial id="missingcustom" name="missingcustom" sourcepath=".\materials\missing.material" />
+			<Behavior id="existing1" name="existing1" sourcepath=".\scripts\existing1.lua" />
+			<Behavior id="missing1" name="missing1" sourcepath=".\scripts\missing1.lua" />
+		</Classes>
+		<Graph >
+			<Scene id="Scene" >
+				<Behavior id="existing1_001" class="#existing1" />
+				<Behavior id="missing1_001" class="#missing1" />
+				<Layer id="Layer" >
+					<Camera id="Camera" />
+					<Light id="Light" />
+					<Text id="Text" />
+					<Text id="Text2" />
+					<Model id="existing" >
+						<Material id="Material" >
+							<Image id="Material_diffusemap" />
+						</Material>
+					</Model>
+					<Model id="missing" >
+						<Material id="Material_001" >
+							<Image id="Material_001_diffusemap" />
+						</Material>
+					</Model>
+					<Effect id="existing2" class="#existing_001" />
+					<Effect id="existing3" class="#existing_001" />
+					<Effect id="missing2" class="#missing_001" />
+					<Model id="Cube" >
+						<CustomMaterial id="Material_002" class="#concrete" />
+					</Model>
+					<Model id="Rectangle" >
+						<CustomMaterial id="concrete_001" class="#missingcustom" />
+					</Model>
+					<Group id="RoundedPlane-1" importid="__import__root__" >
+						<Model id="RoundedPlane" name="RoundedPlane" importid="RoundedPlane" orientation="Right Handed" position="0 0 -0" rotation="0 -0 0" rotationorder="XYZr" scale="1 1 1" sourcepath=".\RoundedPlane-1\meshes\RoundedPlane.mesh#1" >
+							<Material id="lambert2" name="lambert2" blendmode="Normal" diffuse="1 1 1" emissivepower="0" importid="lambert2" opacity="100" specularamount="0" />
+						</Model>
+					</Group>
+					<Group id="MissingImport" importid="__import__root__" >
+						<Model id="MissingMesh" name="RoundedPlane" importid="RoundedPlane" orientation="Right Handed" position="0 0 -0" rotation="0 -0 0" rotationorder="XYZr" scale="1 1 1" sourcepath=".\models\meshes\missing.mesh#1" >
+							<Material id="lambert2_001" name="lambert2" blendmode="Normal" diffuse="1 1 1" emissivepower="0" importid="lambert2" opacity="100" specularamount="0" />
+						</Model>
+					</Group>
+				</Layer>
+			</Scene>
+		</Graph>
+		<Logic >
+			<State name="Master Slide" component="#Scene" >
+				<Add ref="#Layer" />
+				<Add ref="#Camera" />
+				<Add ref="#Light" />
+				<State id="Scene-Intro" name="Intro" >
+					<Add ref="#existing1_001" name="existing1" />
+					<Add ref="#missing1_001" name="missing1" />
+					<Add ref="#Text" name="WelcomeMessage" font="Arimo-Regular" position="0 90 0" size="36" textstring="Hello World!&#10;This is the Intro Slide." />
+					<Add ref="#Text2" name="MissingText" font="Missing" />
+					<Add ref="#existing" name="existing" position="-353.627 -164.545 0" scale="2.7328 2.7328 0.53375" sourcepath="#Rectangle" />
+					<Add ref="#Material" diffusemap="#Material_diffusemap" />
+					<Add ref="#Material_diffusemap" sourcepath=".\maps\existing.png" />
+					<Add ref="#missing" name="missing" position="291.562 -170.318 0" scale="2.432 2.432 0.475" sourcepath="#Rectangle" />
+					<Add ref="#Material_001" diffusemap="#Material_001_diffusemap" />
+					<Add ref="#Material_001_diffusemap" sourcepath=".\maps\missing.png" />
+					<Add ref="#existing2" name="existing2" />
+					<Add ref="#existing3" name="existing3" NoiseSamp=".\maps\missing2.png" />
+					<Add ref="#missing2" name="missing2" />
+					<Add ref="#Cube" name="Cube" position="373.834 191.969 0" rotation="-41.4279 82.585 -28.6931" sourcepath="#Cube" />
+					<Add ref="#Material_002" name="Material" bump_texture=".\maps\missing.png" diffuse_texture=".\maps\existing.png" />
+					<Add ref="#Rectangle" name="Rectangle" position="-375.278 223.723 0" sourcepath="#Rectangle" />
+					<Add ref="#concrete_001" name="MissingCustom" />
+					<Add ref="#RoundedPlane-1" name="RoundedPlane-1" importfile=".\RoundedPlane-1\RoundedPlane-1.import" sourcepath=".\RoundedPlane-1\RoundedPlane-1.import" />
+					<Add ref="#RoundedPlane" importfile=".\RoundedPlane-1\RoundedPlane-1.import" />
+					<Add ref="#lambert2" importfile=".\RoundedPlane-1\RoundedPlane-1.import" />
+					<Add ref="#MissingImport" name="MissingImport" importfile=".\RoundedPlane-1\RoundedPlane-1.import" position="20 0 0" sourcepath=".\RoundedPlane-1\RoundedPlane-1.import" />
+					<Add ref="#MissingMesh" name="MissingMesh" importfile=".\RoundedPlane-1\RoundedPlane-1.import" />
+					<Add ref="#lambert2_001" importfile=".\RoundedPlane-1\RoundedPlane-1.import" />
+				</State>
+			</State>
+		</Logic>
+	</Project>
+</UIP>

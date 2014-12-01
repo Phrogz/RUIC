@@ -1,0 +1,3 @@
+This folder should be used to hold any custom materials that you add to your project.
+
+You can find sample custom materials in the Material Library supplied with Studio (accessible from the bottom of the Project palette). For more information on writing custom materials, see the documentation page "The .material Format" in the "File Formats" section.

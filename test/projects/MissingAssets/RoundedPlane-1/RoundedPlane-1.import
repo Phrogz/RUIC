@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP Version="1" >
+	<Project Revision="1" >
+		<Graph >
+			<Group id="__import__root__" >
+				<Model id="RoundedPlane" name="RoundedPlane" orientation="Right Handed" position="0 0 -0" rotation="0 -0 0" rotationorder="XYZr" scale="1 1 1" sourcepath=".\meshes\RoundedPlane.mesh#1" >
+					<Material id="lambert2" name="lambert2" blendmode="Normal" diffuse="1 1 1" emissivepower="0" opacity="100" specularamount="0" />
+				</Model>
+			</Group>
+		</Graph>
+		<Import SrcFile="..\..\Program Files (x86)\NVIDIA Corporation\UI Composer 8.0\Content\Models Library\Primitives\Planes\RoundedPlane-1.dae" ImageDir="Images" MeshDir="Meshes" >
+			<Mesh >
+				<Source >RoundedPlane</Source>
+				<Dest >.\meshes\RoundedPlane.mesh</Dest>
+			</Mesh>
+		</Import>
+	</Project>
+</UIP>

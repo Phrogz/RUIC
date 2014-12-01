@@ -2,9 +2,7 @@ require 'fileutils'
 FileUtils.copy_entry('projects/ReferencedMaterials','projects/_RefMat',false,false,true)
 
 metadata 'MetaData.xml'
-
 uia 'projects/_RefMat/ReferencedMaterials.uia'
-show app.errors if app.errors?
 
 layer   = app/'main:Scene.Layer'
 cubemat = layer/"Cube"/"Material"

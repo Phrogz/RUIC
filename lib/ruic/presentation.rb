@@ -1,32 +1,34 @@
 # A `Presentation` represents a `.uip` presentation, created and edited by UI Composer Studio.
 class UIC::Presentation
-	include UIC::FileBacked
+	include UIC::XMLFileBacked
 
 	# Create a new presentation. If you do not specify the `uip_path` to load from, you must
 	# later set the `.file = `for the presentation, and then call the {#load_from_file} method.
 	# @param uip_path [String] path to the `.uip` to load.
 	def initialize( uip_path=nil )
-		self.file = uip_path
-		load_from_file if file_found?
+		@doc = Nokogiri.XML('<UIP version="3"><Project><Graph><Scene id="Scene"/></Graph><Logic><State name="Master Slide" component="#Scene"/></Logic></Project></UIP>')
+		@graph = @doc.at('Graph')
+		@scene = @graph.at('Scene')
+		@logic = @doc.at('Logic')
+		@missing_classes = []
+		@asset_by_el  = {} # indexed by asset graph element
+		@slides_for   = {} # indexed by asset graph element
+		@slides_by_el = {} # indexed by slide state element
+		self.file = uip_path if uip_path
 	end
 
 	# Load information for the presentation from disk.
 	# If you supply a path to a `.uip` file when creating the presentation
 	# this method is automatically called.
+	#
 	# @return [nil]
-	def load_from_file
-		# TODO: this method assumes an application to find the metadata on; the metadata should be part of this class instance instead, shared with the app when present
-		@doc = Nokogiri.XML( File.read( file, encoding:'utf-8' ), &:noblanks )
+	def on_doc_loaded
 		@graph = @doc.at('Graph')
 		@scene = @graph.at('Scene')
 		@logic = @doc.at('Logic')
 
 		generate_custom_classes
 		rebuild_caches_from_document
-
-		@asset_by_el  = {} # indexed by asset graph element
-		@slides_for   = {} # indexed by asset graph element
-		@slides_by_el = {} # indexed by slide state element
 
 		nil
 	end
@@ -42,6 +44,7 @@ class UIC::Presentation
 	# Called once during initial load of the file.
 	# @return [nil]
 	def generate_custom_classes
+		# TODO: this method assumes an application to find the metadata on; the metadata should be part of this class instance instead, shared with the app when present
 		parent_class_name = {
 			'CustomMaterial' => 'MaterialBase',
 			'Effect'         => 'Effect',
@@ -49,8 +52,8 @@ class UIC::Presentation
 		}
 		@class_by_ref = {}
 		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
-			path = resolve_file_path( reference['sourcepath'] )
-			raise "Cannot find file '#{path}' referenced by #{self.inspect}" unless File.exist?( path )
+			path = absolute_path( reference['sourcepath'] )
+			next unless File.exist?( path )
 			parent_class = app.metadata.by_name[ parent_class_name[reference.name] ]
 			parent_props = parent_class.properties
 			new_defaults = Hash[ reference.attributes.map{ |name,attr| [name,attr.value] }.select{ |name,val| parent_props[name] } ]
@@ -169,23 +172,39 @@ class UIC::Presentation
 	# Find or create an asset for a scene graph element.
 	# @param el [Nokogiri::XML::Element] the scene graph element.
 	def asset_for_el(el)
-		(@asset_by_el[el] ||= el['class'] ? @class_by_ref[el['class']].new(self,el) : app.metadata.new_instance(self,el))
+		@asset_by_el[el] ||= begin
+			if el['class'] && @class_by_ref[el['class']]
+				@class_by_ref[el['class']].new(self,el)
+			else
+				app.metadata.new_instance(self,el)
+			end
+		end
 	end
 	private :asset_for_el
 
 	# Which files are used by the presentation.
-	# @return [Hash] a mapping of absolute file path to an array of assets referencing that file.
+	# @return [Array<String>] array of absolute file paths referenced by this presentation.
 	def referenced_files
-		%w[sourcepath importfile texture].flat_map do |att|
-			find(att=>/./).flat_map do |asset|
-				asset[att].values.compact.map do |path|
-					path.sub!(/#.+/,'')
-					{ resolve_file_path(path) => asset } unless path.empty?
-				end.compact
-			end
-		end.inject({}) do |result,pair|
-			result.merge(pair){ |_,a,b| [*a,*b].uniq }
-		end
+		(
+			[file] +
+			%w[sourcepath importfile].flat_map do |att|
+				find(att=>/./).flat_map do |asset|
+					asset[att].values.compact.map do |path|
+						path.sub!(/#.+/,'')
+						absolute_path(path) unless path.empty?
+					end.compact
+				end
+			end +
+			find.flat_map do |asset|
+				asset.properties.select{ |name,prop| prop.type=='Texture' }.flat_map do |name,prop|
+					asset[name].values.compact.uniq.map{ |path| absolute_path(path) }
+				end
+			end +
+			find(_type:'Text').flat_map do |asset|
+				asset['font'].values.compact.map{ |font| absolute_path(font) }
+			end +
+			@doc.xpath('/UIP/Project/Classes/*/@sourcepath').map{ |att| absolute_path att.value }
+		).uniq
 	end
 
 	# @return [MetaData::Scene] the root scene asset for the presentation.
@@ -250,7 +269,7 @@ class UIC::Presentation
 
 	# @return [Array<String>] an array (possibly empty) of all errors in this presentation.
 	def errors
-		(file_found? ? [] : ["File not found: '#{file}'"])
+		@errors
 	end
 
 	# Find an element or asset in this presentation by scripting path.
@@ -606,7 +625,7 @@ class UIC::Presentation
 		cols = hier.map{ |i,a| a ? [ [i,a.name].join, a.type, elide[a.path] ] : [i,"",""] }
 		maxs = cols.transpose.map{ |col| col.map(&:length).max }
 		tmpl = maxs.map{ |n| "%-#{n}s" }.join('  ')
-		cols.map{ |a| tmpl % a }.join("\n").prepend("\n").extend(RUIC::SelfInspecting)
+		cols.map{ |a| tmpl % a }.join("\n").extend(RUIC::SelfInspecting)
 	end
 
 	# @private
@@ -650,7 +669,7 @@ class UIC::Application::Presentation < UIC::Presentation
 	def initialize(application,el)
 		self.owner = application
 		self.el    = el
-		super( application.resolve_file_path(src) )
+		super( application.absolute_path(src) )
 	end
 	alias_method :app, :owner
 

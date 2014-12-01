@@ -1,0 +1,2 @@
+This folder may be used to hold any images you add to your project.
+Feel free to create sub-directories as necessary for further organization.

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application scalemode="center" watermark-location="1.0 1.0" xmlns="http://nvidia.com/uicomposer">
+	<assets initial="main">
+		<behavior               src="scripts/existing1.lua" />
+		<behavior               src="scripts/missing1.lua"  />
+		<statemachine id="s1"   src="states/existing.scxml" />
+		<statemachine id="s2"   src="states/missing.scxml" />
+		<presentation id="main" src="Existing.uip" />
+		<presentation id="sub"  src="Missing.uip"  />
+		<renderplugin id="rp"   src="scripts/missing.so"  />
+	</assets>
+	<statemachine ref="#s1">
+		<visual-states>
+			<state ref="Initial"><enter>
+				<set-attribute element="main:Scene.Layer.existing.Material.Image" attribute="sourcepath" value="'./maps/existing2.png'" />
+			</enter><exit>
+				<set-attribute element="main:Scene.Layer.existing.Material.Image" attribute="sourcepath" value="'.\\maps\\missing3.png'" />
+			</exit></state>
+		</visual-states>
+	</statemachine>
+</application>

@@ -1,6 +1,6 @@
 # The `Application` represents the root of your UIC application, corresponding to a `.uia` file.
 class UIC::Application
-	include UIC::FileBacked
+	include UIC::XMLFileBacked
 
 	def inspect
 		"<UIC::Application '#{File.basename(file)}'#{:' FILENOTFOUND' unless file_found?}>"
@@ -14,18 +14,16 @@ class UIC::Application
 	#        If omitted you will need to later set the `.file = ` for the
 	#        instance and then call {#load_from_file}.
 	def initialize(metadata,uia_path=nil)
+		@assets   = {}
 		@metadata = metadata
 		self.file = uia_path
-		@assets = {}
-		load_from_file if file_found?
 	end
 
 	# Loads the application from the file. If you pass the path to your `.uia`
 	# to {#initialize} then this method is called automatically.
 	#
 	# @return [nil]
-	def load_from_file
-		self.doc = Nokogiri.XML(File.read(file,encoding:'utf-8'))
+	def on_doc_loaded
 		@assets  = @doc.search('assets *').map do |el|
 			case el.name
 				when 'behavior'     then UIC::Application::Behavior
@@ -35,18 +33,6 @@ class UIC::Application
 			end.new(self,el)
 		end.group_by{ |asset| asset.el.name }
 		nil
-	end
-
-	# @return [Boolean] true if there are any errors with the application.
-	def errors?
-		!errors.empty?
-	end
-
-	# @example
-	#   show app.errors if app.errors?
-	# @return [Array<String>] an array (possibly empty) of all errors in this application (including referenced assets).
-	def errors
-		file_found? ? assets.flat_map(&:errors) : ["File not found: '#{file}'"]
 	end
 
 	# Find an asset by `.uia` identifier or path to the asset.
@@ -71,17 +57,37 @@ class UIC::Application
 		end
 	end
 
-	# @private do not document until working
+	# Files in the application directory not used by the application.
+	#
+	# @return [Array<String>] absolute paths of files in the directory not used by the application.
 	def unused_files
-		referenced_files - directory_files
+		(directory_files - referenced_files).sort
 	end
 
-	# @private do not document until working
+	# Files referenced by the application but not present in the directory.
+	#
+	# @return [Array<String>] absolute paths of files referenced but gone.
+	def missing_files
+		(referenced_files - directory_files).sort
+	end
+
+
+	# @return [Array<String>] absolute paths of files referenced by the application.
 	def referenced_files
 		# TODO: state machines can reference external scripts
 		# TODO: behaviors can reference external scripts
-		assets.map{ |asset| resolve_file_path(asset.src) }
-		+ presentations.flat_map{ |pres| pres.referenced_files }
+		(
+			[file] +
+			assets.map{ |asset| absolute_path(asset.src) } +
+			statemachines.flat_map(&:referenced_files) +
+			presentations.flat_map(&:referenced_files)
+		).uniq
+	end
+
+	# @return [Array<String>] absolute paths of all files present in the application directory (used or not).
+	def directory_files
+		dir = File.dirname(file)
+		Dir.chdir(dir){ Dir['**/*.*'] }.map{ |f| File.expand_path(f,dir) }
 	end
 
 	# @return [Array] all assets referenced by the application. Ordered by the order they appear in the `.uia`.

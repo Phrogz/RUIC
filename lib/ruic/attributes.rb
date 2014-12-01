@@ -129,10 +129,18 @@ class UIC::Property
 		end
 	end
 
+	class Font < self
+		self.default = 'Arimo-Regular'
+		def get(asset,slide); "fonts/#{super}.ttf"; end # TODO: how to support non-ttf fonts?
+		def set(asset,new_value,slide_name_or_index)
+			# TODO: how to support non-ttf fonts?
+			super( asset, new_value.sub(%r{^\.[/\\]},'').sub(%r{^fonts[/\\]},'').sub(%r{\.ttf$},''), slide_name_or_index )
+		end
+	end
+
 	Import     = String #TODO: a real class
 	Mesh       = String #TODO: a real class
 	Renderable = String #TODO: a real class
-	Font       = String #TODO: a real class
 	FontSize   = Long
 
 	StringListOrInt = String #TODO: a real class

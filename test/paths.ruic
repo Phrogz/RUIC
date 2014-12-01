@@ -2,8 +2,6 @@
 metadata 'MetaData.xml'         # optional; also may be set via -m flag
 uia 'projects/Paths/Paths.uia'  # required before other commands
 
-show "Uh oh!", app.errors if app.errors?
-
 main = app.main
 paths = main.find _type:'Path'
 assert paths.length == 5

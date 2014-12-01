@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project>
+	<UIADebug>
+		<Tab>
+			<Tab0>
+				<Item Name="Source" value="MissingAssets.uia"/>
+				<Item Name="Line" value="-1"/>
+			</Tab0>
+			<Highlight>
+				<Item Name="Index" value="0"/>
+			</Highlight>
+		</Tab>
+	</UIADebug>
+</Project>

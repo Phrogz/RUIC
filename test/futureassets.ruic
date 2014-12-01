@@ -1,6 +1,5 @@
 metadata 'MetaData-simple.xml'
 uia 'projects/CustomClasses/CustomClasses.uia'  # required before other commands
-show app.errors if app.errors?
 
 future = app["#future"]
 

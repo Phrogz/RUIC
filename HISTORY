@@ -1,7 +1,25 @@
-## Main
+## v0.6.0
 
+### Backwards Incompatible Changes
+
+* Changed `FileBacked#resolve_file_path` to `FileBacked#absolute_path`, and added `FileBacked#relative_path`.
+* Removed `.errors?` and `.errors` for application and assets.
+
+### New/Changed Features
+
+* State machines properly report on visual actions.
+  * _Only `<set-attribute>` properly implemented so far._
+* Added much improved `Presentation#referenced_files`, `Application#missing_files`, `Application#unused_files`.
+* Tweaked REPL output.
+  * `nil` results no longer print `#=> nil` in the REPL.
+  * `show` prefixes the result with `#=>`.
+  * Multi-line results are now wrapped, with each line prefixed with `#=>`.
+* Added beginnings of support for effects and renderplugins.
+* Presentations do not cause a runtime error if a custom class (e.g. behavior, effect, custom material) cannot be found.
+
+### Bug Fixes
 * Fix bug that caused some properties to report their type as `nil` or `float` instead of `Float`.
-* Added working `Presentation#referenced_files`
+* Presentations are slightly more capable if they are created without an existing file.
 
 ## v0.5.0 - 2014-Nov-26
 

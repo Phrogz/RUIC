@@ -167,7 +167,7 @@ There are two ways to enter interactive mode:
   the application and enter the REPL:
 
       $ ruic myapp.uia
-      (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
+      (RUIC v0.6.0 interactive session; 'quit' or ctrl-d to end)
 
       uia "test/projects/SimpleScene/SimpleScene.uia"
       #=> <UIC::Application 'SimpleScene.uia'>
@@ -176,7 +176,7 @@ There are two ways to enter interactive mode:
   by supplying the `-i` command-line switch:
 
       $ ruic -i test/referencematerials.ruic
-      (RUIC v0.2.2 interactive session; 'quit' or ctrl-d to end)
+      (RUIC v0.6.0 interactive session; 'quit' or ctrl-d to end)
 
       app
       #=> <UIC::Application 'ReferencedMaterials.uia'>

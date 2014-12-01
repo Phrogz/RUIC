@@ -1,7 +1,6 @@
 metadata 'MetaData.xml'
 
 uia 'projects/SimpleScene/SimpleScene.uia'
-show app.errors if app.errors?
 
 main = app.main_presentation
 

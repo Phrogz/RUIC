@@ -1,0 +1,3 @@
+<scxml-test document="states/logic.scxml">
+  <step in="Initial"/>
+</scxml-test>
