@@ -15,6 +15,7 @@ require_relative 'ruic/renderplugin'
 require_relative 'ruic/statemachine'
 require_relative 'ruic/presentation'
 require_relative 'ruic/ripl'
+require_relative 'ruic/nicebytes'
 
 # The `RUIC` class provides the interface for running scripts using the special DSL,
 # and for running the interactive REPL.
@@ -74,7 +75,7 @@ class RUIC
 				Ripl::Shell.include Ripl::MultiLine.engine
 				Ripl::Shell.include Ripl::AfterResult
 				Ripl::Shell.include Ripl::FormatResult
-				Ripl.config.merge! prompt:"", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false, after_result:"\n", result_line_limit:120, prefix_result_lines:true, skip_nil_results:true
+				Ripl.config.merge! prompt:"", result_prompt:'#=> ', multi_line_prompt:'  ', irb_verbose:false, after_result:"\n", result_line_limit:200, prefix_result_lines:true, skip_nil_results:true
 				ARGV.clear # So that RIPL doesn't try to interpret the options
 				puts "(RUIC v#{RUIC::VERSION} interactive session; 'quit' or ctrl-d to end)"
 				ruic.instance_eval{ puts @apps.map{ |n,app| "(#{n} is #{app.inspect})" } }
@@ -155,7 +156,7 @@ class RUIC
 	# 'nice' string equivalent for all supplied arguments.
 	def show(*a)
 		a=a.first if a.length==1 && a.first.is_a?(Array)
-		opts = { result_prompt:'# ', result_line_limit:120, prefix_result_lines:true, to_s:true }
+		opts = { result_prompt:'# ', result_line_limit:200, prefix_result_lines:true, to_s:true }
 		a.each{ |x| puts Ripl::FormatResult.format_result(x,opts) }
 		nil # so that Ripl won't show the result
 	end

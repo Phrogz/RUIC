@@ -60,8 +60,31 @@ class UIC::Application
 	# Files in the application directory not used by the application.
 	#
 	# @return [Array<String>] absolute paths of files in the directory not used by the application.
-	def unused_files
-		(directory_files - referenced_files).sort
+	def unused_files( hierarchy=false )
+		unused = (directory_files - referenced_files).sort
+		if hierarchy
+			root = File.dirname(file)
+			UIC.tree_hierarchy(root) do |dir|
+				File.directory?(dir) ? Dir.chdir(dir){ Dir['*'].map{ |f| File.expand_path(f) } } : []
+			end.map do |prefix,file|
+				if file
+					all = unused.select{ |path| path[/^#{file}/] }
+					unless all.empty?
+						size = NiceBytes.nice_bytes(all.map{ |f| File.size(f) }.inject(:+))
+						partial = file.sub(/^#{root}\//o,'')
+						if File.directory?(file)
+							"%s %s (%d files, %s)" % [prefix,partial,all.length,size]
+						else
+							"%s %s (%s)" % [prefix,partial,size]
+						end
+					end
+				else
+					prefix
+				end
+			end.compact.join("\n")
+		else
+			unused
+		end
 	end
 
 	# Files referenced by the application but not present in the directory.
@@ -70,7 +93,6 @@ class UIC::Application
 	def missing_files
 		(referenced_files - directory_files).sort
 	end
-
 
 	# @return [Array<String>] absolute paths of files referenced by the application.
 	def referenced_files

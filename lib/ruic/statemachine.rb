@@ -146,6 +146,12 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		#   @return [String] the `uic:id` of the transition that will trigger the attached visual actions.
 		xmlattribute :ref
 
+		# @return [Nokogiri::XML::Element] the Nokogiri element in the `.uia` representing this visual state.
+		attr_reader :el
+
+		# @return [Application::StateMachine] the state machine containing the referenced state.
+		attr_reader :machine
+
 		def initialize(el,machine)
 			@el = el
 			@machine = machine
