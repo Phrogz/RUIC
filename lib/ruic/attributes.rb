@@ -78,6 +78,7 @@ class UIC::Property
 			end
 		end
 	end
+	class PathBuffer < Texture; end
 
 	class ObjectRef < self
 		self.default = nil
