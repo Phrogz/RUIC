@@ -48,13 +48,15 @@ class UIC::Presentation
 		parent_class_name = {
 			'CustomMaterial' => 'MaterialBase',
 			'Effect'         => 'Effect',
-			'Behavior'       => 'Behavior'
+			'Behavior'       => 'Behavior',
+			'RenderPlugin'   => 'RenderPlugin'
 		}
 		@class_by_ref = {}
 		@doc.xpath('/UIP/Project/Classes/*').each do |reference|
 			path = absolute_path( reference['sourcepath'] )
 			next unless File.exist?( path )
 			parent_class = app.metadata.by_name[ parent_class_name[reference.name] ]
+			raise "Error, unsupported custom class #{reference.name}" unless parent_class
 			parent_props = parent_class.properties
 			new_defaults = Hash[ reference.attributes.map{ |name,attr| [name,attr.value] }.select{ |name,val| parent_props[name] } ]
 			property_el = case reference.name
