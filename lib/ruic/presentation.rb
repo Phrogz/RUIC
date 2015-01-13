@@ -60,8 +60,9 @@ class UIC::Presentation
 			parent_props = parent_class.properties
 			new_defaults = Hash[ reference.attributes.map{ |name,attr| [name,attr.value] }.select{ |name,val| parent_props[name] } ]
 			property_el = case reference.name
-				when 'CustomMaterial', 'Effect'
-					Nokogiri.XML(File.read(path,encoding:'utf-8')).at('/*/MetaData')
+				when 'CustomMaterial', 'Effect', 'RenderPlugin'
+					doc = Nokogiri.XML(File.read(path,encoding:'utf-8'))
+					doc.at('/*/MetaData') || doc.at('/*/metadata') # Some render plugins in the wild use lower-case tag name :/
 				when 'Behavior'
 					lua  = File.read(path,encoding:'utf-8')
 					meta = lua[ /--\[\[(.+?)(?:--)?\]\]/m, 1 ]
