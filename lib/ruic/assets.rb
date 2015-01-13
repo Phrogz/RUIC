@@ -319,7 +319,12 @@ class UIC::MetaData
 			@properties = Hash[ el.css("Property").map do |e|
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
-				property = UIC::Property.const_get(type).new(e)
+				property = begin
+					UIC::Property.const_get(type).new(e)
+				rescue NameError
+					warn "WARNING: Unsupported property type '#{type}' on\n#{e}\nTreating this as a String."
+					UIC::Property::String.new(e)
+				end
 				new_defaults.delete(property.name)
 				[ property.name, property ]
 			end ]

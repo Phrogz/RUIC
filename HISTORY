@@ -1,3 +1,14 @@
+## v0.6.1
+
+### New/Changed Features
+
+* Support for the new `PathBuffer` property types (for paths that reference a `.path` on disk).
+* Unsupported/invalid custom property types fall back to String (with a warning).
+
+### Bug Fixes
+* Render plugins are now lightly tested and supported.
+
+
 ## v0.6.0
 
 ### Backwards Incompatible Changes
@@ -21,6 +32,7 @@
 * Fix bug that caused some properties to report their type as `nil` or `float` instead of `Float`.
 * Presentations are slightly more capable if they are created without an existing file.
 
+
 ## v0.5.0 - 2014-Nov-26
 
 * Fix bug that prevented loading an application from the command line in another directory.
@@ -32,12 +44,14 @@
 * Fix bug that prevented behavior instances from having proper `name` or `sourcepath` attribute values.
 * Added `.hierarchy` to presentations and assets for printing the scene graph.
 
+
 ## v0.4.5 - 2014-Nov-19
 
 * Added a large amount of documentation.
 * Minor code refactoring:
   * Most (internal) Presentation methods that took a scene graph element as the argument now take an asset.
   * All `FileBacked` assets now have `save!` and `save_as`.
+
 
 ## v0.4.1 - 2014-Nov-16
 
@@ -47,37 +61,47 @@
 * Add support for paths and anchor points, including `mypath.anchors` as an array of anchor points.
 * Assets present in MetaData and presentation, but not yet hand-entered into the hierarchy, now work and default to inherit from `Asset`.
 
+
 ## v0.4.0 - 2014-Nov-11
 * Switch attribute filtering again; now all attributes are inline in the `find()` hash, and the four special keys are prefixed with an underscore: `_type`, `_slide`, `_master`, and `_under`.
+
 
 ## v0.3.0 - 2014-Nov-10
 * Switch attribute filtering to use `attr:{ … }` instead of `attributes:{ … }`
 * Attribute matching now requires that a requested attribute be present, or else the asset matching fails.
   * _For example, `main.find attr:{ diffusecolor:[nil,nil,nil] }` will now only find assets with a `diffusecolor` attribute._
 
+
 ## v0.2.5 - 2014-Nov-10
 * Re-adds blank line after REPL result.
+
 
 ## v0.2.4 - 2014-Nov-10
 * Fix bug with history editing in REPL (prompts no longer have a blank line before)
 * Add temporary hack to make projects using Float2 load correctly
 
+
 ## v0.2.3 - 2014-Nov-7
 * Cleaner mechanism for creating a truly blank binding
 
+
 ## v0.2.2 - 2014-Nov-7
 * REPL shows version number when it starts
+
 
 ## v0.2.1 - 2014-Nov-7
 * REPL mode after script maintains binding of script (all local variables remain available)
 * Customized `.irbrc` files will not cause warnings
 
+
 ## v0.2.0 - 2014-Nov-7
 * Add Presentation#save_as
 * REPL working directory is same as .uia
 
+
 ## v0.1.0 - 2014-Nov-7
 * Add REPL mode for ruic binary
+
 
 ## v0.0.1 - 2014-Nov-7
 * Initial gem release
