@@ -1,5 +1,5 @@
 # Supports classes that represent a file on disk (e.g. `.uia` and `.uip`).
-module UIC::FileBacked
+module NDD::FileBacked
 	# @return [String] the absolute path to the underlying file.
 	attr_accessor :file
 
@@ -54,8 +54,8 @@ module UIC::FileBacked
 end
 
 # Supports classes that represent an XML file on disk.
-module UIC::XMLFileBacked
-	include UIC::FileBacked
+module NDD::XMLFileBacked
+	include NDD::FileBacked
 
 	# @return [Nokogiri::XML::Document] the Nokogiri document representing the instance.
 	attr_accessor :doc
@@ -88,7 +88,7 @@ module UIC::XMLFileBacked
 end
 
 # Supports classes that represent an XML element (e.g. `<presentation id="main" src="foo.uip"/>`).
-module UIC::ElementBacked
+module NDD::ElementBacked
 	# @return [Object] the object in charge of this instance.
 	attr_accessor :owner
 
@@ -111,7 +111,7 @@ module UIC::ElementBacked
 	end
 end
 
-module UIC::PresentableHash
+module NDD::PresentableHash
 	def to_s
 		flat_map{ |k,v| [ k, *(v.is_a?(Array) ? v.map{|v2| "\t#{v2.to_s}" } : v) ] }
 	end
@@ -121,7 +121,7 @@ end
 # @param root [Object] the root of the tree.
 # @param children [Block] a block that returns an array of child objects when passed an item in the tree.
 # @return [Array<Array>] array of lines pairing the indent string for the line with the element, or `nil` if the indent line is a separator.
-def UIC.tree_hierarchy( root, &children )
+def NDD.tree_hierarchy( root, &children )
 	queue = [[root,"",true]]
 	[].tap do |results|
 		until queue.empty?

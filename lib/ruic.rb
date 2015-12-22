@@ -1,7 +1,7 @@
 #encoding:utf-8
 
 class RUIC; end
-module UIC; end
+module NDD; end
 
 require 'nokogiri'
 require_relative 'ruic/version'
@@ -21,7 +21,7 @@ require_relative 'ruic/nicebytes'
 # and for running the interactive REPL.
 # See the {file:README.md README} file for description of the DSL.
 class RUIC
-	DEFAULTMETADATA = 'C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml'
+	DEFAULTMETADATA = 'C:\Program Files (x86)\NVIDIA Corporation\DRIVE Design 8.5\res\DataModelMetadata\en-us\MetaData.xml'
 
 	# Execute a script and/or launch the interactive REPL.
 	#
@@ -100,11 +100,11 @@ class RUIC
 
 	# Load an application, making it available as `app`, `app2`, etc.
 	# @param path [String] Path to the `*.uia` application file.
-	# @return [UIC::Application] The new application loaded.
+	# @return [NDD::Application] The new application loaded.
 	def uia(path)
-		meta = UIC.MetaData @metadata
+		meta = NDD.MetaData @metadata
 		name = @apps.empty? ? :app : :"app#{@apps.length+1}"
-		@apps[name] = UIC.Application(meta,path)
+		@apps[name] = NDD.Application(meta,path)
 	end
 
 	# @return [Binding] the shared binding used for evaluating the script and REPL
@@ -115,8 +115,8 @@ class RUIC
 	# @private used as a one-off
 	module SelfInspecting; def inspect; to_s; end; end
 
-	# Used to resolve bare `app` and `app2` calls to a loaded {UIC::Application Application}.
-	# @return [UIC::Application] the new application loaded.
+	# Used to resolve bare `app` and `app2` calls to a loaded {NDD::Application Application}.
+	# @return [NDD::Application] the new application loaded.
 	def method_missing(name,*a)
 		@apps[name] || (name=~/^app\d*/ ? "(no #{name} loaded)".extend(SelfInspecting) : super)
 	end
@@ -173,7 +173,7 @@ end
 #   RUIC do
 #     uia 'test/MyProject/MyProject.uia'
 #     show app
-#     #=>UIC::Application 'MyProject.uia'>
+#     #=>NDD::Application 'MyProject.uia'>
 #   end
 #
 # If no block is supplied, this is the same as {RUIC.run RUIC.run(opts)}.

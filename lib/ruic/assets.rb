@@ -1,5 +1,5 @@
 #encoding: utf-8
-class UIC::MetaData
+class NDD::MetaData
 
 	# The base class for all assets. All other classes are dynamically created when a `MetaData.xml` file is loaded.
 	class AssetBase
@@ -159,7 +159,7 @@ class UIC::MetaData
 		# @return [SlideValues] a proxy that yields attribute values for a specific slide.
 		def on_slide(slide_name_or_index)
 			if has_slide?(slide_name_or_index)
-				UIC::SlideValues.new( self, slide_name_or_index )
+				NDD::SlideValues.new( self, slide_name_or_index )
 			end
 		end
 
@@ -213,7 +213,7 @@ class UIC::MetaData
 				if slide_name_or_index
 					property.get( self, slide_name_or_index ) if has_slide?(slide_name_or_index)
 				else
-					UIC::ValuesPerSlide.new(@presentation,self,property)
+					NDD::ValuesPerSlide.new(@presentation,self,property)
 				end
 			end
 		end
@@ -320,10 +320,10 @@ class UIC::MetaData
 				type = e['type'] || (e['list'] ? 'String' : 'Float')
 				type = "Float" if type=="float"
 				property = begin
-					UIC::Property.const_get(type).new(e)
+					NDD::Property.const_get(type).new(e)
 				rescue NameError
 					warn "WARNING: Unsupported property type '#{type}' on\n#{e}\nTreating this as a String."
-					UIC::Property::String.new(e)
+					NDD::Property::String.new(e)
 				end
 				new_defaults.delete(property.name)
 				[ property.name, property ]
@@ -352,12 +352,12 @@ class UIC::MetaData
 	end
 end
 
-def UIC.MetaData(metadata_path)
+def NDD.MetaData(metadata_path)
 	raise %Q{Cannot find MetaData.xml at "#{metadata_path}"} unless File.exist?(metadata_path)
-	UIC::MetaData.new(File.read(metadata_path,encoding:'utf-8'))
+	NDD::MetaData.new(File.read(metadata_path,encoding:'utf-8'))
 end
 
-class UIC::SlideCollection
+class NDD::SlideCollection
 	include Enumerable
 	attr_reader :length
 	def initialize(slides)
@@ -383,12 +383,12 @@ class UIC::SlideCollection
 	end
 end
 
-class UIC::ValuesPerSlide
+class NDD::ValuesPerSlide
 	def initialize(presentation,asset,property)
-		raise unless presentation.is_a?(UIC::Presentation)
+		raise unless presentation.is_a?(NDD::Presentation)
 
-		raise unless asset.is_a?(UIC::MetaData::AssetBase)
-		raise unless property.is_a?(UIC::Property)
+		raise unless asset.is_a?(NDD::MetaData::AssetBase)
+		raise unless property.is_a?(NDD::Property)
 		@preso    = presentation
 		@asset    = asset
 		@el       = asset.el
@@ -421,7 +421,7 @@ class UIC::ValuesPerSlide
 	alias_method :to_s, :inspect
 end
 
-class UIC::SlideValues
+class NDD::SlideValues
 	attr_reader :asset
 	def initialize( asset, slide )
 		@asset = asset

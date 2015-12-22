@@ -1,5 +1,5 @@
-class UIC::StateMachine
-	include UIC::XMLFileBacked
+class NDD::StateMachine
+	include NDD::XMLFileBacked
 	def initialize( scxml )
 		self.file = scxml
 	end
@@ -8,14 +8,14 @@ class UIC::StateMachine
 	end
 end
 
-def UIC.StateMachine( scxml_path )
-	UIC::StateMachine.new(File.read(scxml_path,encoding:'utf-8'))
+def NDD.StateMachine( scxml_path )
+	NDD::StateMachine.new(File.read(scxml_path,encoding:'utf-8'))
 		.tap{ |o| o.file = scxml_path }
 end
 
-class UIC::Application::StateMachine < UIC::StateMachine
-	include UIC::ElementBacked
-	# @!parse extend UIC::ElementBacked::ClassMethods
+class NDD::Application::StateMachine < NDD::StateMachine
+	include NDD::ElementBacked
+	# @!parse extend NDD::ElementBacked::ClassMethods
 	xmlattribute :id
 	xmlattribute :src
 	xmlattribute :datamodel
@@ -40,9 +40,9 @@ class UIC::Application::StateMachine < UIC::StateMachine
 			visual_states.flat_map{ |vs| vs.exit_actions.flat_map{ |a| [a,vs] } } +
 			visual_transitions.flat_map{ |vt| vt.actions.flat_map{ |a| [a,vt] } }
 		).select do |visual_action,owner|
-			visual_action.is_a?(UIC::Application::StateMachine::VisualAction::SetAttribute) &&
+			visual_action.is_a?(NDD::Application::StateMachine::VisualAction::SetAttribute) &&
 			visual_action.value[/\A(['"])[^'"]+\1\Z/] && # ensure that it's a simple string value
-			visual_action.element.properties[ visual_action.attribute ].is_a?( UIC::Property::Image )
+			visual_action.element.properties[ visual_action.attribute ].is_a?( NDD::Property::Image )
 		end.group_by do |visual_action,owner|
 			app.absolute_path( visual_action.value[/\A(['"])([^'"]+)\1\Z/,2] )
 		end.each do |image_path,array|
@@ -70,7 +70,7 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		end.compact.uniq
 	end
 
-	class UIC::Application::StateMachine::VisualStates
+	class NDD::Application::StateMachine::VisualStates
 		include Enumerable
 		def initialize(app_machine,visuals_el)
 			@machine = app_machine
@@ -91,7 +91,7 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		alias_method :count, :length
 	end
 
-	class UIC::Application::StateMachine::VisualTransitions
+	class NDD::Application::StateMachine::VisualTransitions
 		include Enumerable
 		def initialize(app_machine,visuals_el)
 			@machine = app_machine
@@ -112,8 +112,8 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		alias_method :count, :length
 	end
 
-	class UIC::Application::StateMachine::VisualState
-		include UIC::ElementBacked
+	class NDD::Application::StateMachine::VisualState
+		include NDD::ElementBacked
 
 		# @!attribute ref
 		#   @return [String] the `id` of the state in the state machine whose enter/exit will trigger the attached visual actions.
@@ -139,8 +139,8 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		end
 	end
 
-	class UIC::Application::StateMachine::VisualTransition
-		include UIC::ElementBacked
+	class NDD::Application::StateMachine::VisualTransition
+		include NDD::ElementBacked
 
 		# @!attribute ref
 		#   @return [String] the `uic:id` of the transition that will trigger the attached visual actions.
@@ -161,11 +161,11 @@ class UIC::Application::StateMachine < UIC::StateMachine
 		end
 	end
 
-	class UIC::Application::StateMachine::VisualAction
-		include UIC::ElementBacked
+	class NDD::Application::StateMachine::VisualAction
+		include NDD::ElementBacked
 
 		# @!attribute element
-		#   @return [UIC::MetaData::AssetBase] the element in a UIC presentation affected by this action.
+		#   @return [NDD::MetaData::AssetBase] the element in an NDD presentation affected by this action.
 		xmlattribute(:element, lambda{ |path,action| (action.machine.app / path) }){ |element| element.path }
 
 		# @return [Nokogiri::XML::Element] the Nokogiri element representing this action in the `.uia`.
@@ -194,15 +194,15 @@ class UIC::Application::StateMachine < UIC::StateMachine
 			@machine = owner.machine
 		end
 
-		class UIC::Application::StateMachine::VisualAction::GotoSlide < self
+		class NDD::Application::StateMachine::VisualAction::GotoSlide < self
 			# TODO: xmlattributes
 		end
 
-		class UIC::Application::StateMachine::VisualAction::Call < self
+		class NDD::Application::StateMachine::VisualAction::Call < self
 			# TODO: xmlattributes
 		end
 
-		class UIC::Application::StateMachine::VisualAction::SetAttribute < self
+		class NDD::Application::StateMachine::VisualAction::SetAttribute < self
 			# @!attribute attribute
 			#   @return [String] the name of the attribute to set.
 			xmlattribute :attribute
@@ -212,11 +212,11 @@ class UIC::Application::StateMachine < UIC::StateMachine
 			xmlattribute :value
 		end
 
-		class UIC::Application::StateMachine::VisualAction::FireEvent < self
+		class NDD::Application::StateMachine::VisualAction::FireEvent < self
 			# TODO: xmlattributes
 		end
 
-		class UIC::Application::StateMachine::VisualAction::Generic
+		class NDD::Application::StateMachine::VisualAction::Generic
 			# @return [Nokogiri::XML::Element] the Nokogiri element representing this action in the `.uia`.
 			attr_reader :el
 

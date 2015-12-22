@@ -2,7 +2,7 @@
 require_relative 'window_qrc'
 require_relative '../lib/ruic'
 
-class UIC::GUI < Qt::MainWindow
+class NDD::GUI < Qt::MainWindow
 	NVGREEN = Qt::Color.fromRgb(115,185,0)
 	slots	:open, :saveAll
 
@@ -21,9 +21,9 @@ class UIC::GUI < Qt::MainWindow
 	end
 
 	def connect_menus!
-		connect @ui.actionOpen,    SIGNAL(:triggered), SLOT(:open)  
+		connect @ui.actionOpen,    SIGNAL(:triggered), SLOT(:open)
 		connect @ui.actionSaveAll, SIGNAL(:triggered), SLOT(:saveAll)
-		connect @ui.actionQuit,    SIGNAL(:triggered), SLOT(:close) 
+		connect @ui.actionQuit,    SIGNAL(:triggered), SLOT(:close)
 	end
 
 	def open
@@ -31,7 +31,7 @@ class UIC::GUI < Qt::MainWindow
 		recent = recent ? recent.last : Dir.pwd
 		# TODO: ensure that the file/directory exists
     path = Qt::FileDialog.get_open_file_name(
-    	self, tr("Open an Application"), recent, "UIC Application (*.uia)"
+    	self, tr("Open an Application"), recent, "NDD Application (*.uia)"
     )
     unless path.nil?
     	add_recent(path)

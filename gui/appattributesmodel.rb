@@ -1,5 +1,5 @@
-module UIC; end
-class UIC::GUI::AppAttributesModel < Qt::AbstractItemModel
+module NDD; end
+class NDD::GUI::AppAttributesModel < Qt::AbstractItemModel
 	INVALIDINDEX = Qt::ModelIndex.new
 	NODATA       = Qt::Variant.new
 	def initialize(qtparent,el)

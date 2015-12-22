@@ -1,5 +1,5 @@
 # What is RUIC?
-RUIC is a Ruby API for reading, analyzing, and manipulating application assets created by NVIDIA's [UI Composer][1]. Among other things, it allows you to:
+RUIC is a Ruby API for reading, analyzing, and manipulating application assets created by [NVIDIA DRIVE™ Design][1]. Among other things, it allows you to:
 
 * See if an application is missing any assets (e.g. images or meshes) and what parts of the application are looking for those.
 * See if there are any files in the application folder that you can delete (e.g. images or materials that are no longer being used).
@@ -40,7 +40,7 @@ After this you can access the application as `app`:
 ```ruby
 uia '../MyApp.uia'      # Relative to the ruic script file, or absolute
 
-show app.file           #=> /var/projects/UIC/MyApp/main/MyApp.uia
+show app.file           #=> /var/projects/MyApp/main/MyApp.uia
 show app.filename       #=> MyApp.uia
 
 show app.assets.count   #=> 7
@@ -127,8 +127,8 @@ Notes:
 
 ```ruby
 uia 'MyApp.uia'
-mat1 = app/"main:Scene.Layer.Sphere.Material" # A normal UIC Material
-mat2 = app/"main:Scene.Layer.Cube.Material"   # A normal UIC Material
+mat1 = app/"main:Scene.Layer.Sphere.Material" # A standard NDD Material
+mat2 = app/"main:Scene.Layer.Cube.Material"   # A standard NDD Material
 p mat2.type                                   #=> "Material"
 ref = mat2.replace_with_referenced_material   # A very specific method :)
 p ref.properties['referencedmaterial'].type   #=> "ObjectRef"
@@ -148,9 +148,9 @@ app.save_all!                                 #=> Write presentations in place
 
 
 ## Locating MetaData.xml
-RUIC needs access to a UIC `MetaData.xml` file to understand the properties in the various XML files.
+RUIC needs access to a NDD `MetaData.xml` file to understand the properties in the various XML files.
 By default RUIC will look in the location specified by `RUIC::DEFAULTMETADATA`, e.g.
-`C:/Program Files (x86)/NVIDIA Corporation/UI Composer 8.0/res/DataModelMetadata/en-us/MetaData.xml`
+`C:\Program Files (x86)\NVIDIA Corporation\DRIVE Design 8.5\res\DataModelMetadata\en-us\MetaData.xml`
 
 If this file is in another location, you can tell the script where to find it either:
 
@@ -170,7 +170,7 @@ There are two ways to enter interactive mode:
       (RUIC v0.6.0 interactive session; 'quit' or ctrl-d to end)
 
       uia "test/projects/SimpleScene/SimpleScene.uia"
-      #=> <UIC::Application 'SimpleScene.uia'>
+      #=> <NDD::Application 'SimpleScene.uia'>
 
 * Alternatively, you can have RUIC execute a script and then enter the interactive REPL
   by supplying the `-i` command-line switch:
@@ -179,7 +179,7 @@ There are two ways to enter interactive mode:
       (RUIC v0.6.0 interactive session; 'quit' or ctrl-d to end)
 
       app
-      #=> <UIC::Application 'ReferencedMaterials.uia'>
+      #=> <NDD::Application 'ReferencedMaterials.uia'>
 
       cubemat
       #=> <asset Material#Material_002>
@@ -214,7 +214,7 @@ RUIC is copyright ©2014 by Gavin Kistner and is licensed under the [MIT License
 
 For bugs or feature requests please open [issues on GitHub][4]. For other communication you can [email the author directly](mailto:!@phrogz.net?subject=RUIC).
 
-[1]: http://uicomposer.nvidia.com
+[1]: http://www.nvidia.com/object/drive-design.html
 [2]: http://nokogiri.org
 [3]: http://opensource.org/licenses/MIT
 [4]: https://github.com/Phrogz/RUIC/issues

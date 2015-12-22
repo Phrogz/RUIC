@@ -1,6 +1,6 @@
-# A `Presentation` represents a `.uip` presentation, created and edited by UI Composer Studio.
-class UIC::Presentation
-	include UIC::XMLFileBacked
+# A `Presentation` represents a `.uip` presentation, created and edited by NVIDIA DRIVE Design Studio.
+class NDD::Presentation
+	include NDD::XMLFileBacked
 
 	# Create a new presentation. If you do not specify the `uip_path` to load from, you must
 	# later set the `.file = `for the presentation, and then call the {#load_from_file} method.
@@ -33,7 +33,7 @@ class UIC::Presentation
 		nil
 	end
 
-	# @return [String] the xml representation of this presentation. Formatted to match UI Composer Studio's formatting as closely as possible (for minimal diffs after update).
+	# @return [String] the xml representation of this presentation. Formatted to match NVIDIA DRIVE Design Studio's formatting as closely as possible (for minimal diffs after update).
 	def to_xml
 		doc.to_xml( indent:1, indent_text:"\t" )
 		   .gsub( %r{(<\w+(?: [\w:]+="[^"]*")*)(/?>)}i, '\1 \2' )
@@ -164,7 +164,7 @@ class UIC::Presentation
 		end.sort_by do |path,assets|
 			parts = path.downcase.split '/'
 			[ parts.length, parts ]
-		end ].tap{ |h| h.extend(UIC::PresentableHash) }
+		end ].tap{ |h| h.extend(NDD::PresentableHash) }
 	end
 
 	# @return [Array<String>] array of all image paths referenced by this presentation.
@@ -416,7 +416,7 @@ class UIC::Presentation
 			slides << [master,0] if graph_element==@scene || (@addsets_by_graph[graph_element] && @addsets_by_graph[graph_element][0])
 			slides.concat( master.xpath('./State').map.with_index{ |el,i| [el,i+1] } )
 			slides.map!{ |el,idx| @slides_by_el[el] ||= app.metadata.new_instance(self,el).tap{ |s| s.index=idx; s.name=el['name'] } }
-			UIC::SlideCollection.new( slides )
+			NDD::SlideCollection.new( slides )
 		end
 	end
 
@@ -624,7 +624,7 @@ class UIC::Presentation
 	# @return [String] a visual hierarchy under the specified asset.
 	def hierarchy( root=scene )
 		elide = ->(str){ str.length>64 ? str.sub(/(^.{30}).+?(.{30})$/,'\1...\2') : str }
-		hier = UIC.tree_hierarchy(root){ |e| e.children }
+		hier = NDD.tree_hierarchy(root){ |e| e.children }
 		cols = hier.map{ |i,a| a ? [ [i,a.name].join, a.type, elide[a.path] ] : [i,"",""] }
 		maxs = cols.transpose.map{ |col| col.map(&:length).max }
 		tmpl = maxs.map{ |n| "%-#{n}s" }.join('  ')
@@ -638,16 +638,16 @@ class UIC::Presentation
 end
 
 # @param uip_path [String] Path to the `.uip` presentation file on disk to load.
-# @return [Presentation] Shortcut for `UIC::Presentation.new`
-def UIC.Presentation( uip_path=nil )
-	UIC::Presentation.new( uip_path )
+# @return [Presentation] Shortcut for `NDD::Presentation.new`
+def NDD.Presentation( uip_path=nil )
+	NDD::Presentation.new( uip_path )
 end
 
-# An {Application::Presentation Application::Presentation} is a {UIC::Presentation UIC::Presentation} that is associated with a specific `.uia` application.
-# In addition to normal {UIC::Presentation} methods it adds methods related to its presence in the application.
-class UIC::Application::Presentation < UIC::Presentation
-	include UIC::ElementBacked
-	# @!parse extend UIC::ElementBacked::ClassMethods
+# An {Application::Presentation Application::Presentation} is a {NDD::Presentation NDD::Presentation} that is associated with a specific `.uia` application.
+# In addition to normal {NDD::Presentation} methods it adds methods related to its presence in the application.
+class NDD::Application::Presentation < NDD::Presentation
+	include NDD::ElementBacked
+	# @!parse extend NDD::ElementBacked::ClassMethods
 
 	# @!attribute [rw] id
 	#   @return [String] the id of the presentation asset in the `.uia`
@@ -676,7 +676,7 @@ class UIC::Application::Presentation < UIC::Presentation
 	end
 	alias_method :app, :owner
 
-	# Overrides {UIC::Presentation#path_to} to prefix all absolute paths with the {#id}
+	# Overrides {NDD::Presentation#path_to} to prefix all absolute paths with the {#id}
 	def path_to( el, from=nil )
 		from ? super : "#{id}:#{super}"
 	end

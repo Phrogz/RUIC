@@ -1,15 +1,15 @@
-# The `Application` represents the root of your UIC application, corresponding to a `.uia` file.
-class UIC::Application
-	include UIC::XMLFileBacked
+# The `Application` represents the root of your NDD application, corresponding to a `.uia` file.
+class NDD::Application
+	include NDD::XMLFileBacked
 
 	def inspect
-		"<UIC::Application '#{File.basename(file)}'#{:' FILENOTFOUND' unless file_found?}>"
+		"<NDD::Application '#{File.basename(file)}'#{:' FILENOTFOUND' unless file_found?}>"
 	end
 
-	# @return [UIC::MetaData] the metadata loaded for this application
+	# @return [NDD::MetaData] the metadata loaded for this application
 	attr_reader :metadata
 
-	# @param metadata [UIC::MetaData] the `MetaData` to use for this application.
+	# @param metadata [NDD::MetaData] the `MetaData` to use for this application.
 	# @param uia_path [String] path to a `.uia` file to load.
 	#        If omitted you will need to later set the `.file = ` for the
 	#        instance and then call {#load_from_file}.
@@ -26,10 +26,10 @@ class UIC::Application
 	def on_doc_loaded
 		@assets  = @doc.search('assets *').map do |el|
 			case el.name
-				when 'behavior'     then UIC::Application::Behavior
-				when 'statemachine' then UIC::Application::StateMachine
-				when 'presentation' then UIC::Application::Presentation
-				when 'renderplugin' then UIC::Application::RenderPlugin
+				when 'behavior'     then NDD::Application::Behavior
+				when 'statemachine' then NDD::Application::StateMachine
+				when 'presentation' then NDD::Application::Presentation
+				when 'renderplugin' then NDD::Application::RenderPlugin
 			end.new(self,el)
 		end.group_by{ |asset| asset.el.name }
 		nil
@@ -42,10 +42,10 @@ class UIC::Application
 	#   main3 = app.main_presentation
 	#   assert main1==main2 && main2==main3
 	# @param asset_id_or_path [String] an idref like `"#status"` or a relative path to the asset like `"VehicleStatus.uip"` or `"scripts/Main.lua"`.
-	# @return [UIC::Application::Behavior]
-	# @return [UIC::Application::StateMachine]
-	# @return [UIC::Application::Presentation]
-	# @return [UIC::Application::RenderPlugin]
+	# @return [NDD::Application::Behavior]
+	# @return [NDD::Application::StateMachine]
+	# @return [NDD::Application::Presentation]
+	# @return [NDD::Application::RenderPlugin]
 	def [](asset_id_or_path)
 		all = assets
 		if asset_id_or_path.start_with?('#')
@@ -64,7 +64,7 @@ class UIC::Application
 		unused = (directory_files - referenced_files).sort
 		if hierarchy
 			root = File.dirname(file)
-			UIC.tree_hierarchy(root) do |dir|
+			NDD.tree_hierarchy(root) do |dir|
 				File.directory?(dir) ? Dir.chdir(dir){ Dir['*'].map{ |f| File.expand_path(f) } } : []
 			end.map do |prefix,file|
 				if file
@@ -120,7 +120,7 @@ class UIC::Application
 	# @example
 	#   main = app.main
 	#   main = app.main_presentation # more-explicit alternative
-	# @return [UIC::Application::Presentation] the main presentation rendered by the application.
+	# @return [NDD::Application::Presentation] the main presentation rendered by the application.
 	def main_presentation
 		initial_id = @doc.at('assets')['initial']
 		presos = presentations
@@ -129,8 +129,8 @@ class UIC::Application
 	alias_method :main, :main_presentation
 
 	# Change which presentation is rendered for the application.
-	# @param presentation [UIC::Application::Presentation]
-	# @return [UIC::Application::Presentation]
+	# @param presentation [NDD::Application::Presentation]
+	# @return [NDD::Application::Presentation]
 	def main_presentation=(presentation)
 		# TODO: set to Presentation or Application::Presentation
 		# TODO: create a unique ID if none exists
@@ -148,7 +148,7 @@ class UIC::Application
 					parts = path.downcase.split '/'
 					[ parts.length, parts ]
 				end
-		].tap{ |h| h.extend(UIC::PresentableHash) }
+		].tap{ |h| h.extend(NDD::PresentableHash) }
 	end
 
 	# @return [Array<String>] array of all image paths **used** by the application (not just in subfolders).
@@ -156,22 +156,22 @@ class UIC::Application
 		image_usage.keys
 	end
 
-	# @return [Array<UIC::Application::Presentation>] all presentations referenced by the application.
+	# @return [Array<NDD::Application::Presentation>] all presentations referenced by the application.
 	def presentations
 		@assets['presentation'] ||= []
 	end
 
-	# @return [Array<UIC::Application::Behavior>] all behaviors referenced by the application.
+	# @return [Array<NDD::Application::Behavior>] all behaviors referenced by the application.
 	def behaviors
 		@assets['behavior'] ||= []
 	end
 
-	# @return [Array<UIC::Application::StateMachine>] all state machines referenced by the application.
+	# @return [Array<NDD::Application::StateMachine>] all state machines referenced by the application.
 	def statemachines
 		@assets['statemachine'] ||= []
 	end
 
-	# @return [Array<UIC::Application::RenderPlugin>] all render plug-ins referenced by the application.
+	# @return [Array<NDD::Application::RenderPlugin>] all render plug-ins referenced by the application.
 	def renderplugins
 		@assets['renderplugin'] ||= []
 	end
@@ -206,13 +206,13 @@ class UIC::Application
 	alias_method :/, :at
 end
 
-class << UIC
-	# Create a new {UIC::Application}. Shortcut for `UIC::Application.new(...)`
-	# @param metadata [UIC::MetaData] the MetaData to use for this application.
+class << NDD
+	# Create a new {NDD::Application}. Shortcut for `NDD::Application.new(...)`
+	# @param metadata [NDD::MetaData] the MetaData to use for this application.
 	# @param uia_path [String] a path to the .uia to load.
-	# @return [UIC::Application]
+	# @return [NDD::Application]
 	def Application(metadata,uia_path=nil)
-		UIC::Application.new( metadata, uia_path )
+		NDD::Application.new( metadata, uia_path )
 	end
 end
 

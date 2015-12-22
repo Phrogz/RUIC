@@ -1,5 +1,5 @@
-class UIC::Effect
-	include UIC::FileBacked
+class NDD::Effect
+	include NDD::FileBacked
 	attr_reader :lua
 	def initialize( lua_path )
 		self.file = lua_path
@@ -19,9 +19,9 @@ class UIC::Effect
 
 end
 
-class UIC::Application::Effect < UIC::Effect
-	include UIC::ElementBacked
-	# @!parse extend UIC::ElementBacked::ClassMethods
+class NDD::Application::Effect < NDD::Effect
+	include NDD::ElementBacked
+	# @!parse extend NDD::ElementBacked::ClassMethods
 	xmlattribute :id
 	xmlattribute :src
 	def initialize(application,el)

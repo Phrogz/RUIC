@@ -1,3 +1,11 @@
+## v0.7
+
+### Backwards Incompatible Changes
+
+* Updated to reflect marketing change from "UI Composer" to "NVIDIA DRIVE™ Design".
+  * The `UIC` module is now named `NDD`.
+
+
 ## v0.6.1
 
 ### New/Changed Features

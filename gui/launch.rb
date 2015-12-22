@@ -14,7 +14,7 @@ Qt::CoreApplication.application_name    = "RUIC"
 $prefs = Qt::Settings.new
 
 $app = Qt::Application.new(ARGV)
-gui = UIC::GUI.new
+gui = NDD::GUI.new
 gui.show
 gui.open
 $app.exec

@@ -1,14 +1,14 @@
-class UIC::Behavior
-	include UIC::FileBacked
+class NDD::Behavior
+	include NDD::FileBacked
 	def initialize( lua_path )
 		self.file = lua_path
 	end
 	alias_method :lua, :file_content
 end
 
-class UIC::Application::Behavior < UIC::Behavior
-	include UIC::ElementBacked
-	# @!parse extend UIC::ElementBacked::ClassMethods
+class NDD::Application::Behavior < NDD::Behavior
+	include NDD::ElementBacked
+	# @!parse extend NDD::ElementBacked::ClassMethods
 	xmlattribute :id
 	xmlattribute :src
 	def initialize(application,el)

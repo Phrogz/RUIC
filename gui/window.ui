@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>UIC Inspectamator</string>
+   <string>NDD Inspectamator</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QPlainTextEdit, QTableView, QTreeView { border:1px solid #898c95 }</string>

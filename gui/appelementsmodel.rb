@@ -1,5 +1,5 @@
-module UIC; end
-class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
+module NDD; end
+class NDD::GUI::AppElementsModel < Qt::AbstractItemModel
 	INVALIDINDEX = Qt::ModelIndex.new
 	NODATA       = Qt::Variant.new
 	def initialize(qtparent,app)
@@ -71,7 +71,7 @@ class UIC::GUI::AppElementsModel < Qt::AbstractItemModel
 	end
 end
 
-class UIC::GUI::AppElementsModel::El
+class NDD::GUI::AppElementsModel::El
 	@by_el = {}
 	class << self
 		def [](el,row)
@@ -83,7 +83,7 @@ class UIC::GUI::AppElementsModel::El
 	attr_reader :el
 	def initialize(el,row)
 		@el    = el
-		@isapp = el.is_a?( UIC::Application )
+		@isapp = el.is_a?( NDD::Application )
 		@row   = row
 	end
 	def child_count
@@ -96,13 +96,13 @@ class UIC::GUI::AppElementsModel::El
 	end
 
 	def parent
-		unless @el.is_a?( UIC::Application )
+		unless @el.is_a?( NDD::Application )
 			self.class[@el.parent || @el.presentation.app, @row]
 		end
 	end
 
 	def icon
-		@icon ||= UIC::GUI::IconVariant[@el.type]
+		@icon ||= NDD::GUI::IconVariant[@el.type]
 	end
 
 	def displayName
@@ -113,7 +113,7 @@ class UIC::GUI::AppElementsModel::El
 	end
 end
 
-module UIC::GUI::IconVariant
+module NDD::GUI::IconVariant
 	@by_path = {}
 	def self.[]( alias_or_path )
 		@by_path[alias_or_path] ||= begin
